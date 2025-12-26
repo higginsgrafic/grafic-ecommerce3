@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ca">
+	<head>
+		<meta charset="UTF-8" />
+
+		<!-- Preconnect per millorar performance -->
+		<link rel="preconnect" href="https://images.unsplash.com" />
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link rel="dns-prefetch" href="https://www.youtube.com" />
+
+		<!-- Google Fonts - Optimitzat amb només els pesos necessaris -->
+		<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Roboto:wght@300;400;500&display=swap" rel="stylesheet" />
+
+		<!-- IBM Plex Fonts per Taller i interfícies administratives -->
+		<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+
+		<!-- Fonts addicionals per a l'editor (Google Fonts) -->
+		<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Open+Sans:wght@300;400;500;600;700&family=Lato:wght@300;400;700&family=Raleway:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;600;700&family=Merriweather:wght@300;400;700&family=Nunito:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+
+
+		<!-- Favicon -->
+		<link rel="icon" type="image/png" href="/favicon.png" />
+		<link rel="apple-touch-icon" href="/favicon.png" />
+
+		<!-- Meta Tags -->
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<meta name="description" content="GRAFC - Samarretes premium amb dissenys únics d'autor. Col·leccions exclusives: First Contact, The Human Inside, Austen, Cube i Outcasted." />
+		<meta name="keywords" content="samarretes, GRAFC, disseny, moda, col·leccions, premium, català" />
+		<meta name="author" content="GRAFC" />
+
+		<!-- Open Graph / Facebook -->
+		<meta property="og:type" content="website" />
+		<meta property="og:title" content="GRAFC - Samarretes Premium" />
+		<meta property="og:description" content="Descobreix les nostres col·leccions exclusives de samarretes amb dissenys únics d'autor." />
+		<meta property="og:image" content="/logo-grafc.png" />
+
+		<!-- Twitter -->
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:title" content="GRAFC - Samarretes Premium" />
+		<meta name="twitter:description" content="Descobreix les nostres col·leccions exclusives de samarretes amb dissenys únics d'autor." />
+		<meta name="twitter:image" content="/logo-grafc.png" />
+
+		<!-- Theme Color -->
+		<meta name="theme-color" content="#181818" />
+
+		<!-- PWA Manifest -->
+		<link rel="manifest" href="/manifest.json" />
+
+		<title>GRAFC - Samarretes Premium | Col·leccions Exclusives</title>
+	</head>
+	<body>
+		<div id="root">
+			<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #ffffff; color: #1f2937; font-family: system-ui, -apple-system, sans-serif; font-size: 24px;">
+				<div style="text-align: center;">
+					<div style="font-size: 48px; margin-bottom: 20px;">⏳</div>
+					<div>Carregant Grafic Store...</div>
+					<div style="font-size: 14px; margin-top: 10px; opacity: 0.6;">Si aquest missatge no desapareix, obre la consola (F12)</div>
+				</div>
+			</div>
+		</div>
+		<script>
+			console.log('🌟 HTML loaded, waiting for React...');
+			window.addEventListener('error', (e) => {
+				console.error('💥 Global error:', e.error);
+				const root = document.getElementById('root');
+				if (root) {
+					root.innerHTML = `
+						<div style="display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #ffffff; color: #1f2937; font-family: system-ui, -apple-system, sans-serif;">
+							<div style="text-align: center; max-width: 600px; padding: 20px;">
+								<div style="font-size: 48px; margin-bottom: 20px;">❌</div>
+								<div style="margin-bottom: 20px; font-size: 24px;">Error carregant l'aplicació</div>
+								<div style="font-size: 14px; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 8px; text-align: left; overflow: auto; max-height: 300px;">
+									<strong>Error:</strong><br>
+									${e.error?.message || 'Error desconegut'}<br><br>
+									<strong>File:</strong><br>
+									${e.filename || 'Unknown'}<br><br>
+									<strong>Line:</strong> ${e.lineno || '?'} : ${e.colno || '?'}
+								</div>
+								<button onclick="window.location.href='/debug.html'" style="margin-top: 20px; padding: 10px 20px; background: white; color: #667eea; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: 600;">
+									🔧 Anar al Debug
+								</button>
+							</div>
+						</div>
+					`;
+				}
+			});
+		</script>
+		<script type="module" src="/src/main.jsx"></script>
+	</body>
+</html>
