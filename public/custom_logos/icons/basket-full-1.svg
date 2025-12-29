@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 71 67" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-78,0)">
+        <g id="cistell-ple-1" transform="matrix(1,0,0,1,-58.565,0)">
+            <rect x="136.667" y="0" width="70" height="66.5" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect x="136.667" y="0" width="70" height="66.5"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1.2347,0,0,1.23787,-3868.59,-2157.48)">
+                    <path d="M3243.92,1754.58L3300.62,1754.58L3296.56,1786.74C3295.7,1793.48 3292.16,1796.62 3285.37,1796.62L3259.18,1796.62C3252.39,1796.62 3248.85,1793.48 3248,1786.74L3243.92,1754.58ZM3251.89,1761.6L3254.96,1785.85C3255.13,1787.2 3255.28,1788.3 3256.01,1788.95C3256.74,1789.6 3257.84,1789.61 3259.18,1789.61L3285.37,1789.61C3286.71,1789.61 3287.81,1789.6 3288.54,1788.95C3289.27,1788.3 3289.42,1787.2 3289.59,1785.85L3292.65,1761.6L3251.89,1761.6ZM3267.06,1751.91L3263.3,1751.91C3263.3,1746.94 3267.32,1742.9 3272.28,1742.9C3277.23,1742.9 3281.25,1746.94 3281.25,1751.91L3277.49,1751.91C3277.49,1749.02 3275.15,1746.68 3272.28,1746.68C3269.4,1746.68 3267.06,1749.02 3267.06,1751.91Z"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

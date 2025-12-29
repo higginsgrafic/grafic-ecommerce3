@@ -1,0 +1,211 @@
+/* Import Google Fonts - només els pesos que utilitzem per optimitzar */
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@300;400;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Condensed:wght@300;400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 222.2 47.4% 11.2%;
+
+    --muted: 0 0% 96%;
+    --muted-foreground: 0 0% 47%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 47.4% 11.2%;
+
+    --border: 0 0% 91%;
+    --input: 0 0% 91%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 47.4% 11.2%;
+
+    --primary: 222.2 47.4% 11.2%;
+    --primary-foreground: 0 0% 98%;
+
+    --secondary: 0 0% 96%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --accent: 0 0% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 98%;
+
+    --ring: 222.2 47.4% 11.2%;
+
+    --radius: 0.5rem;
+  }
+
+
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Animacions personalitzades per botons de talla */
+@keyframes pulse-scale {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@layer utilities {
+  .animate-pulse-once {
+    animation: pulse-scale 0.3s ease-out;
+  }
+}
+
+body.cart-open {
+  overflow: hidden !important;
+}
+
+header.cart-open,
+.offers-header-cart-open {
+  padding-right: var(--scrollbar-width, 0);
+}
+
+.debug-containers * {
+  outline: 1px solid rgba(255, 0, 0, 0.3) !important;
+  cursor: pointer !important;
+  position: relative;
+}
+
+.debug-containers .debug-exempt,
+.debug-containers .debug-exempt *,
+.debug-exempt {
+  outline: none !important;
+  cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+.debug-containers .debug-exempt button,
+.debug-exempt button {
+  cursor: pointer !important;
+}
+
+.debug-containers *.debug-selected {
+  outline-width: 4px !important;
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+
+.debug-containers > * {
+  outline: 3px solid rgba(255, 0, 0, 0.7) !important;
+}
+
+.debug-containers header {
+  outline: 3px solid rgba(0, 150, 255, 0.8) !important;
+}
+
+.debug-containers main {
+  outline: 3px solid rgba(0, 255, 0, 0.8) !important;
+}
+
+.debug-containers footer {
+  outline: 3px solid rgba(255, 140, 0, 0.8) !important;
+}
+
+.debug-containers [class*="container"] {
+  outline: 2px solid rgba(255, 0, 255, 0.6) !important;
+}
+
+.debug-containers [class*="grid"] {
+  outline: 2px solid rgba(0, 255, 255, 0.6) !important;
+}
+
+.debug-containers [class*="flex"] {
+  outline: 2px solid rgba(255, 255, 0, 0.6) !important;
+}
+
+.debug-indicator {
+  position: fixed;
+  top: 50%;
+  left: 20px;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.9);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  z-index: 99998;
+  font-family: monospace;
+  font-size: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  max-width: 300px;
+  pointer-events: auto;
+}
+
+.debug-indicator h3 {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #00ff00;
+}
+
+.debug-indicator ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.debug-indicator li {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.debug-indicator .color-box {
+  width: 16px;
+  height: 16px;
+  border-radius: 2px;
+}
+
+.debug-indicator .selected-info {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.debug-indicator .selected-info h4 {
+  font-weight: bold;
+  margin-bottom: 8px;
+  color: #ffff00;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+
+.debug-indicator .selected-info p {
+  margin: 4px 0;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.debug-indicator .selected-info .tag {
+  color: #00ffff;
+  font-weight: bold;
+}
+
+.debug-indicator .selected-info .class {
+  color: #ff69b4;
+  word-break: break-all;
+}
+
+.debug-indicator .selected-info .hierarchy {
+  color: #90ee90;
+  font-size: 10px;
+}

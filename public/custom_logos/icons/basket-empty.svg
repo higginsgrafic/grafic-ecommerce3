@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 70 67" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="cistell-buit" x="0" y="0" width="70" height="66.5" style="fill:none;"/>
+    <g id="cistell-buit1" serif:id="cistell-buit">
+        <g transform="matrix(1.2347,0,0,1.23787,-4005.26,-2157.48)">
+            <path d="M3243.92,1754.58L3300.62,1754.58L3296.56,1786.74C3295.7,1793.48 3292.16,1796.62 3285.37,1796.62L3259.18,1796.62C3252.39,1796.62 3248.85,1793.48 3248,1786.74L3243.92,1754.58ZM3251.89,1761.6L3254.96,1785.85C3255.13,1787.2 3255.28,1788.3 3256.01,1788.95C3256.74,1789.6 3257.84,1789.61 3259.18,1789.61L3285.37,1789.61C3286.71,1789.61 3287.81,1789.6 3288.54,1788.95C3289.27,1788.3 3289.42,1787.2 3289.59,1785.85L3292.65,1761.6L3251.89,1761.6ZM3267.06,1764.27C3267.06,1767.16 3269.4,1769.51 3272.28,1769.51C3275.15,1769.51 3277.49,1767.16 3277.49,1764.27L3281.25,1764.27C3281.25,1769.24 3277.23,1773.28 3272.28,1773.28C3267.32,1773.28 3263.3,1769.24 3263.3,1764.27L3267.06,1764.27Z"/>
+        </g>
+    </g>
+</svg>
