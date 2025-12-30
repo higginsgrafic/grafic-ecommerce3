@@ -130,8 +130,8 @@ export default function AdminPage() {
         description="Panell d'administració i gestió de contingut"
       />
 
-      <div className="h-screen bg-gradient-to-br from-gray-50 to-gray-100 overflow-hidden">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 h-full flex flex-col">
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen flex flex-col">
           <div className="mb-6 flex-shrink-0">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
