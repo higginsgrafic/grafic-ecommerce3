@@ -329,6 +329,7 @@ function App() {
   const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/hero-settings', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
 
   const offersHeaderVisible = !isAdminRoute && !isFullScreenRoute && offersEnabled && !offersLoading;
+  const isHomeRoute = location.pathname === '/' && !isAdminRoute && !isFullScreenRoute;
 
   const baseHeaderHeight = isLargeScreen ? 80 : 64;
   const offersHeaderHeight = offersHeaderVisible ? 40 : 0;
@@ -376,7 +377,7 @@ function App() {
             isAdminRoute
               ? { paddingTop: '40px', '--appHeaderOffset': '40px' }
               : {
-                  paddingTop: appHeaderOffset,
+                  paddingTop: isHomeRoute ? '0px' : appHeaderOffset,
                   '--appHeaderOffset': appHeaderOffset,
                 }
           ) : {}}

@@ -382,14 +382,17 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
 
       {/* Hero Editor Section */}
       {showHeroSettings ? (
-        <div className="relative">
+        <div className="relative" style={{ paddingTop: 'var(--appHeaderOffset, 0px)' }}>
           <HeroSettingsPage
             mode="embedded"
             onRequestClose={() => setShowHeroSettings(false)}
           />
         </div>
       ) : (
-        <section className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black">
+        <section
+          className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black"
+          style={{ paddingTop: 'var(--appHeaderOffset, 0px)' }}
+        >
           {!editMode && (
             <motion.div
               className="absolute left-0 right-0 bottom-0 z-30 cursor-pointer active:cursor-grabbing"
