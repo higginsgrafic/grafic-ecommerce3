@@ -29,7 +29,10 @@ const useResponsiveFontSize = (config) => {
   return fontSize;
 };
 
-export default function HeroSettingsPage() {
+export default function HeroSettingsPage({
+  mode = 'page',
+  onRequestClose
+}) {
   const location = useLocation();
   const navigate = useNavigate();
   const { isAdmin, editMode, setEditMode } = useAdmin();
@@ -52,9 +55,11 @@ export default function HeroSettingsPage() {
 
   useEffect(() => {
     if (!isAdmin) {
-      navigate('/', { replace: true });
+      if (mode === 'page') {
+        navigate('/', { replace: true });
+      }
     }
-  }, [isAdmin, navigate]);
+  }, [isAdmin, navigate, mode]);
 
   useEffect(() => {
     // This page is an admin tool; default to edit mode when the user is admin.
@@ -409,19 +414,17 @@ export default function HeroSettingsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Carregant...</div>
+      <div className={mode === 'embedded' ? 'w-full h-full flex items-center justify-center bg-black' : 'min-h-screen bg-gray-50 flex items-center justify-center'}>
+        <div className={mode === 'embedded' ? 'text-white/70' : 'text-gray-600'}>Carregant...</div>
       </div>
     );
   }
 
   const currentSlideData = slides[currentSlide];
 
-  return (
-    <>
-      <SEO title="Configuració del Hero" description="Gestiona els slides del hero" />
-
-      <div className="min-h-screen bg-gray-50">
+  const content = (
+    <div className={mode === 'embedded' ? 'w-full h-full' : 'min-h-screen bg-gray-50'}>
+      {mode === 'page' && (
         <div className="sticky top-0 z-40 bg-white border-b border-gray-200 shadow-sm">
           <div className="max-w-7xl mx-auto px-6 py-4">
             <div className="flex items-center justify-between">
@@ -449,8 +452,9 @@ export default function HeroSettingsPage() {
             </div>
           </div>
         </div>
+      )}
 
-        <div className="w-full">
+      <div className="w-full">
           <section className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black">
             <div className="absolute inset-0">
               {slides.map((slide, index) => (
@@ -637,20 +641,22 @@ export default function HeroSettingsPage() {
                     <div className="w-8 flex items-center justify-center shrink-0">
                       <button
                         onClick={() => {
-                          if (editMode) {
-                            navigate(-1);
-                          } else {
-                            setEditMode(true);
+                          if (mode === 'embedded') {
+                            if (typeof onRequestClose === 'function') {
+                              onRequestClose();
+                            }
+                            return;
                           }
+                          navigate(-1);
                         }}
                         className={`transition-colors ${
                           editMode
                             ? 'text-white'
                             : 'text-white/50 hover:text-white/80'
                         }`}
-                        aria-label={editMode ? 'Sortir de l\'editor' : 'Activar mode edició'}
+                        aria-label={mode === 'embedded' ? 'Tancar editor' : 'Tornar'}
                       >
-                        {editMode ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
+                        <X className="w-4 h-4" />
                       </button>
                     </div>
                   )}
@@ -751,7 +757,7 @@ export default function HeroSettingsPage() {
               </div>
             </div>
           </section>
-        </div>
+      </div>
 
         {/* Delete Confirmation Dialog */}
         <AnimatePresence>
@@ -926,7 +932,17 @@ export default function HeroSettingsPage() {
             </>
           )}
         </AnimatePresence>
-      </div>
+    </div>
+  );
+
+  if (mode === 'embedded') {
+    return content;
+  }
+
+  return (
+    <>
+      <SEO title="Configuració del Hero" description="Gestiona els slides del hero" />
+      {content}
     </>
   );
 }

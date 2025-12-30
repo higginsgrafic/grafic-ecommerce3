@@ -6,6 +6,7 @@ import { useAdmin } from '@/contexts/AdminContext';
 export default function EditWrapper({
   children,
   editPath,
+  onEdit,
   section = 'section',
   className = ''
 }) {
@@ -18,6 +19,10 @@ export default function EditWrapper({
 
   const handleEditClick = () => {
     setEditMode(true);
+    if (typeof onEdit === 'function') {
+      onEdit();
+      return;
+    }
     navigate(editPath, { state: { editMode: true } });
   };
 

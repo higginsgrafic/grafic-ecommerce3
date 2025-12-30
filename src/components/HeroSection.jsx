@@ -3,12 +3,14 @@ import { useTexts } from '@/hooks/useTexts';
 import { supabase } from '@/api/supabase-products';
 import EditWrapper from '@/components/EditWrapper';
 import HeroPreview from '@/components/HeroPreview';
+import HeroSettingsPage from '@/pages/HeroSettingsPage';
 
 const HeroSection = () => {
   const texts = useTexts();
   const [slides, setSlides] = useState([]);
   const [autoplayInterval, setAutoplayInterval] = useState(8000);
   const [loading, setLoading] = useState(true);
+  const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
     loadHeroConfig();
@@ -88,11 +90,19 @@ const HeroSection = () => {
   }
 
   return (
-    <EditWrapper editPath="/hero-settings" section="Hero">
-      <HeroPreview
-        slides={slides}
-        autoplayInterval={autoplayInterval}
-      />
+    <EditWrapper
+      editPath="/hero-settings"
+      section="Hero"
+      onEdit={() => setShowEditor((v) => !v)}
+    >
+      {showEditor ? (
+        <HeroSettingsPage mode="embedded" onRequestClose={() => setShowEditor(false)} />
+      ) : (
+        <HeroPreview
+          slides={slides}
+          autoplayInterval={autoplayInterval}
+        />
+      )}
     </EditWrapper>
   );
 };
