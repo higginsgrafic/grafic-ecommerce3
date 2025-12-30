@@ -337,7 +337,7 @@ function App() {
 
 
           <div
-            className={`${isAdminRoute ? 'h-screen overflow-y-hidden' : 'min-h-screen'} bg-white flex flex-col overflow-x-hidden ${debugContainers ? 'debug-containers' : ''}`}
+            className={`${isAdminRoute ? 'min-h-screen' : 'min-h-screen'} bg-white flex flex-col overflow-x-hidden ${debugContainers ? 'debug-containers' : ''}`}
           >
         {/* AdminBanner - només visible per a administradors */}
         {isAdmin && (
@@ -364,7 +364,7 @@ function App() {
 
         <main
           id="main-content"
-          className={`flex-grow ${!isFullScreenRoute ? 'transition-[padding-top] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]' : ''}`}
+          className={`flex-grow ${isAdminRoute ? 'overflow-y-auto' : ''} ${!isFullScreenRoute ? 'transition-[padding-top] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]' : ''}`}
           style={!isFullScreenRoute ? (
             isAdminRoute
               ? { paddingTop: '40px', '--appHeaderOffset': '40px' }
