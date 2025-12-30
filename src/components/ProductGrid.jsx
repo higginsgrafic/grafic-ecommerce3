@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import ProductCard from '@/components/ProductCard';
@@ -56,6 +56,103 @@ function ProductGrid({
         .filter(p => p?.id || p?.slug || p?.gelatoProductId)
     : [];
 
+  const displayProducts = useMemo(() => {
+    const outcasted = safeProducts.filter((p) => (p?.collection || '').toString().toLowerCase() === 'outcasted');
+    if (outcasted.length === 0) return safeProducts;
+
+    const normalize = (v) => (v || '').toString().trim().toLowerCase();
+    const inferOutcastedColorFromImageUrl = (url) => {
+      const key = normalize(url);
+      if (!key) return null;
+
+      const tokens = [
+        'militar', 'military', 'army', 'olive', 'khaki',
+        'negre', 'black', 'negro',
+        'blanc', 'white', 'blanco',
+        'vermell', 'red', 'rojo',
+        'blau', 'blue', 'azul', 'navy',
+        'verd', 'green', 'forest', 'royal'
+      ];
+
+      let lastHit = null;
+      let lastIndex = -1;
+      for (const t of tokens) {
+        const idx = key.lastIndexOf(t);
+        if (idx > lastIndex) {
+          lastIndex = idx;
+          lastHit = t;
+        }
+      }
+      if (!lastHit) return null;
+
+      if (['militar', 'military', 'army', 'olive', 'khaki', 'verd', 'green', 'forest'].includes(lastHit)) return 'militar';
+      if (['negre', 'black', 'negro'].includes(lastHit)) return 'black';
+      if (['blanc', 'white', 'blanco'].includes(lastHit)) return 'white';
+      if (['vermell', 'red', 'rojo'].includes(lastHit)) return 'red';
+      if (['blau', 'blue', 'azul', 'navy', 'royal'].includes(lastHit)) return 'blue';
+      return null;
+    };
+
+    const mulberry32 = (a) => {
+      return () => {
+        let t = a += 0x6D2B79F5;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    };
+
+    const getSeed = () => {
+      try {
+        const key = 'outcastedGridSeed';
+        const existing = window.sessionStorage.getItem(key);
+        if (existing) return Number(existing) || 1;
+        const next = Math.floor(Math.random() * 2147483647) + 1;
+        window.sessionStorage.setItem(key, String(next));
+        return next;
+      } catch {
+        return 1;
+      }
+    };
+
+    const rng = mulberry32(getSeed());
+    const randPick = (arr) => {
+      const a = Array.isArray(arr) ? arr : [];
+      if (a.length === 0) return null;
+      const idx = Math.floor(rng() * a.length);
+      return a[idx] || a[0] || null;
+    };
+
+    const usedColors = new Set();
+    const mapped = safeProducts.map((p) => {
+      if ((p?.collection || '').toString().toLowerCase() !== 'outcasted') return p;
+
+      const imgs = (Array.isArray(p?.images) ? p.images : []).filter((u) => typeof u === 'string' && u.length > 0);
+      if (imgs.length === 0) return p;
+
+      const byColor = new Map();
+      for (const u of imgs) {
+        const c = inferOutcastedColorFromImageUrl(u) || 'other';
+        const list = byColor.get(c) || [];
+        list.push(u);
+        byColor.set(c, list);
+      }
+
+      const availableColors = Array.from(byColor.keys());
+      const unusedColors = availableColors.filter((c) => !usedColors.has(c));
+      const chosenColor = randPick(unusedColors.length > 0 ? unusedColors : availableColors) || availableColors[0];
+      usedColors.add(chosenColor);
+
+      const chosenImage = randPick(byColor.get(chosenColor)) || imgs[0];
+      return {
+        ...p,
+        image: chosenImage
+      };
+    });
+
+    return mapped;
+  }, [safeProducts]);
+
   return (
     <section
       style={isSectionEnabled('layout') ? getDebugStyle('layout', 'main') : {}}
@@ -105,7 +202,7 @@ function ProductGrid({
             animate="show"
             className="grid grid-cols-2 lg:grid-cols-4 gap-x-3 gap-y-5 sm:gap-x-4 sm:gap-y-6 lg:gap-x-6 lg:gap-y-10"
           >
-            {safeProducts.map((product, index) => (
+            {displayProducts.map((product, index) => (
               <motion.div key={product.id || product.slug || String(product.gelatoProductId)} variants={item} className="h-full">
                 <ProductCard
                   product={product}

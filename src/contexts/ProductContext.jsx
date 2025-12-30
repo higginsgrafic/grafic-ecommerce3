@@ -44,19 +44,44 @@ const isBlackOrWhite = (value) => {
   );
 };
 
+const isOutcastedAllowedColor = (value) => {
+  const key = normalizeColorKey(value);
+  return isBlackOrWhite(key) || key === 'militar' || key === 'military' || key === 'army' || key === 'olive' || key === 'khaki';
+};
+
 const inferOutcastedColorFromImageUrl = (url) => {
   const key = normalizeColorKey(url);
   if (!key) return null;
 
-  // Try to detect the dominant garment color from the URL/path.
-  if (key.includes('militar') || key.includes('military') || key.includes('army') || key.includes('olive') || key.includes('khaki')) {
-    return 'militar';
+  // Outcasted mockup filenames may include multiple color tokens (e.g. ink + garment):
+  // outcasted-xxx-black-green.png
+  // In that case, we want the *last* color token as the best guess for the garment color.
+  const tokens = [
+    'militar', 'military', 'army', 'olive', 'khaki',
+    'negre', 'black', 'negro',
+    'blanc', 'white', 'blanco',
+    'vermell', 'red', 'rojo',
+    'blau', 'blue', 'azul', 'navy',
+    'verd', 'green'
+  ];
+
+  let lastHit = null;
+  let lastIndex = -1;
+  for (const t of tokens) {
+    const idx = key.lastIndexOf(t);
+    if (idx > lastIndex) {
+      lastIndex = idx;
+      lastHit = t;
+    }
   }
-  if (key.includes('negre') || key.includes('black') || key.includes('negro')) return 'black';
-  if (key.includes('blanc') || key.includes('white') || key.includes('blanco')) return 'white';
-  if (key.includes('vermell') || key.includes('red') || key.includes('rojo')) return 'red';
-  if (key.includes('blau') || key.includes('blue') || key.includes('azul') || key.includes('navy')) return 'blue';
-  if (key.includes('verd') || key.includes('green')) return 'militar';
+
+  if (!lastHit) return null;
+
+  if (['militar', 'military', 'army', 'olive', 'khaki', 'verd', 'green'].includes(lastHit)) return 'militar';
+  if (['negre', 'black', 'negro'].includes(lastHit)) return 'black';
+  if (['blanc', 'white', 'blanco'].includes(lastHit)) return 'white';
+  if (['vermell', 'red', 'rojo'].includes(lastHit)) return 'red';
+  if (['blau', 'blue', 'azul', 'navy'].includes(lastHit)) return 'blue';
 
   return null;
 };
@@ -68,7 +93,14 @@ const sanitizeOutcastedProducts = (items) => {
     if (!p || (p.collection || '').toString().toLowerCase() !== 'outcasted') return p;
 
     const variants = Array.isArray(p.variants) ? p.variants : [];
-    const filteredVariants = variants.filter((v) => isBlackOrWhite(v?.color));
+    const filteredVariants = variants.filter((v) => isOutcastedAllowedColor(v?.color));
+
+    const pickImageFromList = (list) => {
+      const urls = (Array.isArray(list) ? list : []).filter((u) => typeof u === 'string' && u.length > 0);
+      if (urls.length === 0) return null;
+      const byColor = (wanted) => urls.find((u) => inferOutcastedColorFromImageUrl(u) === wanted);
+      return byColor('black') || byColor('white') || byColor('militar') || urls[0] || null;
+    };
 
     // Prefer variant image for Black, then White. This prevents random-color mockupUrl from becoming the main card image.
     const pickVariantImage = () => {
@@ -78,6 +110,8 @@ const sanitizeOutcastedProducts = (items) => {
       if (black?.image) return black.image;
       const white = withImage.find((v) => ['blanc', 'white', 'blanco'].includes(getColor(v)));
       if (white?.image) return white.image;
+      const militar = withImage.find((v) => ['militar', 'military', 'army', 'olive', 'khaki'].includes(getColor(v)));
+      if (militar?.image) return militar.image;
       return null;
     };
 
@@ -92,11 +126,20 @@ const sanitizeOutcastedProducts = (items) => {
 
     const inferredColor = inferOutcastedColorFromImageUrl(p?.image || p?.images?.[0] || '');
 
-    const nextImage = preferredVariantImage || (hasAnyImage ? p.image : fallbackImage);
+    const preferredListImage = pickImageFromList(p?.images);
+    const nextImage = preferredVariantImage || preferredListImage || (hasAnyImage ? p.image : fallbackImage);
     const nextImages = (() => {
-      if (preferredVariantImage) return [preferredVariantImage];
+      const baseImages = (Array.isArray(p?.images) ? p.images : []).filter(Boolean);
+
+      // If we have a preferred image (usually from variants), use it as the main one,
+      // but preserve the full image gallery when available (important for Outcasted).
+      if (preferredVariantImage) {
+        const deduped = [preferredVariantImage, ...baseImages.filter((u) => u !== preferredVariantImage)];
+        return deduped.length > 0 ? deduped : [preferredVariantImage];
+      }
       if (!hasAnyImage) return [fallbackImage];
-      return p.images;
+      // Preserve all images if present; otherwise keep the chosen one.
+      return (Array.isArray(p?.images) && p.images.length > 0) ? p.images : [nextImage].filter(Boolean);
     })();
 
     const finalColor =
@@ -182,7 +225,17 @@ export const ProductProvider = ({ children }) => {
     const id = storeProduct?.id?.toString() || `store-${index}`;
     const name = storeProduct?.title || storeProduct?.name || `Producte ${index + 1}`;
     const mockupUrl = storeProduct?.mockupUrl || storeProduct?.previewUrl || storeProduct?.imageUrl;
-    const images = mockupUrl ? [mockupUrl] : ['/placeholder-product.svg'];
+    const candidateImages = [
+      ...(Array.isArray(storeProduct?.images) ? storeProduct.images : []),
+      ...(Array.isArray(storeProduct?.imageUrls) ? storeProduct.imageUrls : []),
+      ...(Array.isArray(storeProduct?.mockupUrls) ? storeProduct.mockupUrls : []),
+      ...(Array.isArray(storeProduct?.previewUrls) ? storeProduct.previewUrls : []),
+      ...(mockupUrl ? [mockupUrl] : [])
+    ]
+      .filter((u) => typeof u === 'string' && u.length > 0);
+
+    const images = Array.from(new Set(candidateImages));
+    const finalImages = images.length > 0 ? images : ['/placeholder-product.svg'];
 
     const variants = (storeProduct?.variants || []).map(v => {
       const colorMatch = v?.title?.match(/Color\s+([^,]+)/i);
@@ -212,8 +265,8 @@ export const ProductProvider = ({ children }) => {
       description: storeProduct?.description || name,
       price: storeProduct?.price || 29.99,
       currency: storeProduct?.currency || 'EUR',
-      image: images[0],
-      images,
+      image: finalImages[0],
+      images: finalImages,
       category: 'apparel',
       collection: inferCollectionFromTitle(name),
       sku: storeProduct?.sku || id,

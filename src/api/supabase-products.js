@@ -22,6 +22,145 @@ export const productsService = {
     return includeInactive ? this.getAllProductsIncludingInactive() : this.getAllProducts();
   },
 
+  async enrichOutcastedImages(products) {
+    const items = Array.isArray(products) ? products : [];
+    const outcasted = items.filter((p) => (p?.collection || '').toString().toLowerCase() === 'outcasted');
+
+    if (outcasted.length === 0) return items;
+
+    const inferNameFromUrl = (url) => {
+      try {
+        const u = new URL(url);
+        const marker = '/media/outcasted/';
+        const idx = u.pathname.indexOf(marker);
+        if (idx === -1) return null;
+        const rest = u.pathname.slice(idx + marker.length);
+        const parts = rest.split('/').filter(Boolean);
+        // parts: [productName, colorFolder, filename]
+        return parts?.[0] || null;
+      } catch {
+        return null;
+      }
+    };
+
+    const listAllFilesRecursivelyShallow = async (basePath) => {
+      // list(basePath) returns files and subfolders; we then list each subfolder one level deep.
+      const { data: top, error: topErr } = await supabase
+        .storage
+        .from('media')
+        .list(basePath, { limit: 100, offset: 0 });
+
+      if (topErr) {
+        console.warn('⚠️ Could not list storage path:', basePath, topErr);
+        return [];
+      }
+
+      const looksLikeFile = (name) => {
+        const lower = (name || '').toString().toLowerCase();
+        return lower.endsWith('.png') || lower.endsWith('.jpg') || lower.endsWith('.jpeg') || lower.endsWith('.webp') || lower.endsWith('.gif') || lower.endsWith('.svg');
+      };
+
+      const isFileEntry = (x) => {
+        if (!x || !x.name) return false;
+        if (x.metadata) return true;
+        if (x.created_at || x.updated_at || x.last_accessed_at) return true;
+        return looksLikeFile(x.name);
+      };
+
+      const isFolderEntry = (x) => {
+        if (!x || !x.name) return false;
+        return !isFileEntry(x);
+      };
+
+      const folders = (top || []).filter(isFolderEntry);
+      const files = (top || []).filter(isFileEntry);
+
+      const nestedFiles = [];
+      for (const folder of folders) {
+        const folderPath = `${basePath}/${folder.name}`;
+        const { data: sub, error: subErr } = await supabase
+          .storage
+          .from('media')
+          .list(folderPath, { limit: 200, offset: 0 });
+        if (subErr) {
+          console.warn('⚠️ Could not list storage subpath:', folderPath, subErr);
+          continue;
+        }
+        nestedFiles.push(...(sub || []).filter(isFileEntry).map((x) => ({ ...x, __path: folderPath })));
+      }
+
+      return [
+        ...files.map((x) => ({ ...x, __path: basePath })),
+        ...nestedFiles
+      ];
+    };
+
+    const toPublicUrl = (path) => {
+      const { data } = supabase.storage.from('media').getPublicUrl(path);
+      return data?.publicUrl || null;
+    };
+
+    const enrichOne = async (p) => {
+      const existing = Array.isArray(p?.images) ? p.images.filter(Boolean) : [];
+      // If you already have multiple images, don't touch it.
+      if (existing.length > 1) return p;
+
+      const name = p?.name || inferNameFromUrl(existing?.[0]) || null;
+      if (!name) return p;
+
+      const basePath = `outcasted/${name}`;
+      console.log('🖼️ [OUTCASTED] Enrich images for:', {
+        slug: p?.slug,
+        name,
+        basePath,
+        existingCount: existing.length,
+        existingSample: existing[0]
+      });
+      const files = await listAllFilesRecursivelyShallow(basePath);
+      console.log('🖼️ [OUTCASTED] Storage files found:', {
+        basePath,
+        count: files.length,
+        sample: files?.[0]
+      });
+
+      const urls = files
+        .map((f) => {
+          const fullPath = `${f.__path}/${f.name}`;
+          return toPublicUrl(fullPath);
+        })
+        .filter(Boolean);
+
+      console.log('🖼️ [OUTCASTED] Public URLs built:', {
+        basePath,
+        count: urls.length,
+        sample: urls?.[0]
+      });
+
+      const deduped = Array.from(new Set([...existing, ...urls]));
+      if (deduped.length === 0) return p;
+
+      console.log('🖼️ [OUTCASTED] Final images:', {
+        slug: p?.slug,
+        basePath,
+        count: deduped.length,
+        first: deduped[0]
+      });
+
+      return {
+        ...p,
+        image: deduped[0],
+        images: deduped
+      };
+    };
+
+    const enriched = await Promise.all(items.map((p) => {
+      if ((p?.collection || '').toString().toLowerCase() !== 'outcasted') return p;
+      return enrichOne(p);
+    }));
+
+    return enriched;
+  },
+
   async getAllProducts() {
     try {
       console.log('🔍 Fetching products from Supabase...');
@@ -60,7 +199,8 @@ export const productsService = {
       console.log('✅ Products fetched:', data?.length);
       console.log('📦 Sample product:', data?.[0]);
 
-      const transformed = data.map(transformProduct);
+      let transformed = data.map(transformProduct);
+      transformed = await this.enrichOutcastedImages(transformed);
       console.log('📦 Sample transformed:', transformed?.[0]);
 
       return transformed;
@@ -107,7 +247,8 @@ export const productsService = {
       console.log('✅ Products fetched (including inactive):', data?.length);
       console.log('📦 Sample product:', data?.[0]);
 
-      const transformed = data.map(transformProduct);
+      let transformed = data.map(transformProduct);
+      transformed = await this.enrichOutcastedImages(transformed);
       console.log('📦 Sample transformed:', transformed?.[0]);
 
       return transformed;
