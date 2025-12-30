@@ -400,7 +400,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
               onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
               onClick={handleContainerClick}
-              style={{ touchAction: 'pan-y', top: 'var(--appHeaderOffset, 0px)' }}
+              style={{ touchAction: 'pan-y', top: 0 }}
             />
           )}
 
@@ -524,10 +524,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
             )}
 
             {isAdmin && (
-              <div
-                className="absolute right-6 z-[12000] h-8 flex items-center gap-3"
-                style={{ top: 'calc(var(--appHeaderOffset, 0px) + 12px)' }}
-              >
+              <div className="absolute right-6 top-6 z-[12000] h-8 flex items-center gap-3">
                 <div className="min-w-[280px] flex items-center justify-end">
                   <AnimatePresence mode="wait">
                     {editMode && activeTab === 'text' && (
