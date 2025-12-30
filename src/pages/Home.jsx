@@ -382,14 +382,14 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
 
       {/* Hero Editor Section */}
       {showHeroSettings ? (
-        <div className="relative -mt-[104px] pt-[104px] lg:-mt-[120px] lg:pt-[120px]">
+        <div className="relative">
           <HeroSettingsPage
             mode="embedded"
             onRequestClose={() => setShowHeroSettings(false)}
           />
         </div>
       ) : (
-        <section className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black -mt-[104px] pt-[104px] lg:-mt-[120px] lg:pt-[120px]">
+        <section className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black">
           {!editMode && (
             <motion.div
               className="absolute left-0 right-0 bottom-0 z-30 cursor-pointer active:cursor-grabbing"
@@ -435,7 +435,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute top-20 lg:top-24 left-0 right-0 z-40">
+        <div className="absolute top-6 left-0 right-0 z-40">
           <div className="relative h-8 px-6">
             {isAdmin && editMode && (
               <div className="absolute left-6 top-0 h-8 flex items-center gap-3 text-xs font-medium uppercase tracking-wide">
