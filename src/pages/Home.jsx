@@ -447,7 +447,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
           </motion.div>
         </AnimatePresence>
 
-        <div className="absolute top-6 left-0 right-0 z-40">
+        <div className="absolute top-6 left-0 right-0 z-[10002]">
           <div className="relative h-8 px-6">
             {isAdmin && editMode && (
               <div className="absolute left-6 top-0 h-8 flex items-center gap-3 text-xs font-medium uppercase tracking-wide">

@@ -492,7 +492,7 @@ export default function HeroSettingsPage({
               ))}
             </div>
 
-            <div className="absolute top-6 left-0 right-0 z-40">
+            <div className="absolute top-6 left-0 right-0 z-[10002]">
               <div className="relative h-8 px-6">
                 {/* Tabs a l'esquerra - només visibles en mode edició */}
                 {editMode && (
