@@ -328,6 +328,11 @@ function App() {
   const isFullScreenRoute = location.pathname === '/ec-preview';
   const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/hero-settings', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
 
+  const baseHeaderHeight = isLargeScreen ? 80 : 64;
+  const offersHeaderHeight = (offersEnabled && !isAdminRoute && !isFullScreenRoute) ? 40 : 0;
+  const adminBannerHeight = isAdmin ? 40 : 0;
+  const appHeaderOffset = `${baseHeaderHeight + offersHeaderHeight + adminBannerHeight}px`;
+
   return (
     <ErrorBoundary>
       <>
@@ -369,12 +374,8 @@ function App() {
             isAdminRoute
               ? { paddingTop: '40px', '--appHeaderOffset': '40px' }
               : {
-                  paddingTop: (offersEnabled)
-                    ? (isLargeScreen ? (isAdmin ? '200px' : '160px') : (isAdmin ? '184px' : '144px'))
-                    : (isLargeScreen ? (isAdmin ? '160px' : '120px') : (isAdmin ? '144px' : '104px')),
-                  '--appHeaderOffset': (offersEnabled)
-                    ? (isLargeScreen ? (isAdmin ? '200px' : '160px') : (isAdmin ? '184px' : '144px'))
-                    : (isLargeScreen ? (isAdmin ? '160px' : '120px') : (isAdmin ? '144px' : '104px')),
+                  paddingTop: appHeaderOffset,
+                  '--appHeaderOffset': appHeaderOffset,
                 }
           ) : {}}
           tabIndex={-1}
