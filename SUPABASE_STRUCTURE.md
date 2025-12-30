@@ -5,7 +5,7 @@
 ### Variables d'entorn (.env)
 ```
 VITE_USE_MOCK_DATA=true          # false per utilitzar Supabase
-VITE_SUPABASE_URL=https://urtamitqryoeclfbhrav.supabase.co
+VITE_SUPABASE_URL=https://jnuuejlxuyqhhkfucuxg.supabase.co
 VITE_SUPABASE_ANON_KEY=eyJhbGci...
 ```
 

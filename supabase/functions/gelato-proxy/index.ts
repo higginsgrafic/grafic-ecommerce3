@@ -1,5 +1,7 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
+declare const Deno: any;
+
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
@@ -28,6 +30,8 @@ Deno.serve(async (req: Request) => {
     const action = url.searchParams.get('action') || 'catalog';
     const catalogId = url.searchParams.get('catalogId');
     const storeId = url.searchParams.get('storeId') || Deno.env.get('GELATO_STORE_ID');
+    const limit = url.searchParams.get('limit');
+    const offset = url.searchParams.get('offset');
 
     console.log('[gelato-proxy] Action:', action);
     console.log('[gelato-proxy] Catalog ID:', catalogId);
@@ -77,6 +81,12 @@ Deno.serve(async (req: Request) => {
           throw new Error('Store ID requerit per obtenir productes');
         }
         gelatoUrl = `${GELATO_ECOMMERCE_API}/stores/${storeId}/products`;
+        if (limit || offset) {
+          const qs = new URLSearchParams();
+          if (limit) qs.set('limit', limit);
+          if (offset) qs.set('offset', offset);
+          gelatoUrl = `${gelatoUrl}?${qs.toString()}`;
+        }
         break;
       case 'store-product':
         if (!storeId) {
@@ -117,12 +127,12 @@ Deno.serve(async (req: Request) => {
         },
       },
     );
-  } catch (error) {
+  } catch (error: any) {
     console.error('[gelato-proxy] Error:', error);
     return new Response(
       JSON.stringify({ 
-        error: error.message,
-        details: error.toString()
+        error: error?.message,
+        details: String(error)
       }),
       {
         status: 500,

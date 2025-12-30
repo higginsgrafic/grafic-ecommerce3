@@ -12,7 +12,7 @@ dist-ssr
 *.local
 
 vite.config.js.timestamp-*.mjs
-Icon
+Icon*
 
 supabase/.temp
 
@@ -26,3 +26,6 @@ supabase/.temp
 *.sln
 *.sw?
 .env
+
+store_products_export.csv
+store_products_full.csv

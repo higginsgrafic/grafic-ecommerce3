@@ -2,13 +2,21 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dotenv from 'dotenv';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Configuració Supabase
-const supabaseUrl = 'https://urtamitqryoeclfbhrav.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVydGFtaXRxcnlvZWNsZmJocmF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTA4NzIsImV4cCI6MjA4MTQ2Njg3Mn0.OuVuPbzPoZ4NYoP_4bbC6_n0dA8E0tBL7RJE0lSIo4k';
+dotenv.config({ path: path.join(__dirname, '..', '.env') });
+
+const supabaseUrl = process.env.VITE_SUPABASE_URL;
+const supabaseKey = process.env.VITE_SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error('Error: VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY must be set');
+  process.exit(1);
+}
 
 const supabase = createClient(supabaseUrl, supabaseKey);
 

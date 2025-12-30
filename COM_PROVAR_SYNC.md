@@ -92,7 +92,7 @@ Si voleu provar directament l'API sense passar per la interfície:
 
 ## Informació tècnica
 
-**Clau API configurada:** `065e87f5-53b9-...`
+**Clau API configurada:** `VITE_GELATO_API_KEY (amaga-la al .env)`
 **Endpoint:** `https://product.gelatoapis.com/v3`
-**Base de dades:** Supabase (`urtamitqryoeclfbhrav.supabase.co`)
+**Base de dades:** Supabase (`jnuuejlxuyqhhkfucuxg.supabase.co`)
 **Mode:** Producció (no sandbox)

@@ -104,10 +104,26 @@ function StoreProductsTab() {
         throw new Error('Gelato API no està configurada');
       }
 
-      const response = await gelatoClient.listStoreProducts();
+      const listFn = typeof gelatoClient.listAllStoreProducts === 'function'
+        ? gelatoClient.listAllStoreProducts.bind(gelatoClient)
+        : gelatoClient.listStoreProducts.bind(gelatoClient);
+
+      const response = await listFn();
       console.log('📦 Productes de la botiga:', response);
 
-      if (response && response.data) {
+      if (Array.isArray(response)) {
+        setProducts(response);
+
+        const gildan5000 = response.find(p =>
+          p.title?.includes('Gildan® 5000') ||
+          p.productUid?.includes('gildan_5000')
+        );
+
+        if (gildan5000) {
+          console.log('🎯 Gildan 5000 trobat, carregant automàticament...');
+          loadProductDetails(gildan5000.id, gildan5000.productUid);
+        }
+      } else if (response && response.data) {
         setProducts(response.data);
 
         // Auto-seleccionar Gildan 5000 si existeix

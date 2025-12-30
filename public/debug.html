@@ -114,14 +114,14 @@
             { id: 4, name: "NCC-1701", price: 15.50, image: "/tshirt-blue.jpg", collection: "first-contact" }
         ];
 
-        const SUPABASE_URL = 'https://urtamitqryoeclfbhrav.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVydGFtaXRxcnlvZWNsZmJocmF2Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU4OTA4NzIsImV4cCI6MjA4MTQ2Njg3Mn0.OuVuPbzPoZ4NYoP_4bbC6_n0dA8E0tBL7RJE0lSIo4k';
-        const GELATO_STORE_ID = '3fc67d70-cfbc-4741-9474-f460f03bc8d1';
+        const SUPABASE_URL = '';
+        const SUPABASE_ANON_KEY = '';
+        const GELATO_STORE_ID = '';
 
         // Update config display
-        document.getElementById('mode').textContent = 'Mock Data (VITE_USE_MOCK_DATA=true)';
-        document.getElementById('supabase-url').textContent = SUPABASE_URL;
-        document.getElementById('store-id').textContent = GELATO_STORE_ID;
+        document.getElementById('mode').textContent = 'Debug (set SUPABASE_URL / SUPABASE_ANON_KEY / GELATO_STORE_ID inside public/debug.html)';
+        document.getElementById('supabase-url').textContent = SUPABASE_URL || 'NOT SET';
+        document.getElementById('store-id').textContent = GELATO_STORE_ID || 'NOT SET';
 
         // Console logging
         const originalLog = console.log;

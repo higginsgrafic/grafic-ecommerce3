@@ -28,40 +28,45 @@ class GelatoClient {
   }
 
   async request(endpoint, options = {}, useOrdersAPI = false) {
-    // Construir URL de la edge function amb paràmetres
-    const url = new URL(this.edgeFunctionUrl);
-
-    // Determinar acció basant-se en l'endpoint
-    if (endpoint === '/catalogs') {
-      url.searchParams.set('action', 'catalogs');
-    } else if (endpoint.startsWith('/catalogs/')) {
-      url.searchParams.set('action', 'catalog');
-      const catalogId = endpoint.split('/')[2];
-      if (catalogId && catalogId !== 'products') {
-        url.searchParams.set('catalogId', catalogId);
-      }
-    } else if (endpoint === '/products') {
-      url.searchParams.set('action', 'catalog');
-    } else if (endpoint.includes('/prices')) {
-      url.searchParams.set('action', 'prices');
-      const parts = endpoint.split('/');
-      const productId = parts[2];
-      url.searchParams.set('productId', productId);
-    } else if (endpoint.startsWith('/products/')) {
-      url.searchParams.set('action', 'product');
-      const productId = endpoint.split('/')[2];
-      url.searchParams.set('productId', productId);
-    } else if (endpoint.startsWith('/orders')) {
-      url.searchParams.set('action', 'order');
-      if (endpoint !== '/orders') {
-        const orderId = endpoint.split('/')[2];
-        url.searchParams.set('orderId', orderId);
-      }
-    }
-
-    console.log('🌐 [REQUEST] Edge Function URL:', url.toString());
-
     try {
+      // Construir URL de la edge function amb paràmetres
+      let url;
+      try {
+        url = new URL(this.edgeFunctionUrl);
+      } catch {
+        throw new Error('Supabase config invalid: VITE_SUPABASE_URL must be a valid URL');
+      }
+
+      // Determinar acció basant-se en l'endpoint
+      if (endpoint === '/catalogs') {
+        url.searchParams.set('action', 'catalogs');
+      } else if (endpoint.startsWith('/catalogs/')) {
+        url.searchParams.set('action', 'catalog');
+        const catalogId = endpoint.split('/')[2];
+        if (catalogId && catalogId !== 'products') {
+          url.searchParams.set('catalogId', catalogId);
+        }
+      } else if (endpoint === '/products') {
+        url.searchParams.set('action', 'catalog');
+      } else if (endpoint.includes('/prices')) {
+        url.searchParams.set('action', 'prices');
+        const parts = endpoint.split('/');
+        const productId = parts[2];
+        url.searchParams.set('productId', productId);
+      } else if (endpoint.startsWith('/products/')) {
+        url.searchParams.set('action', 'product');
+        const productId = endpoint.split('/')[2];
+        url.searchParams.set('productId', productId);
+      } else if (endpoint.startsWith('/orders')) {
+        url.searchParams.set('action', 'order');
+        if (endpoint !== '/orders') {
+          const orderId = endpoint.split('/')[2];
+          url.searchParams.set('orderId', orderId);
+        }
+      }
+
+      console.log('🌐 [REQUEST] Edge Function URL:', url.toString());
+
       const response = await fetch(url.toString(), {
         ...options,
         headers: {
@@ -157,16 +162,23 @@ class GelatoClient {
   /**
    * Llistar productes de la botiga
    */
-  async listStoreProducts() {
-    const url = new URL(this.edgeFunctionUrl);
-    url.searchParams.set('action', 'store-products');
-    if (this.storeId) {
-      url.searchParams.set('storeId', this.storeId);
-    }
-
-    console.log('🎨 [API] Obtenint productes de la botiga...');
-
+  async listStoreProducts(options = {}) {
     try {
+      const url = new URL(this.edgeFunctionUrl);
+      url.searchParams.set('action', 'store-products');
+      if (this.storeId) {
+        url.searchParams.set('storeId', this.storeId);
+      }
+
+      if (options?.limit != null) {
+        url.searchParams.set('limit', options.limit);
+      }
+      if (options?.offset != null) {
+        url.searchParams.set('offset', options.offset);
+      }
+
+      console.log('🎨 [API] Obtenint productes de la botiga...');
+
       const response = await fetch(url.toString(), {
         headers: this.headers
       });
@@ -185,20 +197,45 @@ class GelatoClient {
     }
   }
 
+  async listAllStoreProducts(options = {}) {
+    const pageSize = Number(options?.limit ?? 100);
+    const maxPages = Number(options?.maxPages ?? 50);
+
+    const all = [];
+    let offset = Number(options?.offset ?? 0);
+
+    for (let page = 0; page < maxPages; page++) {
+      const response = await this.listStoreProducts({ limit: pageSize, offset });
+      const items = Array.isArray(response?.data)
+        ? response.data
+        : (Array.isArray(response?.products) ? response.products : (Array.isArray(response) ? response : []));
+
+      all.push(...items);
+
+      if (items.length < pageSize) {
+        break;
+      }
+
+      offset += items.length;
+    }
+
+    return all;
+  }
+
   /**
    * Obtenir detalls d'un producte de la botiga
    */
   async getStoreProduct(productId) {
-    const url = new URL(this.edgeFunctionUrl);
-    url.searchParams.set('action', 'store-product');
-    url.searchParams.set('productId', productId);
-    if (this.storeId) {
-      url.searchParams.set('storeId', this.storeId);
-    }
-
-    console.log(`🎨 [API] Obtenint producte ${productId}...`);
-
     try {
+      const url = new URL(this.edgeFunctionUrl);
+      url.searchParams.set('action', 'store-product');
+      url.searchParams.set('productId', productId);
+      if (this.storeId) {
+        url.searchParams.set('storeId', this.storeId);
+      }
+
+      console.log(`🎨 [API] Obtenint producte ${productId}...`);
+
       const response = await fetch(url.toString(), {
         headers: this.headers
       });
@@ -221,13 +258,13 @@ class GelatoClient {
    * Obtenir template (si el producte té templateId)
    */
   async getTemplate(templateId) {
-    const url = new URL(this.edgeFunctionUrl);
-    url.searchParams.set('action', 'template');
-    url.searchParams.set('templateId', templateId);
-
-    console.log(`🎨 [API] Obtenint template ${templateId}...`);
-
     try {
+      const url = new URL(this.edgeFunctionUrl);
+      url.searchParams.set('action', 'template');
+      url.searchParams.set('templateId', templateId);
+
+      console.log(`🎨 [API] Obtenint template ${templateId}...`);
+
       const response = await fetch(url.toString(), {
         headers: this.headers
       });
@@ -657,14 +694,7 @@ export const syncGelatoStoreProducts = async () => {
   }
 
   try {
-    const productsResponse = await gelatoClient.listStoreProducts();
-
-    if (!productsResponse || !productsResponse.data) {
-      console.warn('⚠️ No s\'han trobat productes');
-      return [];
-    }
-
-    const products = productsResponse.data;
+    const products = await gelatoClient.listAllStoreProducts();
     console.log(`✅ Trobats ${products.length} productes`);
 
     const detailedProducts = [];
