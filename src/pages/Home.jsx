@@ -11,6 +11,8 @@ import { useToast } from '@/components/ui/use-toast';
 import { typography, getTypographyClasses } from '@/config/typography';
 import { useAdmin } from '@/contexts/AdminContext';
 import HeroSettingsPage from '@/pages/HeroSettingsPage';
+import FullBleedUnderHeader from '@/components/FullBleedUnderHeader';
+import OverlayUnderHeader from '@/components/OverlayUnderHeader';
 
 const useResponsiveFontSize = (config) => {
   const [fontSize, setFontSize] = useState(config.fontSize?.mobile || config.fontSize?.base || '14px');
@@ -380,226 +382,224 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
         <meta name="description" content={texts.home.seo.description} />
       </Helmet>
 
-      {/* Hero Editor Section */}
-      {showHeroSettings ? (
-        <FullBleedUnderHeader className="relative">
-          <HeroSettingsPage
-            mode="embedded"
-            onRequestClose={() => setShowHeroSettings(false)}
+      <OverlayUnderHeader open={showHeroSettings} onClose={() => setShowHeroSettings(false)}>
+        <HeroSettingsPage
+          mode="embedded"
+          onRequestClose={() => setShowHeroSettings(false)}
+        />
+      </OverlayUnderHeader>
+
+      <FullBleedUnderHeader
+        as="section"
+        className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black"
+      >
+        {!editMode && (
+          <motion.div
+            className="absolute left-0 right-0 bottom-0 z-30 cursor-pointer active:cursor-grabbing"
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.2}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+            onClick={handleContainerClick}
+            style={{ touchAction: 'pan-y', top: 0 }}
           />
-        </FullBleedUnderHeader>
-      ) : (
-        <FullBleedUnderHeader
-          as="section"
-          className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black"
-        >
-          {!editMode && (
-            <motion.div
-              className="absolute left-0 right-0 bottom-0 z-30 cursor-pointer active:cursor-grabbing"
-              drag="x"
-              dragConstraints={{ left: 0, right: 0 }}
-              dragElastic={0.2}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onClick={handleContainerClick}
-              style={{ touchAction: 'pan-y', top: 0 }}
-            />
-          )}
+        )}
 
-          <AnimatePresence mode='wait'>
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
-              className="absolute inset-0 z-0"
-            >
-              {slides[currentSlide]?.bg_type === 'video' && (
-                <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                  <iframe
-                    className="absolute top-1/2 left-1/2 w-[225%] h-[225%] -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
-                    src={getEmbedUrl(slides[currentSlide].bg_value || slides[currentSlide].video_url)}
-                    title="Background Video"
-                    frameBorder="0"
-                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                    referrerPolicy="strict-origin-when-cross-origin"
-                    style={{
-                      pointerEvents: 'none',
-                      opacity: 1 - (slides[currentSlide].bg_opacity ?? 0.6)
-                    }}
-                  />
-                </div>
-              )}
-              <div
-                className="absolute inset-0 bg-black"
-                style={{ opacity: slides[currentSlide]?.bg_opacity ?? 0.5 }}
-              />
-            </motion.div>
-          </AnimatePresence>
-
-          <div
-            className="absolute left-0 right-0 z-[10002]"
-            style={{ top: 'calc(var(--appHeaderOffset, 0px) + 12px)' }}
+        <AnimatePresence mode='wait'>
+          <motion.div
+            key={currentSlide}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1 }}
+            className="absolute inset-0 z-0"
           >
-            <div className="relative h-8 px-6">
-              {isAdmin && editMode && (
-                <div className="absolute left-6 top-0 h-8 flex items-center gap-3 text-xs font-medium uppercase tracking-wide">
-                  <button
-                    onClick={() => setActiveTab('text')}
-                    className={`transition-colors ${
-                      activeTab === 'text'
-                        ? 'text-white'
-                        : 'text-white/50 hover:text-white/80'
-                    }`}
-                  >
-                    Text
-                  </button>
-                  <div className="w-px h-4 bg-white/30" />
-                  <button
-                    onClick={() => setActiveTab('background')}
-                    className={`transition-colors ${
-                      activeTab === 'background'
-                        ? 'text-white'
-                        : 'text-white/50 hover:text-white/80'
-                    }`}
-                  >
-                    Background
-                  </button>
-                  <div className="w-px h-4 bg-white/30" />
-                  <button
-                    onClick={addSlide}
-                    className="flex items-center gap-1 transition-colors text-white/50 hover:text-white"
-                    title="Afegir slide"
-                  >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                    </svg>
-                  </button>
-                  <div className="w-px h-4 bg-white/30" />
-                  <button
-                    onClick={() => setDeleteConfirmDialog(true)}
-                    className="flex items-center gap-1 transition-colors text-white/50 hover:text-red-400"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
-                </div>
-              )}
+            {slides[currentSlide]?.bg_type === 'video' && (
+              <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <iframe
+                  className="absolute top-1/2 left-1/2 w-[225%] h-[225%] -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
+                  src={getEmbedUrl(slides[currentSlide].bg_value || slides[currentSlide].video_url)}
+                  title="Background Video"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  referrerPolicy="strict-origin-when-cross-origin"
+                  style={{
+                    pointerEvents: 'none',
+                    opacity: 1 - (slides[currentSlide].bg_opacity ?? 0.6)
+                  }}
+                />
+              </div>
+            )}
+            <div
+              className="absolute inset-0 bg-black"
+              style={{ opacity: slides[currentSlide]?.bg_opacity ?? 0.5 }}
+            />
+          </motion.div>
+        </AnimatePresence>
 
-              {isAdmin && editMode && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-0 h-8 flex items-center gap-2 text-white/90 font-mono text-sm">
-                  {editingInterval ? (
-                    <>
-                      <input
-                        type="number"
-                        value={tempInterval.seconds}
-                        onChange={(e) => handleIntervalChange('seconds', e.target.value)}
-                        onBlur={handleIntervalBlur}
-                        onKeyDown={handleIntervalKeyDown}
-                        onWheel={(e) => e.stopPropagation()}
-                        className="w-12 h-6 px-1 py-0.5 bg-white/20 text-white text-center rounded border border-white/30 focus:border-white/60 focus:outline-none"
-                        min="0"
-                        autoFocus
-                      />
-                      <span>s</span>
-                      <input
-                        type="number"
-                        value={tempInterval.milliseconds}
-                        onChange={(e) => handleIntervalChange('milliseconds', e.target.value)}
-                        onBlur={handleIntervalBlur}
-                        onKeyDown={handleIntervalKeyDown}
-                        onWheel={(e) => e.stopPropagation()}
-                        className="w-16 h-6 px-1 py-0.5 bg-white/20 text-white text-center rounded border border-white/30 focus:border-white/60 focus:outline-none"
-                        min="0"
-                        max="999"
-                      />
-                      <span className="text-white/50">ms</span>
-                    </>
-                  ) : (
-                    <button
-                      onClick={handleIntervalClick}
-                      className="flex items-center gap-2 hover:bg-white/10 px-2 h-6 rounded transition-colors cursor-pointer"
-                    >
-                      <span className="text-white/50">⏱</span>
-                      <span>{tempInterval.seconds}s</span>
-                      <span className="text-white/50">{String(tempInterval.milliseconds).padStart(3, '0')}ms</span>
-                    </button>
-                  )}
-                </div>
-              )}
+        <div
+          className="absolute left-0 right-0 z-[10002]"
+          style={{ top: 'calc(var(--appHeaderOffset, 0px) + 12px)' }}
+        >
+          <div className="relative h-8 px-6">
+            {isAdmin && editMode && (
+              <div className="absolute left-6 top-0 h-8 flex items-center gap-3 text-xs font-medium uppercase tracking-wide">
+                <button
+                  onClick={() => setActiveTab('text')}
+                  className={`transition-colors ${
+                    activeTab === 'text'
+                      ? 'text-white'
+                      : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  Text
+                </button>
+                <div className="w-px h-4 bg-white/30" />
+                <button
+                  onClick={() => setActiveTab('background')}
+                  className={`transition-colors ${
+                    activeTab === 'background'
+                      ? 'text-white'
+                      : 'text-white/50 hover:text-white/80'
+                  }`}
+                >
+                  Background
+                </button>
+                <div className="w-px h-4 bg-white/30" />
+                <button
+                  onClick={addSlide}
+                  className="flex items-center gap-1 transition-colors text-white/50 hover:text-white"
+                  title="Afegir slide"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                  </svg>
+                </button>
+                <div className="w-px h-4 bg-white/30" />
+                <button
+                  onClick={() => setDeleteConfirmDialog(true)}
+                  className="flex items-center gap-1 transition-colors text-white/50 hover:text-red-400"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            )}
 
-              {isAdmin && (
-                <div className="absolute right-6 top-6 z-[12000] h-8 flex items-center gap-3">
-                  <div className="min-w-[280px] flex items-center justify-end">
-                    <AnimatePresence mode="wait">
-                      {editMode && activeTab === 'text' && (
-                        <motion.div
-                          key="text-controls"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15 }}
-                          className="flex items-center gap-3 text-xs font-medium text-white/90"
+            {isAdmin && editMode && (
+              <div className="absolute left-1/2 -translate-x-1/2 top-0 h-8 flex items-center gap-2 text-white/90 font-mono text-sm">
+                {editingInterval ? (
+                  <>
+                    <input
+                      type="number"
+                      value={tempInterval.seconds}
+                      onChange={(e) => handleIntervalChange('seconds', e.target.value)}
+                      onBlur={handleIntervalBlur}
+                      onKeyDown={handleIntervalKeyDown}
+                      onWheel={(e) => e.stopPropagation()}
+                      className="w-12 h-6 px-1 py-0.5 bg-white/20 text-white text-center rounded border border-white/30 focus:border-white/60 focus:outline-none"
+                      min="0"
+                      autoFocus
+                    />
+                    <span>s</span>
+                    <input
+                      type="number"
+                      value={tempInterval.milliseconds}
+                      onChange={(e) => handleIntervalChange('milliseconds', e.target.value)}
+                      onBlur={handleIntervalBlur}
+                      onKeyDown={handleIntervalKeyDown}
+                      onWheel={(e) => e.stopPropagation()}
+                      className="w-16 h-6 px-1 py-0.5 bg-white/20 text-white text-center rounded border border-white/30 focus:border-white/60 focus:outline-none"
+                      min="0"
+                      max="999"
+                    />
+                    <span className="text-white/50">ms</span>
+                  </>
+                ) : (
+                  <button
+                    onClick={handleIntervalClick}
+                    className="flex items-center gap-2 hover:bg-white/10 px-2 h-6 rounded transition-colors cursor-pointer"
+                  >
+                    <span className="text-white/50">⏱</span>
+                    <span>{tempInterval.seconds}s</span>
+                    <span className="text-white/50">{String(tempInterval.milliseconds).padStart(3, '0')}ms</span>
+                  </button>
+                )}
+              </div>
+            )}
+
+            {isAdmin && (
+              <div className="absolute right-6 top-6 z-[12000] h-8 flex items-center gap-3">
+                <div className="min-w-[280px] flex items-center justify-end">
+                  <AnimatePresence mode="wait">
+                    {editMode && activeTab === 'text' && (
+                      <motion.div
+                        key="text-controls"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="flex items-center gap-3 text-xs font-medium text-white/90"
+                      >
+                        <label className="flex items-center gap-2">
+                          <span>Opacitat fons:</span>
+                          <input
+                            type="range"
+                            min="0"
+                            max="1"
+                            step="0.05"
+                            value={currentSlideData?.bg_opacity ?? 0.6}
+                            onChange={(e) => updateSlide(currentSlide, 'bg_opacity', parseFloat(e.target.value))}
+                            className="w-24 accent-white"
+                          />
+                          <span>{Math.round((currentSlideData?.bg_opacity ?? 0.6) * 100)}%</span>
+                        </label>
+                        <div className="w-px h-4 bg-white/30" />
+                      </motion.div>
+                    )}
+                    {editMode && activeTab === 'background' && (
+                      <motion.div
+                        key="background-controls"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.15 }}
+                        className="flex items-center gap-3 text-xs font-medium text-white/90"
+                      >
+                        <button
+                          onClick={() => openSearchDialog('video')}
+                          className="bg-transparent text-white border-b border-transparent hover:border-white/30 focus:border-white/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
                         >
-                          <label className="flex items-center gap-2">
-                            <span>Opacitat fons:</span>
-                            <input
-                              type="range"
-                              min="0"
-                              max="1"
-                              step="0.05"
-                              value={currentSlideData?.bg_opacity ?? 0.6}
-                              onChange={(e) => updateSlide(currentSlide, 'bg_opacity', parseFloat(e.target.value))}
-                              className="w-24 accent-white"
-                            />
-                            <span>{Math.round((currentSlideData?.bg_opacity ?? 0.6) * 100)}%</span>
-                          </label>
-                          <div className="w-px h-4 bg-white/30" />
-                        </motion.div>
-                      )}
-                      {editMode && activeTab === 'background' && (
-                        <motion.div
-                          key="background-controls"
-                          initial={{ opacity: 0 }}
-                          animate={{ opacity: 1 }}
-                          exit={{ opacity: 0 }}
-                          transition={{ duration: 0.15 }}
-                          className="flex items-center gap-3 text-xs font-medium text-white/90"
+                          {currentSlideData?.bg_value ?? currentSlideData?.video_url ?? 'ID vídeo'}
+                        </button>
+                        <div className="w-px h-4 bg-white/30" />
+                        <button
+                          onClick={() => openSearchDialog('route')}
+                          className="bg-transparent text-white border-b border-transparent hover:border-white/30 focus:border-white/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
                         >
-                          <button
-                            onClick={() => openSearchDialog('video')}
-                            className="bg-transparent text-white border-b border-transparent hover:border-white/30 focus:border-white/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
-                          >
-                            {currentSlideData?.bg_value ?? currentSlideData?.video_url ?? 'ID vídeo'}
-                          </button>
-                          <div className="w-px h-4 bg-white/30" />
-                          <button
-                            onClick={() => openSearchDialog('route')}
-                            className="bg-transparent text-white border-b border-transparent hover:border-white/30 focus:border-white/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
-                          >
-                            {currentSlideData?.path ?? '/ruta'}
-                          </button>
-                          <div className="w-px h-4 bg-white/30" />
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-                  </div>
-
-                  <button
-                    onClick={() => setShowHeroSettings((s) => !s)}
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-lg border border-white/20 ${
-                      showHeroSettings
-                        ? 'bg-white text-black hover:bg-white/90'
-                        : 'bg-black/60 text-white hover:bg-black/70'
-                    }`}
-                    aria-label={showHeroSettings ? 'Tancar hero settings' : 'Obrir hero settings'}
-                  >
-                    {showHeroSettings ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-                  </button>
+                          {currentSlideData?.path ?? '/ruta'}
+                        </button>
+                        <div className="w-px h-4 bg-white/30" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
-              )}
-            </div>
+
+                <button
+                  onClick={() => setShowHeroSettings((s) => !s)}
+                  className={`w-8 h-8 rounded-full flex items-center justify-center transition-colors shadow-lg border border-white/20 ${
+                    showHeroSettings
+                      ? 'bg-white text-black hover:bg-white/90'
+                      : 'bg-black/60 text-white hover:bg-black/70'
+                  }`}
+                  aria-label={showHeroSettings ? 'Tancar hero settings' : 'Obrir hero settings'}
+                >
+                  {showHeroSettings ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
+                </button>
+              </div>
+            )}
           </div>
+        </div>
 
         <div className="absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-center p-4">
           {isAdmin && editMode && activeTab === 'text' ? (
@@ -695,8 +695,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
             )}
           </div>
         </div>
-        </FullBleedUnderHeader>
-      )}
+      </FullBleedUnderHeader>
 
       {/* Delete Confirmation Dialog */}
       <AnimatePresence>
