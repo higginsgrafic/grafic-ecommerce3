@@ -328,8 +328,10 @@ function App() {
   const isFullScreenRoute = location.pathname === '/ec-preview';
   const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/hero-settings', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
 
+  const offersHeaderVisible = !isAdminRoute && !isFullScreenRoute && offersEnabled && !offersLoading;
+
   const baseHeaderHeight = isLargeScreen ? 80 : 64;
-  const offersHeaderHeight = (offersEnabled && !isAdminRoute && !isFullScreenRoute) ? 40 : 0;
+  const offersHeaderHeight = offersHeaderVisible ? 40 : 0;
   const adminBannerHeight = isAdmin ? 40 : 0;
   const appHeaderOffset = `${baseHeaderHeight + offersHeaderHeight + adminBannerHeight}px`;
 
@@ -352,7 +354,7 @@ function App() {
         )}
 
         {/* OffersHeader només visible a pàgines no admin ni full-screen */}
-        {!isAdminRoute && !isFullScreenRoute && offersEnabled && (
+        {offersHeaderVisible && (
           <OffersHeader adminBannerVisible={isAdmin} />
         )}
 
@@ -362,7 +364,7 @@ function App() {
             cartItemCount={getTotalItems()}
             onCartClick={() => setIsCartOpen(true)}
             onUserClick={() => setIsUserSidebarOpen(true)}
-            offersHeaderVisible={offersEnabled}
+            offersHeaderVisible={offersHeaderVisible}
             adminBannerVisible={isAdmin}
           />
         )}
