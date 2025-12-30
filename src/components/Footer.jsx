@@ -284,7 +284,7 @@ const Footer = () => {
                       style={{
                         display: 'block',
                         opacity: 1,
-                        filter: collection.id === 'higgins-grafic' ? 'brightness(0) invert(0.96)' : collection.id === 'austen' ? 'brightness(0)' : 'none',
+                        filter: collection.id === 'higgins-grafic' ? 'brightness(0) invert(1)' : collection.id === 'austen' ? 'brightness(0)' : 'none',
                         transform: collection.id === 'the-human-inside'
                           ? 'scale(1.18)'
                           : collection.id === 'higgins-grafic'
@@ -346,7 +346,7 @@ const Footer = () => {
                     }`}
                     style={{
                       opacity: 1,
-                      filter: collection.id === 'higgins-grafic' ? 'brightness(0) invert(0.96)' : collection.id === 'austen' ? 'brightness(0)' : 'none',
+                      filter: collection.id === 'higgins-grafic' ? 'brightness(0) invert(1)' : collection.id === 'austen' ? 'brightness(0)' : 'none',
                       transform: collection.id === 'the-human-inside'
                         ? 'scale(1.18)'
                         : collection.id === 'higgins-grafic'
