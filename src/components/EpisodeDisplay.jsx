@@ -16,10 +16,16 @@ const EpisodeDisplay = ({
     useLayoutEffect(() => {
       const compute = () => {
         const cartButton = document.querySelector('[data-cart-button="1"]');
-        if (!cartButton) return;
+        if (!cartButton) {
+          setDesktopWidth(null);
+          return;
+        }
 
         const desktopContainer = document.querySelector('[data-pdp-desktop="1"]');
-        if (!desktopContainer) return;
+        if (!desktopContainer) {
+          setDesktopWidth(null);
+          return;
+        }
 
         const cartRect = cartButton.getBoundingClientRect();
         const desktopRect = desktopContainer.getBoundingClientRect();

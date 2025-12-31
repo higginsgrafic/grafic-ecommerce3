@@ -13,9 +13,16 @@ if (!supabaseUrl || !supabaseKey) {
   console.error('❌ Missing Supabase credentials!', { supabaseUrl, hasKey: !!supabaseKey });
 }
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+const supabase = (supabaseUrl && supabaseKey) ? createClient(supabaseUrl, supabaseKey) : null;
 
 export { supabase };
+
+const requireSupabase = () => {
+  if (!supabase) {
+    throw new Error('Supabase no configurat: falta VITE_SUPABASE_URL o VITE_SUPABASE_ANON_KEY');
+  }
+  return supabase;
+};
 
 export const productsService = {
   async getProducts(includeInactive = false) {
@@ -23,6 +30,7 @@ export const productsService = {
   },
 
   async enrichOutcastedImages(products) {
+    if (!supabase) return Array.isArray(products) ? products : [];
     const items = Array.isArray(products) ? products : [];
     const outcasted = items.filter((p) => (p?.collection || '').toString().toLowerCase() === 'outcasted');
 
@@ -45,7 +53,7 @@ export const productsService = {
 
     const listAllFilesRecursivelyShallow = async (basePath) => {
       // list(basePath) returns files and subfolders; we then list each subfolder one level deep.
-      const { data: top, error: topErr } = await supabase
+      const { data: top, error: topErr } = await requireSupabase()
         .storage
         .from('media')
         .list(basePath, { limit: 100, offset: 0 });
@@ -78,7 +86,7 @@ export const productsService = {
       const nestedFiles = [];
       for (const folder of folders) {
         const folderPath = `${basePath}/${folder.name}`;
-        const { data: sub, error: subErr } = await supabase
+        const { data: sub, error: subErr } = await requireSupabase()
           .storage
           .from('media')
           .list(folderPath, { limit: 200, offset: 0 });
@@ -96,7 +104,7 @@ export const productsService = {
     };
 
     const toPublicUrl = (path) => {
-      const { data } = supabase.storage.from('media').getPublicUrl(path);
+      const { data } = requireSupabase().storage.from('media').getPublicUrl(path);
       return data?.publicUrl || null;
     };
 
@@ -165,7 +173,7 @@ export const productsService = {
     try {
       console.log('🔍 Fetching products from Supabase...');
 
-      const { data, error } = await supabase
+      const { data, error } = await requireSupabase()
         .from('products')
         .select(`
           *,
@@ -214,7 +222,7 @@ export const productsService = {
     try {
       console.log('🔍 Fetching ALL products (including inactive) from Supabase...');
 
-      const { data, error } = await supabase
+      const { data, error } = await requireSupabase()
         .from('products')
         .select(`
           *,
@@ -259,7 +267,7 @@ export const productsService = {
   },
 
   async getProductById(id) {
-    const { data, error } = await supabase
+    const { data, error } = await requireSupabase()
       .from('products')
       .select(`
         *,
@@ -295,7 +303,7 @@ export const productsService = {
   },
 
   async getProductsByCollection(collection) {
-    const { data, error } = await supabase
+    const { data, error } = await requireSupabase()
       .from('products')
       .select(`
         *,
@@ -330,7 +338,7 @@ export const productsService = {
   },
 
   async searchProducts(searchTerm) {
-    const { data, error } = await supabase
+    const { data, error } = await requireSupabase()
       .from('products')
       .select(`
         *,
@@ -438,7 +446,7 @@ export const productsService = {
   async upsertProduct(product) {
     const { product_images, product_variants, ...productData } = product;
 
-    const { data, error } = await supabase
+    const { data, error } = await requireSupabase()
       .from('products')
       .upsert(productData)
       .select()
@@ -450,7 +458,7 @@ export const productsService = {
     }
 
     if (product_images && product_images.length > 0) {
-      await supabase
+      await requireSupabase()
         .from('product_images')
         .delete()
         .eq('product_id', data.id);
@@ -461,11 +469,11 @@ export const productsService = {
         position: img.position !== undefined ? img.position : index
       }));
 
-      await supabase.from('product_images').insert(images);
+      await requireSupabase().from('product_images').insert(images);
     }
 
     if (product_variants && product_variants.length > 0) {
-      await supabase
+      await requireSupabase()
         .from('product_variants')
         .delete()
         .eq('product_id', data.id);
@@ -475,7 +483,7 @@ export const productsService = {
         product_id: data.id
       }));
 
-      await supabase.from('product_variants').insert(variants);
+      await requireSupabase().from('product_variants').insert(variants);
     }
 
     return data;
@@ -486,7 +494,7 @@ export const productsService = {
       const { images: imageUrls, variants: variantData, ...productData } = updates;
 
       // Update main product
-      const { data, error } = await supabase
+      const { data, error } = await requireSupabase()
         .from('products')
         .update(productData)
         .eq('id', id)
@@ -500,7 +508,7 @@ export const productsService = {
 
       // Update images if provided
       if (imageUrls && imageUrls.length > 0) {
-        await supabase
+        await requireSupabase()
           .from('product_images')
           .delete()
           .eq('product_id', id);
@@ -511,12 +519,12 @@ export const productsService = {
           position: index
         }));
 
-        await supabase.from('product_images').insert(images);
+        await requireSupabase().from('product_images').insert(images);
       }
 
       // Update variants if provided
       if (variantData && variantData.length > 0) {
-        await supabase
+        await requireSupabase()
           .from('product_variants')
           .delete()
           .eq('product_id', id);
@@ -535,7 +543,7 @@ export const productsService = {
           design: v.design || null
         }));
 
-        await supabase.from('product_variants').insert(variants);
+        await requireSupabase().from('product_variants').insert(variants);
       }
 
       return data;
@@ -546,7 +554,7 @@ export const productsService = {
   },
 
   async deleteProduct(id) {
-    const { error } = await supabase
+    const { error } = await requireSupabase()
       .from('products')
       .delete()
       .eq('id', id);

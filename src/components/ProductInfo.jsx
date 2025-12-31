@@ -39,12 +39,27 @@ const ProductInfo = ({
 
   if (layout === 'desktop') {
     const [pillWidth, setPillWidth] = useState(null);
+    const [titleFontPx, setTitleFontPx] = useState(47);
+    const titleRef = React.useRef(null);
+
+    const DESKTOP_SIZE_SLOTS = ['S', 'M', 'L', 'XL'];
+
+    const normalizeLoose = (value) =>
+      (value || '')
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '');
 
     useLayoutEffect(() => {
       const compute = () => {
         const cartButton = document.querySelector('[data-cart-button="1"]');
         const desktopContainer = document.querySelector('[data-pdp-desktop="1"]');
-        if (!cartButton || !desktopContainer) return;
+        if (!cartButton || !desktopContainer) {
+          setPillWidth(null);
+          return;
+        }
 
         const cartRect = cartButton.getBoundingClientRect();
         const desktopRect = desktopContainer.getBoundingClientRect();
@@ -65,9 +80,65 @@ const ProductInfo = ({
       };
     }, []);
 
+    useLayoutEffect(() => {
+      const el = titleRef.current;
+      if (!el) return;
+
+      let raf = 0;
+      const fit = () => {
+        const available = pillWidth ? parseFloat(pillWidth) : el.getBoundingClientRect().width;
+        if (!available || !Number.isFinite(available)) return;
+
+        // Fit title in one line by scaling font size down when needed.
+        const base = 47; // ~35.25pt
+        el.style.fontSize = `${base}px`;
+        el.style.whiteSpace = 'nowrap';
+        el.style.overflow = 'visible';
+        el.style.textOverflow = 'clip';
+
+        const scroll = el.scrollWidth;
+        if (!scroll || !Number.isFinite(scroll)) {
+          setTitleFontPx(base);
+          return;
+        }
+
+        const ratio = available / scroll;
+        const next = Math.max(18, Math.min(base, Math.floor(base * Math.min(1, ratio))));
+        setTitleFontPx(next);
+      };
+
+      raf = requestAnimationFrame(fit);
+
+      const onResize = () => {
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(fit);
+      };
+
+      window.addEventListener('resize', onResize);
+      return () => {
+        cancelAnimationFrame(raf);
+        window.removeEventListener('resize', onResize);
+      };
+    }, [pillWidth, product?.name]);
+
     return (
       <>
-        <h1 className="font-oswald leading-none font-bold uppercase" style={{ position: 'absolute', top: '8px', left: '645px', fontSize: '35.25pt', color: '#141414', transform: 'scale(1.01)' }}>
+        <h1
+          className="font-oswald leading-none font-bold uppercase"
+          style={{
+            position: 'absolute',
+            top: '8px',
+            left: '645px',
+            fontSize: `${titleFontPx}px`,
+            color: '#141414',
+            transform: 'scale(1.01)',
+            width: pillWidth || '322.5px',
+            overflow: 'visible',
+            textOverflow: 'clip',
+            whiteSpace: 'nowrap'
+          }}
+          ref={titleRef}
+        >
           {humanizeLabel(product.name)}
         </h1>
 
@@ -107,77 +178,85 @@ const ProductInfo = ({
 
         {/* Selector de talles (Desktop) */}
         <div className="flex items-center gap-4" style={{ position: 'absolute', top: '410px', left: '645px', transform: 'scale(1.01)', zIndex: 9 }}>
-          {SIZES.map((size, idx) => {
-            const leftPosition = idx === 0 ? '0px' : idx === 1 ? '-0.67px' : idx === 2 ? '-1.34px' : '-4px';
-
-            if (size === 'XL') {
-              return (
-                <div key={size} style={{ position: 'relative', width: '70px', height: '35px', left: leftPosition }}>
-                  <button
-                    onClick={() => onSizeChange(size)}
-                    data-size-button={size}
-                    data-size-layout="desktop"
-                    className={`transition-all duration-200 rounded-md text-xl font-oswald
-                      ${selectedSize === size
-                        ? 'bg-black text-white font-semibold'
-                        : 'bg-[#F9FAFB] text-black font-light hover:bg-gray-300'}`}
-                    style={{ width: '70px', height: '35px', position: 'relative', top: '0px', left: '0px', zIndex: 5 }}
-                  >
-                    {size}
-                  </button>
-
-                  <button
-                    onClick={onAddToCart}
-                    data-cart-button="1"
-                    className="bg-transparent rounded-md flex items-end justify-center"
-                    style={{ width: '70px', height: '35px', position: 'absolute', top: '0px', left: '91px', zIndex: 10, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', lineHeight: '0' }}
-                    aria-label="Afegeix al cistell"
-                  >
-                    {cartItems.length > 0 ? (
-                      <span
-                        style={{
-                          position: 'absolute',
-                          top: '50%',
-                          left: '50%',
-                          transform: 'translate(-50%, calc(-35% - 2.5px))',
-                          backgroundColor: 'transparent',
-                          color: '#141414',
-                          fontSize: '20px',
-                          fontWeight: 500,
-                          lineHeight: '20px',
-                          zIndex: 20,
-                          pointerEvents: 'none'
-                        }}
-                      >
-                        {cartItems.length}
-                      </span>
-                    ) : null}
-                    <img
-                      src={cartItems.length > 0 ? "/custom_logos/icons/basket-full-1.svg" : "/custom_logos/icons/basket-empty.svg"}
-                      alt={cartItems.length > 0 ? "Cistell amb productes" : "Cistell buit"}
-                      style={{ height: '35px', width: '70px', display: 'block', objectFit: 'contain', objectPosition: 'center bottom', transform: 'scale(1.27)', transformOrigin: 'center bottom' }}
-                    />
-                  </button>
-                </div>
-              );
-            }
-
-            return (
-              <button
-                key={size}
-                onClick={() => onSizeChange(size)}
-                data-size-button={size}
-                data-size-layout="desktop"
-                className={`transition-all duration-200 rounded-md text-xl font-oswald
-                  ${selectedSize === size
-                    ? 'bg-black text-white font-semibold'
-                    : 'bg-[#F9FAFB] text-black font-light hover:bg-gray-300'}`}
-                style={{ width: '70px', height: '35px', position: 'relative', top: '0px', left: leftPosition }}
-              >
-                {size}
-              </button>
+          {(() => {
+            const normalizedAvailable = new Set(
+              (Array.isArray(SIZES) ? SIZES : []).map((v) => normalizeLoose(v))
             );
-          })}
+            const isUniOnly = normalizedAvailable.size === 1 && normalizedAvailable.has('uni');
+
+            return DESKTOP_SIZE_SLOTS.map((slot, idx) => {
+              const leftPosition = idx === 0 ? '0px' : idx === 1 ? '-0.67px' : idx === 2 ? '-1.34px' : '-4px';
+              const slotAvailable = normalizedAvailable.has(normalizeLoose(slot));
+              const isVisible = !isUniOnly || idx === 0;
+              const isEnabled = !isUniOnly && slotAvailable;
+              const isSelected = !isUniOnly && selectedSize === slot;
+
+              return (
+                <button
+                  key={slot}
+                  onClick={() => {
+                    if (!isEnabled) return;
+                    onSizeChange(slot);
+                  }}
+                  data-size-button={slot}
+                  data-size-layout="desktop"
+                  className={`transition-all duration-200 rounded-md text-xl font-oswald
+                    ${isUniOnly
+                      ? 'bg-[#F9FAFB] text-black font-light cursor-default'
+                      : isSelected
+                      ? 'bg-black text-white font-semibold'
+                      : isEnabled
+                      ? 'bg-[#F9FAFB] text-black font-light hover:bg-gray-300'
+                      : 'bg-[#F9FAFB] text-black font-light cursor-default'}`}
+                  style={{
+                    width: '70px',
+                    height: '35px',
+                    position: 'relative',
+                    top: '0px',
+                    left: leftPosition,
+                    opacity: !isUniOnly && !isEnabled ? 0.35 : 1,
+                    visibility: isVisible ? 'visible' : 'hidden'
+                  }}
+                  disabled={!isEnabled}
+                >
+                  {isUniOnly && idx === 0 ? 'UNI' : slot}
+                </button>
+              );
+            });
+          })()}
+
+          <button
+            onClick={onAddToCart}
+            data-cart-button="1"
+            className="bg-transparent rounded-md flex items-end justify-center"
+            style={{ width: '70px', height: '35px', position: 'relative', top: '0px', left: '-4px', zIndex: 10, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', lineHeight: '0' }}
+            aria-label="Afegeix al cistell"
+          >
+            {cartItems.length > 0 ? (
+              <span
+                style={{
+                  position: 'absolute',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, calc(-35% - 2.5px))',
+                  backgroundColor: 'transparent',
+                  color: '#141414',
+                  fontSize: '20px',
+                  fontWeight: 500,
+                  lineHeight: '20px',
+                  zIndex: 20,
+                  pointerEvents: 'none'
+                }}
+              >
+                {cartItems.length}
+              </span>
+            ) : null}
+            <img
+              src={cartItems.length > 0 ? "/custom_logos/icons/basket-full-1.svg" : "/custom_logos/icons/basket-empty.svg"}
+              alt={cartItems.length > 0 ? "Cistell amb productes" : "Cistell buit"}
+              style={{ height: '35px', width: '70px', display: 'block', objectFit: 'contain', objectPosition: 'center bottom', transform: 'scale(1.27)', transformOrigin: 'center bottom' }}
+            />
+          </button>
         </div>
       </>
     );

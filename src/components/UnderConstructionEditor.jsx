@@ -273,13 +273,7 @@ export default function UnderConstructionEditor() {
                     checked={config.globalRedirect}
                     onChange={(e) => {
                       const newValue = e.target.checked;
-                      if (newValue) {
-                        if (window.confirm('ATENCIÓ: Això redirigirà tots els visitants a la pàgina "En Construcció". El teu web no serà accessible. Vols continuar?')) {
-                          setConfig({ ...config, globalRedirect: newValue });
-                        }
-                      } else {
-                        setConfig({ ...config, globalRedirect: newValue });
-                      }
+                      setConfig({ ...config, globalRedirect: newValue });
                     }}
                     className="sr-only"
                   />

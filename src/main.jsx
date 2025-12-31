@@ -7,6 +7,7 @@ import { ProductProvider } from '@/contexts/ProductContext';
 import { ToastProvider } from '@/contexts/ToastContext';
 import { GridDebugProvider } from '@/contexts/GridDebugContext';
 import { AdminProvider } from '@/contexts/AdminContext';
+import { AdminToolsProvider } from '@/contexts/AdminToolsContext';
 import App from '@/App';
 import '@/index.css';
 
@@ -19,13 +20,15 @@ window.__GRAFIC_REACT_MOUNTED__ = false;
 ReactDOM.createRoot(document.getElementById('root')).render(
   <BrowserRouter>
     <AdminProvider>
-      <GridDebugProvider>
-        <ProductProvider>
-          <ToastProvider>
-            <App />
-          </ToastProvider>
-        </ProductProvider>
-      </GridDebugProvider>
+      <AdminToolsProvider>
+        <GridDebugProvider>
+          <ProductProvider>
+            <ToastProvider>
+              <App />
+            </ToastProvider>
+          </ProductProvider>
+        </GridDebugProvider>
+      </AdminToolsProvider>
     </AdminProvider>
   </BrowserRouter>
 );

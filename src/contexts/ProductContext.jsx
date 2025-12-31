@@ -45,8 +45,9 @@ const isBlackOrWhite = (value) => {
 };
 
 const isOutcastedAllowedColor = (value) => {
-  const key = normalizeColorKey(value);
-  return isBlackOrWhite(key) || key === 'militar' || key === 'military' || key === 'army' || key === 'olive' || key === 'khaki';
+  // Outcasted should show all available colors/variants.
+  // Any previous restrictions here caused only a subset (e.g. Militar) to be visible.
+  return true;
 };
 
 const inferOutcastedColorFromImageUrl = (url) => {
@@ -147,7 +148,7 @@ const sanitizeOutcastedProducts = (items) => {
       inferredColor ||
       null;
 
-    const nextVariants = (filteredVariants.length > 0) ? filteredVariants : variants;
+    const nextVariants = variants;
 
     return {
       ...p,
@@ -223,7 +224,24 @@ export const ProductProvider = ({ children }) => {
 
   function mapStoreProductToInternal(storeProduct, index = 0) {
     const id = storeProduct?.id?.toString() || `store-${index}`;
-    const name = storeProduct?.title || storeProduct?.name || `Producte ${index + 1}`;
+    const rawName = storeProduct?.title || storeProduct?.name || `Producte ${index + 1}`;
+    const name = (rawName || '').toString().includes('_')
+      ? (rawName || '').toString().replace(/_/g, ' ').replace(/\s+/g, ' ').trim()
+      : rawName;
+
+    const normalizeComparable = (value) => {
+      return (value || '')
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, ' ')
+        .replace(/\s+/g, ' ');
+    };
+
+    const rawDescription = (storeProduct?.description || '').toString().trim();
+    const hasMeaningfulDescription =
+      !!rawDescription && normalizeComparable(rawDescription) !== normalizeComparable(name);
+    const description = hasMeaningfulDescription ? rawDescription : '';
     const mockupUrl = storeProduct?.mockupUrl || storeProduct?.previewUrl || storeProduct?.imageUrl;
     const candidateImages = [
       ...(Array.isArray(storeProduct?.images) ? storeProduct.images : []),
@@ -237,11 +255,89 @@ export const ProductProvider = ({ children }) => {
     const images = Array.from(new Set(candidateImages));
     const finalImages = images.length > 0 ? images : ['/placeholder-product.svg'];
 
+    const extractVariantOptionValue = (variant, names = []) => {
+      const normalizedNames = (Array.isArray(names) ? names : []).map((n) => normalizeComparable(n));
+
+      const candidates = [
+        ...(Array.isArray(variant?.options) ? variant.options : []),
+        ...(Array.isArray(variant?.attributes) ? variant.attributes : []),
+        ...(Array.isArray(variant?.variantOptions) ? variant.variantOptions : [])
+      ];
+
+      for (const entry of candidates) {
+        if (!entry) continue;
+        const key = normalizeComparable(entry?.name || entry?.key || entry?.label || entry?.type);
+        if (key && normalizedNames.some((n) => key.includes(n))) {
+          const value = entry?.value ?? entry?.option ?? entry?.selection ?? entry?.title;
+          if (value != null && `${value}`.trim()) return `${value}`.trim();
+        }
+      }
+
+      const title = (variant?.title || '').toString();
+      for (const n of normalizedNames) {
+        const re = new RegExp(`\\b${n}\\b\\s*[:\\-]?\\s*([^,]+)`, 'i');
+        const m = title.match(re);
+        if (m && (m[1] || '').trim()) return (m[1] || '').trim();
+      }
+
+      return null;
+    };
+
+    const extractVariantSize = (variant) => {
+      const direct = variant?.size ?? variant?.Size ?? variant?.sizeName;
+      if (direct != null && `${direct}`.trim()) return `${direct}`.trim().toUpperCase();
+      const opt = extractVariantOptionValue(variant, ['talla', 'size', 'taille']);
+      if (opt != null && `${opt}`.trim()) return `${opt}`.trim().toUpperCase();
+
+      const title = (variant?.title || '').toString().toUpperCase();
+      const sizeToken = title.match(/\b(XXS|XS|S|M|L|XL|XXL|2XL|3XL|4XL|5XL|XXXL)\b/);
+      if (sizeToken && (sizeToken[1] || '').trim()) return (sizeToken[1] || '').trim();
+
+      return 'UNI';
+    };
+
+    const extractVariantColor = (variant) => {
+      const direct = variant?.color ?? variant?.Colour ?? variant?.Color ?? variant?.colorName;
+      if (direct != null && `${direct}`.trim()) return `${direct}`.trim();
+      const opt = extractVariantOptionValue(variant, ['color', 'colour', 'couleur']);
+      if (opt != null && `${opt}`.trim()) return `${opt}`.trim();
+
+      const title = (variant?.title || '').toString();
+      const knownColors = [
+        { re: /\b(militar|military|army|olive|khaki)\b/i, value: 'Militar' },
+        { re: /\b(forest)\b/i, value: 'Forest' },
+        { re: /\b(royal)\b/i, value: 'Royal' },
+        { re: /\b(navy|marina)\b/i, value: 'Navy' },
+        { re: /\b(vermell|red|rojo)\b/i, value: 'Vermell' },
+        { re: /\b(blau|blue|azul)\b/i, value: 'Blau' },
+        { re: /\b(verd|green)\b/i, value: 'Verd' },
+        { re: /\b(negre|black|negro)\b/i, value: 'Negre' },
+        { re: /\b(blanc|white|blanco)\b/i, value: 'Blanc' }
+      ];
+      for (const c of knownColors) {
+        if (c.re.test(title)) return c.value;
+      }
+
+      return 'Default';
+    };
+
     const variants = (storeProduct?.variants || []).map(v => {
-      const colorMatch = v?.title?.match(/Color\s+([^,]+)/i);
-      const sizeMatch = v?.title?.match(/Talla\s+(\w+)/i);
-      const color = colorMatch ? colorMatch[1].trim() : 'Default';
-      const size = sizeMatch ? sizeMatch[1].trim() : 'UNI';
+      const color = extractVariantColor(v);
+      const size = extractVariantSize(v);
+
+      if (import.meta.env.DEV && size === 'UNI') {
+        console.warn('⚠️ [STORE VARIANT] Could not infer size (defaulting to UNI):', {
+          productId: id,
+          productName: name,
+          variantId: v?.id || v?.variantId,
+          variantTitle: v?.title,
+          variantSize: v?.size,
+          variantColor: v?.color,
+          options: v?.options,
+          attributes: v?.attributes,
+          variantOptions: v?.variantOptions
+        });
+      }
 
       return {
         id: v?.id?.toString() || v?.variantId?.toString() || `${id}-${size}-${color}`,
@@ -262,7 +358,7 @@ export const ProductProvider = ({ children }) => {
       id,
       slug: storeProduct?.slug,
       name,
-      description: storeProduct?.description || name,
+      description,
       price: storeProduct?.price || 29.99,
       currency: storeProduct?.currency || 'EUR',
       image: finalImages[0],

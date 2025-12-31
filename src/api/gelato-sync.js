@@ -66,6 +66,15 @@ function transformStoreProductForSupabase(storeProduct) {
   const productTitle = storeProduct.title || storeProduct.name || 'Product';
   const productTitleLower = productTitle.toLowerCase();
 
+  const normalizeComparable = (value) => {
+    return (value || '')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .replace(/_/g, ' ')
+      .replace(/\s+/g, ' ');
+  };
+
   let collection = 'first-contact';
   for (const [key, value] of Object.entries(collectionMap)) {
     if (productTitleLower.includes(key)) {
@@ -100,7 +109,12 @@ function transformStoreProductForSupabase(storeProduct) {
   return {
     gelato_product_id: storeProduct.id?.toString() || storeProduct.productId?.toString(),
     name: productTitle,
-    description: storeProduct.description || productTitle,
+    description: (() => {
+      const raw = (storeProduct.description || '').toString().trim();
+      if (!raw) return '';
+      if (normalizeComparable(raw) === normalizeComparable(productTitle)) return '';
+      return raw;
+    })(),
     price: storeProduct.price || 29.99,
     currency: 'EUR',
     category: 'apparel',

@@ -88,7 +88,7 @@ class ErrorBoundary extends React.Component {
     if (this.state.hasError) {
       return (
         <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-          <div className="max-w-md w-full bg-white rounded-lg shadow-lg p-8 text-center">
+          <div className="max-w-6xl w-full bg-white rounded-lg shadow-lg p-8 text-center">
             <div className="mb-6">
               <svg
                 className="mx-auto h-16 w-16 text-red-500"
@@ -115,9 +115,9 @@ class ErrorBoundary extends React.Component {
 
             {process.env.NODE_ENV === 'development' && this.state.error && (
               <div className="mb-6">
-                <details className="text-left bg-gray-100 p-4 rounded text-sm">
+                <details className="text-left bg-gray-100 p-4 rounded text-sm" style={{ maxHeight: '70vh', overflow: 'auto' }}>
                   <summary className="cursor-pointer font-medium mb-2">{this.texts.errorBoundary.detailsTitle}</summary>
-                  <pre className="text-xs overflow-auto">
+                  <pre className="text-xs whitespace-pre-wrap break-words" style={{ maxHeight: '60vh', overflow: 'auto' }}>
                     {this.formatError(this.state.error)}
                     {this.state.errorInfo && this.state.errorInfo.componentStack}
                   </pre>

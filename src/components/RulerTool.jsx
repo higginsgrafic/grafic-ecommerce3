@@ -10,6 +10,13 @@ export default function RulerTool() {
   const canvasRef = useRef(null);
 
   useEffect(() => {
+    window.__RULER_TOOL_ACTIVE__ = !!isActive;
+    return () => {
+      window.__RULER_TOOL_ACTIVE__ = false;
+    };
+  }, [isActive]);
+
+  useEffect(() => {
     const handleKeyPress = (e) => {
       if (e.key === 'r' && e.ctrlKey) {
         e.preventDefault();
@@ -35,13 +42,19 @@ export default function RulerTool() {
     }
 
     const handleClick = (e) => {
+      // Do not hijack normal interactions. Only measure on modifier-click.
+      if (!e.shiftKey && !e.altKey) {
+        return;
+      }
+
       let element = e.target;
       while (element && element !== document.body) {
         if (
           (element.classList && element.classList.contains('debug-exempt')) ||
           (element.className && typeof element.className === 'string' && element.className.includes('debug-exempt'))
         ) {
-          return;
+          // Still allow measuring on exempt UI if user modifier-clicks.
+          break;
         }
         element = element.parentElement;
       }
@@ -229,41 +242,39 @@ export default function RulerTool() {
     setPoints([]);
   };
 
-  if (!isActive) {
-    return (
+  return (
+    <>
       <button
-        onClick={() => setIsActive(true)}
-        className="fixed bottom-4 right-4 bg-blue-600 text-white p-3 rounded-full shadow-lg hover:bg-blue-700 transition-colors debug-exempt"
+        onClick={() => setIsActive((prev) => !prev)}
+        className={`fixed bottom-4 right-4 text-white p-3 rounded-full shadow-lg transition-colors debug-exempt ${isActive ? 'bg-blue-700 hover:bg-blue-800' : 'bg-blue-600 hover:bg-blue-700'}`}
         style={{ zIndex: 99999 }}
-        title="Activar regle (Ctrl+R)"
+        title={isActive ? 'Desactivar regle (Ctrl+R)' : 'Activar regle (Ctrl+R)'}
       >
         <Ruler className="w-5 h-5" />
       </button>
-    );
-  }
 
-  return (
-    <>
-      <canvas
-        ref={canvasRef}
-        className="fixed inset-0 pointer-events-none debug-exempt"
-        style={{ zIndex: 99999, cursor: 'crosshair' }}
-      />
+      {!isActive ? null : (
+        <>
+          <canvas
+            ref={canvasRef}
+            className="fixed inset-0 pointer-events-none debug-exempt"
+            style={{ zIndex: 99999, cursor: 'crosshair' }}
+          />
 
-      <div className="fixed top-4 right-4 bg-white rounded-lg shadow-xl p-4 border-2 border-blue-500 min-w-[280px] debug-exempt" style={{ zIndex: 99999 }}>
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-center gap-2">
-            <Ruler className="w-5 h-5 text-blue-600" />
-            <h3 className="font-bold text-gray-900">Eina de Mesura</h3>
-          </div>
-          <button
-            onClick={() => setIsActive(false)}
-            className="text-gray-500 hover:text-gray-700"
-            title="Tancar (Ctrl+R)"
-          >
-            <X className="w-5 h-5" />
-          </button>
-        </div>
+          <div className="fixed top-4 right-4 bg-white rounded-lg shadow-xl p-4 border-2 border-blue-500 min-w-[280px] debug-exempt" style={{ zIndex: 99999 }}>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Ruler className="w-5 h-5 text-blue-600" />
+                <h3 className="font-bold text-gray-900">Eina de Mesura</h3>
+              </div>
+              <button
+                onClick={() => setIsActive(false)}
+                className="text-gray-500 hover:text-gray-700"
+                title="Tancar (Ctrl+R)"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
 
         <div className="space-y-3">
           <div className="flex gap-2">
@@ -335,17 +346,19 @@ export default function RulerTool() {
 
           {mode === 'distance' && (
             <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
-              Fes clic en dos punts per mesurar la distància
+              Shift+Click (o Alt+Click) en dos punts per mesurar la distància
             </div>
           )}
 
           {mode === 'angle' && (
             <div className="text-xs text-gray-500 bg-amber-50 p-2 rounded">
-              Fes clic en tres punts per mesurar l'angle (el segon punt és el vèrtex)
+              Shift+Click (o Alt+Click) en tres punts per mesurar l'angle (el segon punt és el vèrtex)
             </div>
           )}
         </div>
-      </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

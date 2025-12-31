@@ -14,6 +14,8 @@ const ProductGallery = ({
 }) => {
   const [selectedImage, setSelectedImage] = useState(0);
   const [pendingSelectedImage, setPendingSelectedImage] = useState(null);
+  const [selectedThumbKey, setSelectedThumbKey] = useState(null);
+  const [mainForcedSrc, setMainForcedSrc] = useState(null);
   const [mainOverlaySrc, setMainOverlaySrc] = useState(null);
   const [isZoomed, setIsZoomed] = useState(false);
   const [zoomPosition, setZoomPosition] = useState({ x: 50, y: 50 });
@@ -31,6 +33,8 @@ const ProductGallery = ({
   const prefetchedRef = useRef(new Set());
   const displayedMainSrcRef = useRef(null);
   const nextDisableFadeRef = useRef(false);
+  const lastThumbWasPlaceholderRef = useRef(false);
+  const forcedPlaceholderColorKeyRef = useRef(null);
 
   const imagesSignature = Array.isArray(images) ? images.join('|') : '';
 
@@ -48,6 +52,59 @@ const ProductGallery = ({
       .replace(/[\u0300-\u036f]/g, '');
   };
 
+  const normalizeToCanonicalColor = (value) => {
+    const v = (value || '')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/%20/g, ' ')
+      .replace(/[_-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+
+    if (!v) return null;
+    if (v === 'blanc' || v === 'white') return 'Blanc';
+    if (v === 'negre' || v === 'black') return 'Negre';
+    if (v === 'vermell' || v === 'red') return 'Vermell';
+    if (v === 'verd' || v === 'green') return 'Verd';
+    if (v.includes('militar') || v.includes('military') || v.includes('army')) return 'Militar';
+    if (v.includes('forest')) return 'Forest';
+    if (v.includes('royal')) return 'Royal';
+    if (v.includes('navy') || v.includes('marina')) return 'Navy';
+    if (v === 'blau' || v === 'blue' || v === 'azul') return 'Blau';
+    return null;
+  };
+
+  const normalizeHexColor = (value) => {
+    const raw = (value ?? '').toString().trim();
+    if (!raw) return null;
+    const lower = raw.toLowerCase();
+
+    // Allow functional colors directly
+    if (lower.startsWith('rgb(') || lower.startsWith('rgba(') || lower.startsWith('hsl(') || lower.startsWith('hsla(')) {
+      return raw;
+    }
+
+    // 0xRRGGBB
+    if (lower.startsWith('0x') && lower.length === 8) {
+      return `#${lower.slice(2)}`;
+    }
+
+    // #RGB / #RRGGBB
+    if (lower.startsWith('#')) {
+      return lower;
+    }
+
+    // RRGGBB
+    if (/^[0-9a-f]{6}$/i.test(raw)) {
+      return `#${raw}`;
+    }
+
+    return raw;
+  };
+
   const extractLooseColorFromImageUrl = (url) => {
     const normalized = (url || '').toString().replace(/\\/g, '/');
     const parts = normalized.split('/').filter(Boolean);
@@ -62,15 +119,32 @@ const ProductGallery = ({
     Militar: '/placeholders/Gildan-5000-Unisex-militar.jpg',
     Forest: '/placeholders/Gildan-5000-Unisex-forest.jpg',
     Royal: '/placeholders/Gildan-5000-Unisex-royal.jpg',
-    Navy: '/placeholders/Gildan-5000-Unisex-navy.jpg'
+    Navy: '/placeholders/Gildan-5000-Unisex-navy.jpg',
+    Blau: '/placeholders/Gildan-5000-Unisex-royal.jpg',
+    Verd: '/placeholders/Gildan-5000-Unisex-forest.jpg'
+  };
+
+  const fallbackHexByCanonicalColor = {
+    Blanc: '#FFFFFF',
+    Negre: '#000000',
+    Vermell: '#D00000',
+    Militar: '#556B2F',
+    Forest: '#0B3D2E',
+    Royal: '#0052CC',
+    Navy: '#001F3F',
+    Blau: '#0052CC',
+    Verd: '#0B3D2E'
   };
 
   const resolvePlaceholderForColor = (color) => {
-    const key = (color || '').toString().trim();
-    return placeholderByCanonicalColor[key] || null;
+    const canonical = normalizeToCanonicalColor(color) || (color || '').toString().trim();
+    return placeholderByCanonicalColor[canonical] || null;
   };
 
+  const selectedColorKey = selectedColor ? normalizeLoose(selectedColor) : null;
+
   const resolveMainImageSrc = () => {
+    if (mainForcedSrc) return mainForcedSrc;
     const img = Array.isArray(images) ? images[selectedImage] : null;
     if (!selectedColor) return img || null;
 
@@ -101,7 +175,19 @@ const ProductGallery = ({
     displayedMainSrcRef.current = currentMainSrc || null;
   }, [currentMainSrc]);
 
-  const selectedColorKey = selectedColor ? normalizeLoose(selectedColor) : null;
+  useEffect(() => {
+    // If selectedColor changes due to clicking a placeholder, keep the forced placeholder image.
+    // Only clear forced placeholder when the selected color changes to a *different* color.
+    if (mainForcedSrc) {
+      const forcedKey = forcedPlaceholderColorKeyRef.current;
+      const shouldKeep = !!forcedKey && !!selectedColorKey && forcedKey === selectedColorKey;
+      if (!shouldKeep) {
+        forcedPlaceholderColorKeyRef.current = null;
+        setMainForcedSrc(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [selectedColorKey]);
 
   const inferInkKeyFromUrl = (url) => {
     const u = (url || '').toString().toLowerCase();
@@ -265,6 +351,22 @@ const ProductGallery = ({
   })();
 
   useEffect(() => {
+    const thumbRows = Array.isArray(thumbnailRows) ? thumbnailRows : [];
+    const flatThumbs = thumbRows.flatMap((r) => (Array.isArray(r) ? r : []));
+
+    const byIndex = flatThumbs.find((it) => typeof it?.index === 'number' && it.index === effectiveSelectedImage);
+    if (!lastThumbWasPlaceholderRef.current && byIndex?.key) {
+      setSelectedThumbKey(byIndex.key);
+      return;
+    }
+
+    if (selectedColorKey) {
+      const byColor = flatThumbs.find((it) => normalizeLoose(it?.color || it?.label) === selectedColorKey);
+      if (!lastThumbWasPlaceholderRef.current && byColor?.key) setSelectedThumbKey(byColor.key);
+    }
+  }, [effectiveSelectedImage, selectedColorKey, thumbnailRows]);
+
+  useEffect(() => {
     if (!Array.isArray(images) || images.length === 0) {
       setSelectedImage(0);
       return;
@@ -332,24 +434,45 @@ const ProductGallery = ({
       setThumbsTop(px);
       window.__GRAFIC_THUMBS_TOP__ = px;
 
-      // Align the first thumbnail column center with the center of size button 'L'
-      // (in ProductInfo desktop size selector).
-      const sizeL = document.querySelector('[data-size-layout="desktop"][data-size-button="L"]');
-      if (sizeL) {
-        const cartButton = document.querySelector('[data-cart-button="1"]');
-        if (!cartButton) return;
+      // Align the first thumbnail column center with the leftmost size button in the
+      // ProductInfo desktop size selector.
+      //
+      // IMPORTANT: we must not anchor to a specific size label (like 'L'), because
+      // size ordering can change (e.g. adding XXS/XS) and would shift thumbnails.
+      const sizeButtons = Array.from(
+        document.querySelectorAll('[data-size-layout="desktop"][data-size-button]')
+      );
 
-        const firstThumbButton = thumbsEl.querySelector('button');
-        if (!firstThumbButton) return;
+      const sizeAnchor = sizeButtons
+        .map((el) => ({ el, rect: el.getBoundingClientRect?.() }))
+        .filter((it) => it?.rect && Number.isFinite(it.rect.left) && Number.isFinite(it.rect.width))
+        .sort((a, b) => a.rect.left - b.rect.left)[0]?.el;
 
-        const lRect = sizeL.getBoundingClientRect();
-        const cartRect = cartButton.getBoundingClientRect();
+      const cartButton = document.querySelector('[data-cart-button="1"]');
+      const firstThumbButton = thumbsEl.querySelector('button');
 
-        const lCenterX = lRect.left + lRect.width / 2;
-        const cartCenterX = cartRect.left + cartRect.width / 2;
+      // If anchors are missing (DOM not ready or different layout), reset derived values so
+      // we don't keep stale positioning from a previous render/product.
+      if (!sizeAnchor || !cartButton || !firstThumbButton) {
+        setThumbsLeft(null);
+        setThumbsWidth(null);
+        setThumbsGap(null);
+        return;
+      }
 
-        const cell = firstThumbButton.getBoundingClientRect().width;
-        if (!cell) return;
+      const lRect = sizeAnchor.getBoundingClientRect();
+      const cartRect = cartButton.getBoundingClientRect();
+
+      const lCenterX = lRect.left + lRect.width / 2;
+      const cartCenterX = cartRect.left + cartRect.width / 2;
+
+      const cell = firstThumbButton.getBoundingClientRect().width;
+      if (!cell) {
+        setThumbsLeft(null);
+        setThumbsWidth(null);
+        setThumbsGap(null);
+        return;
+      }
 
         // Desired behavior:
         // - Thumb 1 center aligned with size L (anchor left)
@@ -393,11 +516,10 @@ const ProductGallery = ({
 
         setThumbsLeft(leftPx);
         setThumbsWidth(widthPx);
-        setThumbsGap(gapPx);
-        window.__GRAFIC_THUMBS_LEFT__ = leftPx;
-        window.__GRAFIC_THUMBS_WIDTH__ = widthPx;
-        window.__GRAFIC_THUMBS_GAP__ = gapPx;
-      }
+      setThumbsGap(gapPx);
+      window.__GRAFIC_THUMBS_LEFT__ = leftPx;
+      window.__GRAFIC_THUMBS_WIDTH__ = widthPx;
+      window.__GRAFIC_THUMBS_GAP__ = gapPx;
     };
 
     const raf1 = requestAnimationFrame(compute);
@@ -450,13 +572,16 @@ const ProductGallery = ({
       const selectedByIndex = absoluteIndex === effectiveSelectedImage;
       const selectedByColor = !!selectedColorKey && itemColorKey === selectedColorKey;
 
-      // When a real thumbnail is selected (has valid index), only highlight by index.
-      // Highlight by color only when selection has no valid index (e.g. placeholder slot).
-      const isSelected = hasValidSelectedIndex ? selectedByIndex : selectedByColor;
+      const itemKey = item?.key || `${keyPrefix}-${idx}`;
+      const selectedByKey = !!selectedThumbKey && itemKey === selectedThumbKey;
+
+      // If a thumbKey is selected, ONLY that one should show the selector.
+      // Otherwise fall back to index (real image) or color.
+      const isSelected = selectedThumbKey ? selectedByKey : (hasValidSelectedIndex ? selectedByIndex : selectedByColor);
 
       return (
         <button
-          key={item?.key || `${keyPrefix}-${idx}`}
+          key={itemKey}
           onMouseEnter={() => {
             if (img) prefetchUrl(img);
           }}
@@ -464,7 +589,11 @@ const ProductGallery = ({
             if (img) prefetchUrl(img);
           }}
           onClick={() => {
+            setSelectedThumbKey(itemKey);
+            lastThumbWasPlaceholderRef.current = !(img && absoluteIndex >= 0);
             if (img && absoluteIndex >= 0) {
+              setMainForcedSrc(null);
+              forcedPlaceholderColorKeyRef.current = null;
               const nextColorKey = normalizeLoose(item?.color || item?.label);
               prepareFadeForNextSelection({ nextUrl: img, nextColorKey });
 
@@ -489,9 +618,18 @@ const ProductGallery = ({
               return;
             }
 
+            const rawFallback = item?.color || item?.label || null;
+            const canonicalFallback = normalizeToCanonicalColor(rawFallback) || rawFallback;
+            const placeholder = resolvePlaceholderForColor(canonicalFallback);
+            if (placeholder) {
+              forcedPlaceholderColorKeyRef.current = canonicalFallback
+                ? normalizeLoose(canonicalFallback)
+                : null;
+              setMainForcedSrc(placeholder);
+            }
+
             if (typeof onColorSelect === 'function') {
-              const fallbackColor = item?.color || item?.label || null;
-              if (fallbackColor) onColorSelect(fallbackColor);
+              if (canonicalFallback) onColorSelect(canonicalFallback);
             }
           }}
           className="aspect-square transition-all"
@@ -502,11 +640,35 @@ const ProductGallery = ({
             outlineOffset: '0px',
             borderRadius: '0px',
             overflow: isSelected ? 'visible' : 'hidden',
-            backgroundColor: isSelected ? '#D1D5DB' : 'transparent',
-            boxShadow: isSelected ? '0 0 0 5px #D1D5DB' : 'none'
+            backgroundColor: 'transparent',
+            boxShadow: 'none',
+            position: 'relative'
           }}
           aria-label={item?.label || `Seleccionar miniatura ${idx + 1}`}
         >
+          {isSelected ? (
+            <span
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                inset: '-6px',
+                width: 'calc(100% + 12px)',
+                height: 'calc(100% + 12px)',
+                pointerEvents: 'none',
+                zIndex: 0,
+                backgroundColor: '#d1d5db',
+                WebkitMaskImage: "url('/custom_logos/icons/badge-square-white.svg')",
+                WebkitMaskRepeat: 'no-repeat',
+                WebkitMaskPosition: 'center',
+                WebkitMaskSize: 'contain',
+                maskImage: "url('/custom_logos/icons/badge-square-white.svg')",
+                maskRepeat: 'no-repeat',
+                maskPosition: 'center',
+                maskSize: 'contain'
+              }}
+            />
+          ) : null}
+
           {img ? (
             <img
               src={img}
@@ -514,31 +676,42 @@ const ProductGallery = ({
               className="w-full h-full object-cover"
               loading="lazy"
               decoding="async"
-              style={{ borderRadius: '3px' }}
+              style={{ borderRadius: '3px', position: 'relative', zIndex: 1 }}
             />
           ) : (
             <span
               className="block w-full h-full"
               style={{
-                backgroundColor:
-                  normalizeLoose(item?.color) === normalizeLoose('Blanc') ||
-                  normalizeLoose(item?.hex) === normalizeLoose('#ffffff')
-                    ? '#f3f4f6'
-                    : (item?.hex || '#f9fafb'),
-                WebkitMaskImage: "url('/custom_logos/icons/badge-white.svg')",
+                position: 'relative',
+                zIndex: 1,
+                backgroundColor: (() => {
+                  const raw = (item?.color || '').toString().trim();
+                  const canonical = normalizeToCanonicalColor(raw) || raw;
+                  const hex = normalizeHexColor(item?.hex || fallbackHexByCanonicalColor[canonical] || null);
+                  const isWhite =
+                    normalizeLoose(canonical) === normalizeLoose('Blanc') ||
+                    normalizeLoose(hex) === normalizeLoose('#ffffff');
+                  return isWhite ? '#f3f4f6' : (hex || '#f9fafb');
+                })(),
+                WebkitMaskImage: "url('/custom_logos/icons/badge-head-white.svg')",
                 WebkitMaskRepeat: 'no-repeat',
                 WebkitMaskPosition: 'center',
                 WebkitMaskSize: '75%',
-                maskImage: "url('/custom_logos/icons/badge-white.svg')",
+                maskImage: "url('/custom_logos/icons/badge-head-white.svg')",
                 maskRepeat: 'no-repeat',
                 maskPosition: 'center',
                 maskSize: '75%',
+                transform: 'translateY(1px)',
                 borderRadius: '3px',
-                border:
-                  normalizeLoose(item?.color) === normalizeLoose('Blanc') ||
-                  normalizeLoose(item?.hex) === normalizeLoose('#ffffff')
-                    ? '1px solid #e5e7eb'
-                    : 'none'
+                border: (() => {
+                  const raw = (item?.color || '').toString().trim();
+                  const canonical = normalizeToCanonicalColor(raw) || raw;
+                  const hex = normalizeHexColor(item?.hex || fallbackHexByCanonicalColor[canonical] || null);
+                  const isWhite =
+                    normalizeLoose(canonical) === normalizeLoose('Blanc') ||
+                    normalizeLoose(hex) === normalizeLoose('#ffffff');
+                  return isWhite ? '1px solid #e5e7eb' : 'none';
+                })()
               }}
             />
           )}
@@ -589,7 +762,7 @@ const ProductGallery = ({
                 toggleZoom();
               }}
               className="bg-white/90 hover:bg-white p-2 rounded-full shadow-lg transition-colors"
-              aria-label={isZoomed ? "Reduir zoom" : "Ampliar"}
+              aria-label={isZoomed ? 'Reduir zoom' : 'Ampliar'}
             >
               {isZoomed ? <ZoomOut className="h-5 w-5" /> : <ZoomIn className="h-5 w-5" />}
             </button>
@@ -597,7 +770,12 @@ const ProductGallery = ({
         </motion.div>
 
         {hasTwoRows ? (
-          <div ref={thumbsWrapRef} data-thumbs="1" data-two-row-thumbs="1" style={{ position: 'absolute', top: thumbsTop || '492px', left: thumbsLeft || '655px', width: thumbsWidth || '400px' }}>
+          <div
+            ref={thumbsWrapRef}
+            data-thumbs="1"
+            data-two-row-thumbs="1"
+            style={{ position: 'absolute', top: thumbsTop || '492px', left: thumbsLeft || '655px', width: thumbsWidth || '400px' }}
+          >
             <div className="grid grid-cols-6" style={{ gap: thumbsGap || '10px' }}>
               {thumbnailRows[0].map((item, idx) => renderThumbItem(item, idx, 'r1'))}
             </div>
@@ -607,18 +785,28 @@ const ProductGallery = ({
             </div>
           </div>
         ) : hasOneRow ? (
-          <div ref={thumbsWrapRef} data-thumbs="1" data-one-row-thumbs="1" style={{ position: 'absolute', top: thumbsTop || '540px', left: thumbsLeft || '655px', width: thumbsWidth || '400px' }}>
+          <div
+            ref={thumbsWrapRef}
+            data-thumbs="1"
+            data-one-row-thumbs="1"
+            style={{ position: 'absolute', top: thumbsTop || '540px', left: thumbsLeft || '655px', width: thumbsWidth || '400px' }}
+          >
             <div className="grid grid-cols-6" style={{ gap: thumbsGap || '10px' }}>
               {thumbnailRows[0].map((item, idx) => renderThumbItem(item, idx, 'r0'))}
             </div>
           </div>
         ) : (
-          <div ref={thumbsWrapRef} data-thumbs="1" style={{ position: 'absolute', top: thumbsTop || '540px', left: thumbsLeft || '655px', width: thumbsWidth || '400px' }}>
+          <div
+            ref={thumbsWrapRef}
+            data-thumbs="1"
+            style={{ position: 'absolute', top: thumbsTop || '540px', left: thumbsLeft || '655px', width: thumbsWidth || '400px' }}
+          >
             <div className="grid grid-cols-6" style={{ gap: thumbsGap || '10px' }}>
               {images.map((img, idx) => (
                 <button
                   key={idx}
                   onClick={() => {
+                    setSelectedThumbKey(null);
                     skipNextColorSyncRef.current = true;
                     setSelectedImage(idx);
                     if (typeof onColorSelect === 'function') {
@@ -630,19 +818,45 @@ const ProductGallery = ({
                   style={{
                     padding: '0',
                     border: 'none',
-                    outline: idx === selectedImage ? '1px solid black' : 'none',
-                    outlineOffset: '5px',
-                    borderRadius: '3px'
+                    outline: 'none',
+                    outlineOffset: '0px',
+                    borderRadius: '0px',
+                    overflow: idx === selectedImage ? 'visible' : 'hidden',
+                    backgroundColor: 'transparent',
+                    boxShadow: 'none',
+                    position: 'relative'
                   }}
                   aria-label={`Seleccionar miniatura ${idx + 1}`}
                 >
+                  {idx === selectedImage ? (
+                    <span
+                      aria-hidden="true"
+                      style={{
+                        position: 'absolute',
+                        inset: '-6px',
+                        width: 'calc(100% + 12px)',
+                        height: 'calc(100% + 12px)',
+                        pointerEvents: 'none',
+                        zIndex: 0,
+                        backgroundColor: '#d1d5db',
+                        WebkitMaskImage: "url('/custom_logos/icons/badge-square-white.svg')",
+                        WebkitMaskRepeat: 'no-repeat',
+                        WebkitMaskPosition: 'center',
+                        WebkitMaskSize: 'contain',
+                        maskImage: "url('/custom_logos/icons/badge-square-white.svg')",
+                        maskRepeat: 'no-repeat',
+                        maskPosition: 'center',
+                        maskSize: 'contain'
+                      }}
+                    />
+                  ) : null}
                   <img
                     src={img}
                     alt={`Miniatura ${idx + 1}`}
                     className="w-full h-full object-cover"
                     loading="lazy"
                     decoding="async"
-                    style={{ borderRadius: '3px' }}
+                    style={{ borderRadius: '3px', position: 'relative', zIndex: 1 }}
                   />
                 </button>
               ))}
@@ -696,7 +910,6 @@ const ProductGallery = ({
                   const itemColorKey = normalizeLoose(item?.color || item?.label);
                   const selectedByIndex = absoluteIndex === effectiveSelectedImage;
                   const selectedByColor = !!selectedColorKey && itemColorKey === selectedColorKey;
-
                   const isSelected = hasValidSelectedIndex ? selectedByIndex : selectedByColor;
 
                   return (
@@ -733,9 +946,18 @@ const ProductGallery = ({
                           return;
                         }
 
+                        const rawFallback = item?.color || item?.label || null;
+                        const canonicalFallback = normalizeToCanonicalColor(rawFallback) || rawFallback;
+                        const placeholder = resolvePlaceholderForColor(canonicalFallback);
+                        if (placeholder) {
+                          forcedPlaceholderColorKeyRef.current = canonicalFallback
+                            ? normalizeLoose(canonicalFallback)
+                            : null;
+                          setMainForcedSrc(placeholder);
+                        }
+
                         if (typeof onColorSelect === 'function') {
-                          const fallbackColor = item?.color || item?.label || null;
-                          if (fallbackColor) onColorSelect(fallbackColor);
+                          if (canonicalFallback) onColorSelect(canonicalFallback);
                         }
                       }}
                       className={`aspect-square overflow-hidden transition-all ${
@@ -755,31 +977,42 @@ const ProductGallery = ({
                           className="w-full h-full object-cover"
                           loading="lazy"
                           decoding="async"
-                          style={{ borderRadius: '3px' }}
+                          style={{ borderRadius: '3px', position: 'relative', zIndex: 1 }}
                         />
                       ) : (
                         <span
                           className="block w-full h-full"
                           style={{
-                            backgroundColor:
-                              normalizeLoose(item?.color) === normalizeLoose('Blanc') ||
-                              normalizeLoose(item?.hex) === normalizeLoose('#ffffff')
-                                ? '#f3f4f6'
-                                : (item?.hex || '#f9fafb'),
-                            WebkitMaskImage: "url('/custom_logos/icons/badge-white.svg')",
+                            position: 'relative',
+                            zIndex: 1,
+                            backgroundColor: (() => {
+                              const raw = (item?.color || '').toString().trim();
+                              const canonical = normalizeToCanonicalColor(raw) || raw;
+                              const hex = item?.hex || fallbackHexByCanonicalColor[canonical] || null;
+                              const isWhite =
+                                normalizeLoose(canonical) === normalizeLoose('Blanc') ||
+                                normalizeLoose(hex) === normalizeLoose('#ffffff');
+                              return isWhite ? '#f3f4f6' : (hex || '#f9fafb');
+                            })(),
+                            WebkitMaskImage: "url('/custom_logos/icons/badge-head-white.svg')",
                             WebkitMaskRepeat: 'no-repeat',
                             WebkitMaskPosition: 'center',
                             WebkitMaskSize: '75%',
-                            maskImage: "url('/custom_logos/icons/badge-white.svg')",
+                            maskImage: "url('/custom_logos/icons/badge-head-white.svg')",
                             maskRepeat: 'no-repeat',
                             maskPosition: 'center',
                             maskSize: '75%',
+                            transform: 'translateY(1px)',
                             borderRadius: '3px',
-                            border:
-                              normalizeLoose(item?.color) === normalizeLoose('Blanc') ||
-                              normalizeLoose(item?.hex) === normalizeLoose('#ffffff')
-                                ? '1px solid #e5e7eb'
-                                : 'none'
+                            border: (() => {
+                              const raw = (item?.color || '').toString().trim();
+                              const canonical = normalizeToCanonicalColor(raw) || raw;
+                              const hex = item?.hex || fallbackHexByCanonicalColor[canonical] || null;
+                              const isWhite =
+                                normalizeLoose(canonical) === normalizeLoose('Blanc') ||
+                                normalizeLoose(hex) === normalizeLoose('#ffffff');
+                              return isWhite ? '1px solid #e5e7eb' : 'none';
+                            })()
                           }}
                         />
                       )}

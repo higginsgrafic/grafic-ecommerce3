@@ -12,101 +12,15 @@ import SEOProductSchema from '@/components/SEOProductSchema';
 import { trackProductView, trackAddToCart, trackAddToWishlist, trackShare } from '@/utils/analytics';
 import { useProductContext } from '@/contexts/ProductContext';
 import { useToast } from '@/contexts/ToastContext';
+import useProductEpisodes from '@/hooks/useProductEpisodes';
+import { useAdmin } from '@/contexts/AdminContext';
 
-const EPISODES_VERSION = '1.3';
-
-const episodes = [
-  {
-    season: 1,
-    episode: 28,
-    originalTitle: "The City on the Edge of Forever",
-    title: "LA CIUTAT A LA FRONTERA DEL FUTUR",
-    text: "McCoy desapareix, com si res,  per un portal temporal i, amb ell, tot record de la Federació. Així, Kirk troba l'amor perdut en una època inexistent. Compra'm."
-  },
-  {
-    season: 1,
-    episode: 22,
-    originalTitle: "Space Seed",
-    title: "LA LLAVOR DE L'ESPAI",
-    text: "Khan, el superhome del passat, té grans somnis i es desperta amb fam de conquesta. Traïció, seducció i ambició. El preu del poder serà molt car. Compra'm."
-  },
-  {
-    season: 2,
-    episode: 5,
-    originalTitle: "Amok Time",
-    title: "L'ÈPOCA DE L'AMOK",
-    text: "Es trenca l'amistat quan has de lluitar fins a la mort? El foc de Vulcà, ancestral, crema dins de Spock. L'hora greu tomba sobre el combat ritual. Compra'm."
-  },
-  {
-    season: 2,
-    episode: 10,
-    originalTitle: "Mirror, Mirror",
-    title: "MIRALLET, MIRALLET",
-    text: "I si existís un lloc on la Federació és un Imperi brutal i cruel que conquereix amb violència tot allò que vol? Kirk n'haurà de fugir per poder tornar a casa. Compra'm."
-  },
-  {
-    season: 2,
-    episode: 13,
-    originalTitle: "The Trouble with Tribbles",
-    title: "EL PROBLEMA DELS TRIBBLES",
-    text: "Avui, unes entranyables boles de pèl han començat a envair cada racó de la nau. Es multipliquen sense parar i consumeixen tot el que troben. Compra'm."
-  },
-  {
-    season: 1,
-    episode: 14,
-    originalTitle: "Balance of Terror",
-    title: "L'EQUILIBRI DE LA POR",
-    text: "Una nau fantasma travessa la fosca de l'espai tot trencant el silenci. Els Romulans han tornat cent anys després! Què deuen tramar aquests, ara. Compra'm."
-  },
-  {
-    season: 1,
-    episode: 18,
-    originalTitle: "Arena",
-    title: "ARENA",
-    text: "Kirk s'enfronta, en una platja, enmig del no-res, a un Gorn -la il·lustració contra l'instint. Ha de superar el repte de l'explorador: sobreviure. Compra'm."
-  },
-  {
-    season: 2,
-    episode: 6,
-    originalTitle: "The Doomsday Machine",
-    title: "LA MÀQUINA DEL JUDICI FINAL",
-    text: "Decker, capità desaparegut mesos enrere i obsessionat amb venjar la seva tripulació, vol, com sigui, destruir l'arma \"devoradora de planetes\". Compra'm."
-  },
-  {
-    season: 2,
-    episode: 15,
-    originalTitle: "Journey to Babel",
-    title: "VIATGE A BABEL",
-    text: "Sarek i Spock naveguen en silenci mentre un assassí vaga entre els ambaixadors. L'honor contra l'amor xoquen amb força. Compra'm."
-  },
-  {
-    season: 1,
-    episode: 25,
-    originalTitle: "The Devil in the Dark",
-    title: "EL MONSTRE AMAGAT",
-    text: "A Janus VI hi passen coses estranyes, no ho has pas sentit? Hi ha accidents misteriosos. La Federació creu que hi ha d'haver una explicació. Compra'm."
-  },
-  {
-    season: 1,
-    episode: 27,
-    originalTitle: "Errand of Mercy",
-    title: "ELS SALVADORS, SALVATS",
-    text: "La guerra contra els Klingon, ja és aquí. La Federació arriba a Orgània per oferir ajut defensiu, malgrat que, la gent, no sembli gens preocupada. Compra'm."
-  },
-  {
-    season: 1,
-    episode: 11,
-    originalTitle: "The Menagerie",
-    title: "EL ZOO",
-    text: "Spock navega cap a un món prohibit on la mort és el càstig segur. La lleialtat supera la freda lògica. L'amistat crida des del dolor intens. Compra'm."
-  }
-];
-
-const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) => {
+const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, language = 'ca' }) => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { products, getProductById, toggleWishlist, isInWishlist } = useProductContext();
   const { success } = useToast();
+  const { isAdmin } = useAdmin();
 
   const product = getProductById(id);
 
@@ -125,7 +39,18 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
 
   // Obtenir talles i colors disponibles de les variants
   const availableSizes = validVariants.length > 0
-    ? [...new Set(validVariants.map(v => v.size))].sort()
+    ? [...new Set(validVariants.map(v => v.size))].sort((a, b) => {
+        const order = ['XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', '2XL', 'XXXL', '3XL', '4XL', '5XL'];
+        const norm = (v) => (v || '').toString().trim().toUpperCase();
+        const aa = norm(a);
+        const bb = norm(b);
+        const ia = order.indexOf(aa);
+        const ib = order.indexOf(bb);
+        if (ia !== -1 || ib !== -1) {
+          return (ia === -1 ? 999 : ia) - (ib === -1 ? 999 : ib);
+        }
+        return aa.localeCompare(bb);
+      })
     : ['S', 'M', 'L', 'XL'];
 
   const [selectedSize, setSelectedSize] = useState(availableSizes[0] || 'M');
@@ -400,28 +325,18 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
     }
   }, [product?.id, availableSizes.join('|'), selectedSize, selectedColor, validVariants]);
 
-  const [selectedEpisodeIndex, setSelectedEpisodeIndex] = useState(() => {
-    const savedIndex = localStorage.getItem(`episodeIndex_${product?.id}`);
-    return savedIndex ? parseInt(savedIndex) : (product?.id % episodes.length || 0);
-  });
+  const {
+    episodes,
+    currentEpisode,
+    selectedEpisodeIndex,
+    setSelectedEpisodeIndex,
+    setEpisodeText,
+    missingFile
+  } = useProductEpisodes({ product, language });
 
-  const [editableEpisodes, setEditableEpisodes] = useState(() => {
-    const savedVersion = localStorage.getItem(`episodesVersion_${product?.id}`);
-    const saved = localStorage.getItem(`editableEpisodes_${product?.id}`);
-
-    if (savedVersion === EPISODES_VERSION && saved) {
-      return JSON.parse(saved);
-    }
-
-    localStorage.setItem(`episodesVersion_${product?.id}`, EPISODES_VERSION);
-    return episodes;
-  });
   const [isEditingText, setIsEditingText] = useState(false);
   const [editedText, setEditedText] = useState('');
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
-
-  const ROTATION_INTERVAL = 16000;
-  const currentEpisode = editableEpisodes[selectedEpisodeIndex];
+  const activeEpisodesLength = episodes.length;
 
   // Obtenir imatges del producte
   // Prioritat: 1) Imatges de la variant, 2) Imatges del producte, 3) Mockups, 4) Imatges per defecte
@@ -524,6 +439,26 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
     const preferredRow1 = ['Negre', 'Vermell', 'Militar', 'Forest', 'Royal', 'Navy'];
     const preferredRow2 = ['Blanc', 'Vermell', 'Militar', 'Forest', 'Royal', 'Navy'];
 
+    const normalizeLoose = (value) => {
+      return (value || '')
+        .toString()
+        .trim()
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-z0-9]+/g, '');
+    };
+
+    const normalizeHexColor = (value) => {
+      const raw = (value ?? '').toString().trim();
+      if (!raw) return null;
+      const lower = raw.toLowerCase();
+      if (lower.startsWith('#')) return lower;
+      if (lower.startsWith('0x') && lower.length === 8) return `#${lower.slice(2)}`;
+      if (/^[0-9a-f]{6}$/i.test(raw)) return `#${raw}`.toLowerCase();
+      return raw;
+    };
+
     const colorHexByCanonical = new Map(
       (Array.isArray(availableColors) ? availableColors : [])
         .filter((c) => c && c.color)
@@ -539,6 +474,19 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
       ['Royal', '#0052CC'],
       ['Navy', '#001F3F']
     ]);
+
+    const resolveHexForColor = (color) => {
+      const fromData = normalizeHexColor(colorHexByCanonical.get(color) || null);
+      const fromFallback = normalizeHexColor(fallbackHexByCanonical.get(color) || null);
+
+      // Guard: some sources incorrectly provide '#FFFFFF' for all colors.
+      // If color is NOT Blanc and data is white, ignore it.
+      const isNonWhiteColor = normalizeLoose(color) !== normalizeLoose('Blanc');
+      const isDataWhite = normalizeLoose(fromData) === normalizeLoose('#ffffff');
+      if (isNonWhiteColor && isDataWhite) return fromFallback;
+
+      return fromData || fromFallback || null;
+    };
 
     const candidates = Array.isArray(rawImages) ? rawImages : [];
     if (candidates.length === 0) {
@@ -558,6 +506,17 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
     // Forest, etc.) is encoded in the filename. Since we intentionally ignore the filename
     // in extractCanonicalColorFromImageUrl(), we must rely on variant data for color/design.
     const variantCandidates = Array.isArray(validVariants) ? validVariants : [];
+
+    if (import.meta.env.DEV) {
+      window.__PDP_VARIANTS_BRIEF__ = variantCandidates.slice(0, 60).map((v) => ({
+        id: v?.id,
+        sku: v?.sku,
+        size: v?.size,
+        color: v?.color,
+        design: v?.design,
+        image: v?.image_url || v?.image || null
+      }));
+    }
     for (const v of variantCandidates) {
       const url = v?.image_url || v?.image;
       if (!url) continue;
@@ -648,7 +607,7 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
             color,
             label,
             url,
-            hex: colorHexByCanonical.get(color) || fallbackHexByCanonical.get(color) || null
+            hex: resolveHexForColor(color)
           };
         });
       };
@@ -680,10 +639,16 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
           index: it.url ? (indexByUrl.get(it.url) ?? -1) : -1
         }));
 
-      return {
+      const result = {
         images: ordered,
         thumbnailRows: [finalizeRow(rowForWhiteInk), finalizeRow(rowForBlackInk)]
       };
+
+      if (import.meta.env.DEV) {
+        window.__PDP_THUMB_ROWS__ = result.thumbnailRows;
+      }
+
+      return result;
     }
 
     // Fallback: if variants didn't populate anything (older products), try to infer from URLs.
@@ -779,12 +744,78 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
           color,
           label,
           url,
-          hex: colorHexByCanonical.get(color) || fallbackHexByCanonical.get(color) || null,
+          hex: resolveHexForColor(color),
           index: idx
         };
       });
 
-      return { images: candidates, thumbnailRows: [singleRow] };
+      const normalizeKey = (value) => {
+        return (value || '')
+          .toString()
+          .trim()
+          .toLowerCase()
+          .normalize('NFD')
+          .replace(/[\u0300-\u036f]/g, '')
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/^-+|-+$/g, '');
+      };
+
+      const collectionKey = normalizeKey(product?.collection);
+      const designKey = normalizeKey(product?.name);
+      const isColorDesign = collectionKey === 'austen' || collectionKey === 'cube' || designKey === 'dj-vader';
+
+      // For monochrome designs, keep a fixed 2-row grid even if we only have one design.
+      // This stabilizes the layout and matches the expected PDP model.
+      const shouldForceTwoRows = !isColorDesign;
+      if (!shouldForceTwoRows) {
+        const result = { images: candidates, thumbnailRows: [singleRow] };
+        if (import.meta.env.DEV) {
+          window.__PDP_THUMB_ROWS__ = result.thumbnailRows;
+        }
+        return result;
+      }
+
+      const inkColor = inferDesignInkColor(product);
+      const isWhiteInkDesign = inkColor === 'white' || (hasNegre && !hasBlanc);
+      const isBlackInkDesign = inkColor === 'black' || (hasBlanc && !hasNegre);
+
+      const rowForWhiteInk = preferredRow1.map((color) => {
+        const url = isWhiteInkDesign
+          ? (hasVariantMap ? (soleMap.get(color) || null) : (candidates.find((u) => extractCanonicalColorFromImageUrl(u) === color) || null))
+          : null;
+        const idx = url ? candidates.indexOf(url) : -1;
+        const label = color === 'Militar' ? 'Green' : color;
+        return {
+          key: `ink-white-${color}`,
+          color,
+          label,
+          url,
+          hex: resolveHexForColor(color),
+          index: idx
+        };
+      });
+
+      const rowForBlackInk = preferredRow2.map((color) => {
+        const url = isBlackInkDesign
+          ? (hasVariantMap ? (soleMap.get(color) || null) : (candidates.find((u) => extractCanonicalColorFromImageUrl(u) === color) || null))
+          : null;
+        const idx = url ? candidates.indexOf(url) : -1;
+        const label = color === 'Militar' ? 'Green' : color;
+        return {
+          key: `ink-black-${color}`,
+          color,
+          label,
+          url,
+          hex: resolveHexForColor(color),
+          index: idx
+        };
+      });
+
+      const result = { images: candidates, thumbnailRows: [rowForWhiteInk, rowForBlackInk] };
+      if (import.meta.env.DEV) {
+        window.__PDP_THUMB_ROWS__ = result.thumbnailRows;
+      }
+      return result;
     }
 
     const buildRow = (designKey, colorOrder) => {
@@ -797,7 +828,7 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
           color,
           label,
           url,
-          hex: colorHexByCanonical.get(color) || fallbackHexByCanonical.get(color) || null
+          hex: resolveHexForColor(color)
         };
       });
     };
@@ -827,40 +858,27 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
         index: it.url ? (indexByUrl.get(it.url) ?? -1) : -1
       }));
 
-    return {
+    const result = {
       images: ordered,
       thumbnailRows: [finalizeRow(rowForWhiteInkDesign), finalizeRow(rowForBlackInkDesign)]
     };
+
+    if (import.meta.env.DEV) {
+      window.__PDP_THUMB_ROWS__ = result.thumbnailRows;
+    }
+
+    return result;
   }, [rawImages, product, availableColors, extractDesignFromImageUrl, extractCanonicalColorFromImageUrl]);
 
   useEffect(() => {
-    if (product?.id) {
-      localStorage.setItem(`editableEpisodes_${product.id}`, JSON.stringify(editableEpisodes));
-    }
-  }, [editableEpisodes, product?.id]);
-
-  useEffect(() => {
-    if (product?.id) {
-      localStorage.setItem(`episodeIndex_${product.id}`, selectedEpisodeIndex.toString());
-    }
-  }, [selectedEpisodeIndex, product?.id]);
-
-  useEffect(() => {
-    if (product?.name === 'NCC-1701' && isAutoPlay && !isEditingText) {
-      const interval = setInterval(() => {
-        setSelectedEpisodeIndex((prev) => (prev + 1) % episodes.length);
-      }, ROTATION_INTERVAL);
-      return () => clearInterval(interval);
-    }
-  }, [isAutoPlay, isEditingText, product?.name, ROTATION_INTERVAL]);
-
-  useEffect(() => {
     if (!showGalleryModal) return;
+
     const handleKeyPress = (e) => {
       if (e.key === 'ArrowLeft') prevGalleryImage();
       if (e.key === 'ArrowRight') nextGalleryImage();
       if (e.key === 'Escape') closeGallery();
     };
+
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [showGalleryModal, galleryImageIndex]);
@@ -899,11 +917,15 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
   }
 
   const handleAddToCart = () => {
+    const variantColorRaw = selectedVariant?.color || selectedVariant?.colour || selectedVariant?.color_name || null;
+    const variantColorCanonical = normalizeToCanonicalColor(variantColorRaw) || variantColorRaw || null;
     const productToAdd = {
       ...product,
       selectedVariant,
       variant: selectedVariant,
-      selectedColor
+      // IMPORTANT: use variant color as source-of-truth for cart, not selectedColor (which can be a UI slot/canonical).
+      color: variantColorCanonical || selectedColor,
+      selectedColor: variantColorCanonical || selectedColor
     };
     trackAddToCart(productToAdd, quantity);
     onAddToCart(productToAdd, selectedSize, quantity, true);
@@ -930,17 +952,13 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
   };
 
   const handleDoubleClickEdit = () => {
+    if (!currentEpisode) return;
     setIsEditingText(true);
     setEditedText(currentEpisode.text);
   };
 
   const handleSaveText = () => {
-    const updatedEpisodes = [...editableEpisodes];
-    updatedEpisodes[selectedEpisodeIndex] = {
-      ...updatedEpisodes[selectedEpisodeIndex],
-      text: editedText
-    };
-    setEditableEpisodes(updatedEpisodes);
+    setEpisodeText(selectedEpisodeIndex, editedText);
     setIsEditingText(false);
     success('Text actualitzat');
   };
@@ -951,30 +969,13 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
   };
 
   const nextEpisode = () => {
-    setSelectedEpisodeIndex((prev) => (prev + 1) % episodes.length);
+    if (!activeEpisodesLength) return;
+    setSelectedEpisodeIndex((prev) => (prev + 1) % activeEpisodesLength);
   };
 
   const prevEpisode = () => {
-    setSelectedEpisodeIndex((prev) => (prev - 1 + episodes.length) % episodes.length);
-  };
-
-  const handleExportEpisodes = () => {
-    const exportText = editableEpisodes.map((ep, index) => {
-      return `${index + 1}. ${ep.originalTitle}\n   ${ep.title}\n   \n   ${ep.text}\n`;
-    }).join('\n---\n\n');
-
-    const fullText = `EPISODIS DE STAR TREK - TEXTOS MODIFICATS\n${'='.repeat(50)}\n\n${exportText}\n${'='.repeat(50)}\n\nExportat: ${new Date().toLocaleString('ca-ES')}`;
-
-    const blob = new Blob([fullText], { type: 'text/plain;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'episodis-star-trek-modificats.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    success('Episodis exportats');
+    if (!activeEpisodesLength) return;
+    setSelectedEpisodeIndex((prev) => (prev - 1 + activeEpisodesLength) % activeEpisodesLength);
   };
 
   const handleShare = async () => {
@@ -1056,12 +1057,12 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
       <div className="min-h-screen bg-white">
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
           <nav className="pt-[8px] lg:pt-[10px] pb-4 ml-[5px] -mt-[25px]">
-            <ol className="flex items-center space-x-2 text-sm uppercase">
+            <ol className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm uppercase">
               <li><Link to="/" className="text-gray-500 hover:text-gray-900 transition-colors">Inici</Link></li>
               <ChevronRight className="h-4 w-4 text-gray-400" />
               <li><Link to={`/${product.collection}`} className="text-gray-500 hover:text-gray-900 transition-colors">{humanizeLabel(product.collection)}</Link></li>
               <ChevronRight className="h-4 w-4 text-gray-400" />
-              <li className="text-gray-900 font-medium truncate">{formatProductName(product.name)}</li>
+              <li className="text-gray-900 font-medium break-words">{formatProductName(product.name)}</li>
             </ol>
           </nav>
         </div>
@@ -1110,23 +1111,34 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
             layout="desktop"
           />
 
-        <EpisodeControls
-          currentEpisode={currentEpisode}
-          onPrevious={prevEpisode}
-          onNext={nextEpisode}
-          layout="desktop"
-        />
+          {currentEpisode ? (
+            <>
+              <EpisodeControls
+                currentEpisode={currentEpisode}
+                onPrevious={prevEpisode}
+                onNext={nextEpisode}
+                layout="desktop"
+              />
 
-        <EpisodeDisplay
-          currentEpisode={currentEpisode}
-          isEditing={isEditingText}
-          editedText={editedText}
-          onTextChange={setEditedText}
-          onSave={handleSaveText}
-          onCancel={handleCancelEdit}
-          onDoubleClick={handleDoubleClickEdit}
-          layout="desktop"
-        />
+              <EpisodeDisplay
+                currentEpisode={currentEpisode}
+                isEditing={isEditingText}
+                editedText={editedText}
+                onTextChange={setEditedText}
+                onSave={handleSaveText}
+                onCancel={handleCancelEdit}
+                onDoubleClick={handleDoubleClickEdit}
+                layout="desktop"
+              />
+            </>
+          ) : isAdmin && missingFile ? (
+            <div
+              className="text-xs text-gray-500"
+              style={{ position: 'absolute', top: '78px', left: '645px', width: '340px' }}
+            >
+              Episodis: falta el fitxer JSON per aquest producte.
+            </div>
+          ) : null}
       </div>
 
       {/* Layout Mòbil/Tablet */}
@@ -1163,24 +1175,32 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
           <p className="font-oswald text-2xl sm:text-3xl font-normal">
             {product.price.toFixed(2).replace('.', ',')} €
           </p>
-          <EpisodeControls
-            currentEpisode={currentEpisode}
-            onPrevious={prevEpisode}
-            onNext={nextEpisode}
-            layout="mobile"
-          />
+          {currentEpisode ? (
+            <EpisodeControls
+              currentEpisode={currentEpisode}
+              onPrevious={prevEpisode}
+              onNext={nextEpisode}
+              layout="mobile"
+            />
+          ) : null}
         </div>
 
-        <EpisodeDisplay
-          currentEpisode={currentEpisode}
-          isEditing={isEditingText}
-          editedText={editedText}
-          onTextChange={setEditedText}
-          onSave={handleSaveText}
-          onCancel={handleCancelEdit}
-          onDoubleClick={handleDoubleClickEdit}
-          layout="mobile"
-        />
+        {currentEpisode ? (
+          <EpisodeDisplay
+            currentEpisode={currentEpisode}
+            isEditing={isEditingText}
+            editedText={editedText}
+            onTextChange={setEditedText}
+            onSave={handleSaveText}
+            onCancel={handleCancelEdit}
+            onDoubleClick={handleDoubleClickEdit}
+            layout="mobile"
+          />
+        ) : isAdmin && missingFile ? (
+          <div className="text-xs text-gray-500 mb-4">
+            Episodis: falta el fitxer JSON per aquest producte.
+          </div>
+        ) : null}
 
         <ProductInfo
           product={product}
@@ -1200,19 +1220,6 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity }) =>
           layout="mobile"
         />
       </div>
-
-      {product.name === 'NCC-1701' && (
-        <div className="fixed right-4 bottom-4 z-[10000]">
-          <button
-            onClick={handleExportEpisodes}
-            className="bg-white hover:bg-gray-100 px-4 py-2 rounded-full shadow-lg transition-colors border border-gray-300 font-oswald text-sm font-semibold"
-            aria-label="Exportar episodis"
-            title="Exportar textos dels episodis modificats"
-          >
-            EXPORTA EPISODIS
-          </button>
-        </div>
-      )}
 
       {/* Galeria Modal Fullscreen */}
       {showGalleryModal && (

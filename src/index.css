@@ -84,7 +84,6 @@ header.cart-open,
 .debug-containers * {
   outline: 1px solid rgba(255, 0, 0, 0.3) !important;
   cursor: pointer !important;
-  position: relative;
 }
 
 .debug-containers .debug-exempt,

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAdmin } from '@/contexts/AdminContext';
 import { Lock, Eye, EyeOff } from 'lucide-react';
 import SEO from '@/components/SEO';
@@ -9,20 +9,33 @@ export default function AdminLoginPage() {
   const [showKey, setShowKey] = useState(false);
   const [error, setError] = useState('');
   const { enableAdmin, isAdmin } = useAdmin();
+  const location = useLocation();
   const navigate = useNavigate();
+
+  const nextPath = useMemo(() => {
+    try {
+      const params = new URLSearchParams(location.search || '');
+      const raw = params.get('next');
+      if (!raw) return '/admin';
+      if (raw.startsWith('/')) return raw;
+      return '/admin';
+    } catch {
+      return '/admin';
+    }
+  }, [location.search]);
 
   React.useEffect(() => {
     if (isAdmin) {
-      navigate('/admin');
+      navigate(nextPath);
     }
-  }, [isAdmin, navigate]);
+  }, [isAdmin, navigate, nextPath]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setError('');
 
     if (enableAdmin(key)) {
-      navigate('/admin');
+      navigate(nextPath);
     } else {
       setError('Clau incorrecta');
       setKey('');

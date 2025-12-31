@@ -1,9 +1,10 @@
 import React, { useState, useEffect, Suspense, lazy } from 'react';
-import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { useProductContext } from '@/contexts/ProductContext';
 import { useAdmin } from '@/contexts/AdminContext';
+import { useAdminTools } from '@/contexts/AdminToolsContext';
 import { initAnalytics, trackPageView } from '@/utils/analytics';
 import { useOffersConfig } from '@/hooks/useOffersConfig';
 import { useGlobalRedirect } from '@/hooks/useGlobalRedirect';
@@ -20,7 +21,7 @@ import Cart from '@/components/Cart';
 import UserSidebar from '@/components/UserSidebar';
 import Checkout from '@/components/Checkout';
 import ViewportIndicator from '@/components/ViewportIndicator';
-import RulerTool from '@/components/RulerTool';
+import AdminStudioLayout from '@/components/AdminStudioLayout';
 
 const FulfillmentPage = lazy(() => import('@/pages/FulfillmentPage'));
 const FulfillmentSettingsPage = lazy(() => import('@/pages/FulfillmentSettingsPage'));
@@ -40,7 +41,6 @@ const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const OffersPage = lazy(() => import('@/pages/OffersPage'));
 const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
-const GelatoProductDetailPage = lazy(() => import('@/pages/GelatoProductDetailPage'));
 const OrderConfirmationPage = lazy(() => import('@/pages/OrderConfirmationPage'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
@@ -54,7 +54,7 @@ const CreativeCommonsPage = lazy(() => import('@/pages/CreativeCommonsPage'));
 
 const OutcastedPage = lazy(() => import('@/pages/OutcastedPage'));
 
-const AdminPage = lazy(() => import('@/pages/AdminPage'));
+const AdminStudioHomePage = lazy(() => import('@/pages/AdminStudioHomePage'));
 const IndexPage = lazy(() => import('@/pages/IndexPage'));
 const ECPreviewPage = lazy(() => import('@/pages/ECPreviewPage'));
 const PromotionsManagerPage = lazy(() => import('@/pages/PromotionsManagerPage'));
@@ -83,7 +83,6 @@ function App() {
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
   const [showViewportIndicator, setShowViewportIndicator] = useState(false);
-  const [debugContainers, setDebugContainers] = useState(false);
   const [selectedElement, setSelectedElement] = useState(null);
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
   const location = useLocation();
@@ -91,8 +90,20 @@ function App() {
 
   const productContext = useProductContext();
   const { isAdmin, bypassUnderConstruction } = useAdmin();
+  const { tools, toggleTool } = useAdminTools();
   const { enabled: offersEnabled, loading: offersLoading } = useOffersConfig();
-  const { shouldRedirect, loading: redirectLoading } = useGlobalRedirect(bypassUnderConstruction);
+  const { shouldRedirect, redirectUrl, loading: redirectLoading } = useGlobalRedirect(bypassUnderConstruction);
+
+  useEffect(() => {
+    window.__GLOBAL_REDIRECT_STATE__ = {
+      shouldRedirect,
+      redirectUrl,
+      redirectLoading,
+      bypassUnderConstruction,
+      isAdmin,
+      path: location.pathname
+    };
+  }, [shouldRedirect, redirectUrl, redirectLoading, bypassUnderConstruction, isAdmin, location.pathname]);
 
   if (!productContext) {
     return <div className="min-h-screen flex items-center justify-center">
@@ -152,27 +163,33 @@ function App() {
 
     const adminRoutes = [
       '/admin',
+      '/admin-login',
+      '/user-icon-picker',
+      // Legacy admin routes (redirected)
       '/index',
       '/promotions',
       '/ec-config',
       '/system-messages',
-      '/fulfillment',
-      '/fulfillment-settings',
-      '/admin/media',
       '/hero-settings',
-      '/admin-login',
       '/colleccio-settings',
-      '/user-icon-picker',
       '/mockups',
-      '/admin/gelato-sync',
-      '/admin/gelato-blank',
-      '/admin/products-overview'
+      '/fulfillment',
+      '/fulfillment-settings'
     ];
 
     const isAdminRoute = adminRoutes.includes(location.pathname) ||
                          location.pathname.startsWith('/fulfillment/') ||
                          location.pathname.startsWith('/admin');
     const isECPreview = location.pathname === '/ec-preview';
+
+    const hasExternalTarget = !!redirectUrl && /^https?:\/\//i.test(redirectUrl);
+
+    // If global redirect is enabled and an external target is configured,
+    // always send non-admin routes (including /ec-preview) outside.
+    if (shouldRedirect && hasExternalTarget && !isAdminRoute) {
+      window.location.replace(redirectUrl);
+      return;
+    }
 
     // Si hem de redirigir i no estem en una ruta admin ni ja a ec-preview
     if (shouldRedirect && !isAdminRoute && !isECPreview) {
@@ -185,11 +202,13 @@ function App() {
       navigate('/', { replace: true });
       return;
     }
-  }, [shouldRedirect, redirectLoading, location.pathname, navigate, bypassUnderConstruction]);
+  }, [shouldRedirect, redirectUrl, redirectLoading, location.pathname, navigate, bypassUnderConstruction]);
 
-  // Handle debug element click
+  const layoutInspectorActive = isAdmin && location.pathname !== '/ec-preview' && !!tools?.layoutInspector;
+
+  // Handle layout inspector element click
   useEffect(() => {
-    if (!debugContainers) {
+    if (!layoutInspectorActive) {
       setSelectedElement(null);
       return;
     }
@@ -288,7 +307,7 @@ function App() {
         selected.classList.remove('debug-selected');
       }
     };
-  }, [debugContainers]);
+  }, [layoutInspectorActive]);
 
   if (loading) {
     return <LoadingScreen />;
@@ -344,7 +363,7 @@ function App() {
 
 
           <div
-            className={`${isAdminRoute ? 'min-h-screen' : 'min-h-screen'} bg-white flex flex-col overflow-x-hidden ${debugContainers ? 'debug-containers' : ''}`}
+            className={`${isAdminRoute ? 'min-h-screen' : 'min-h-screen'} bg-white flex flex-col overflow-x-hidden ${layoutInspectorActive ? 'debug-containers' : ''}`}
           >
         {/* AdminBanner - només visible per a administradors */}
         {isAdmin && (
@@ -432,6 +451,20 @@ function App() {
                   }
                 />
 
+                <Route
+                  path="/en/product/:id"
+                  element={
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <ProductDetailPage {...pageProps} language="en" />
+                    </motion.div>
+                  }
+                />
+
                 {/* Gelato Product Detail Page */}
                 <Route
                   path="/product-gelato/:id"
@@ -442,7 +475,7 @@ function App() {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
-                      <GelatoProductDetailPage />
+                      <ProductDetailPage {...pageProps} />
                     </motion.div>
                   }
                 />
@@ -559,63 +592,41 @@ function App() {
 
                 {/* TECHNICAL ROUTES - COMMENTED OUT FOR PRODUCTION */}
 
-                {/* Pàgines Admin - Apps i Documentation */}
-                <Route path="/admin/apps" element={<AppsPage />} />
-                <Route path="/admin/documentation" element={<DocumentationPage />} />
-                <Route path="/admin/gelato-templates" element={<GelatoTemplatesPage />} />
-
                 {/* Admin Login - Login d'administrador */}
                 <Route path="/admin-login" element={<AdminLoginPage />} />
 
-                {/* Admin Dashboard - Central admin panel */}
-                <Route path="/admin" element={<AdminPage />} />
+                {/* Admin Studio - Multi-page under /admin/... */}
+                <Route path="/admin" element={<AdminStudioLayout />}>
+                  <Route index element={<AdminStudioHomePage />} />
+                  <Route path="index" element={<IndexPage />} />
+                  <Route path="promotions" element={<PromotionsManagerPage />} />
+                  <Route path="ec-config" element={<ECConfigPage />} />
+                  <Route path="system-messages" element={<SystemMessagesPage />} />
+                  <Route path="media" element={<AdminMediaPage />} />
+                  <Route path="hero" element={<HeroSettingsPage />} />
+                  <Route path="collections" element={<ColleccioSettingsPage {...pageProps} />} />
+                  <Route path="mockups" element={<MockupsManagerPage />} />
+                  <Route path="upload" element={<AdminUploadPage />} />
+                  <Route path="gelato-sync" element={<GelatoProductsManagerPage />} />
+                  <Route path="gelato-blank" element={<GelatoBlankProductsPage />} />
+                  <Route path="products-overview" element={<ProductsOverviewPage />} />
+                  <Route path="gelato-templates" element={<GelatoTemplatesPage />} />
+                  <Route path="apps" element={<AppsPage />} />
+                  <Route path="documentation" element={<DocumentationPage />} />
+                  <Route path="fulfillment" element={<FulfillmentPage />} />
+                  <Route path="fulfillment-settings" element={<FulfillmentSettingsPage />} />
+                </Route>
 
-                {/* Index Page - Site texts editor */}
-                <Route path="/index" element={<IndexPage />} />
-
-                {/* Hero Settings - Gestor de slides del hero */}
-                <Route path="/hero-settings" element={<HeroSettingsPage />} />
-
-                {/* Promotions Manager - Gestor del banner de promocions */}
-                <Route path="/promotions" element={<PromotionsManagerPage />} />
-
-                {/* EC Config - Gestor de la pàgina "En Construcció" */}
-                <Route path="/ec-config" element={<ECConfigPage />} />
-
-                {/* System Messages - Gestor de missatges del sistema */}
-                <Route path="/system-messages" element={<SystemMessagesPage />} />
-
-                {/* Admin Media Manager - Gestor visual d'imatges */}
-                <Route path="/admin/media" element={<AdminMediaPage />} />
-
-                {/* Collections Settings - Gestor de configuració de col·leccions */}
-                <Route path="/colleccio-settings" element={<ColleccioSettingsPage {...pageProps} />} />
-
-                {/* Mockups Manager - Gestor de mockups de productes */}
-                <Route path="/mockups" element={<MockupsManagerPage />} />
-
-                {/* Gelato Products Manager - Sincronització i gestió de productes de Gelato */}
-                <Route path="/admin/gelato-sync" element={<GelatoProductsManagerPage />} />
-
-                {/* Gelato Blank Products - Productes en blanc de Gelato per comparació */}
-                <Route path="/admin/gelato-blank" element={<GelatoBlankProductsPage />} />
-
-                {/* Products Overview - Visualització de tots els productes mock */}
-                <Route path="/admin/products-overview" element={<ProductsOverviewPage />} />
-
-                {/* Admin Upload Page - Upload de fitxers i carpetes */}
-                <Route path="/admin/upload" element={<AdminUploadPage />} />
-
-                <Route path="/fulfillment" element={
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -10 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                  >
-                    <FulfillmentPage />
-                  </motion.div>
-                } />
+                {/* Legacy admin routes -> redirects to Admin Studio */}
+                <Route path="/index" element={<Navigate to="/admin/index" replace />} />
+                <Route path="/promotions" element={<Navigate to="/admin/promotions" replace />} />
+                <Route path="/ec-config" element={<Navigate to="/admin/ec-config" replace />} />
+                <Route path="/system-messages" element={<Navigate to="/admin/system-messages" replace />} />
+                <Route path="/hero-settings" element={<Navigate to="/admin/hero" replace />} />
+                <Route path="/colleccio-settings" element={<Navigate to="/admin/collections" replace />} />
+                <Route path="/mockups" element={<Navigate to="/admin/mockups" replace />} />
+                <Route path="/fulfillment" element={<Navigate to="/admin/fulfillment" replace />} />
+                <Route path="/fulfillment-settings" element={<Navigate to="/admin/fulfillment-settings" replace />} />
 
                 <Route path="/fulfillment/:id" element={
                   <motion.div
@@ -627,8 +638,6 @@ function App() {
                     <ProductDetailPageEnhanced />
                   </motion.div>
                 } />
-
-                <Route path="/fulfillment-settings" element={<FulfillmentSettingsPage />} />
 
                 {/* User Icon Picker - Temporal */}
                 <Route path="/user-icon-picker" element={<UserIconPicker />} />
@@ -683,8 +692,31 @@ function App() {
           />
         )}
 
-        {/* Debug Containers Indicator - Hidden on ec-preview page */}
-        {location.pathname !== '/ec-preview' && debugContainers && (
+        {/* Toggle button for Debug - Moved outside debug-containers */}
+        {isAdmin && location.pathname !== '/ec-preview' && (
+          <button
+            onClick={() => toggleTool('layoutInspector')}
+            className="fixed bottom-4 left-4 bg-gradient-to-br from-orange-600 to-red-600 text-white rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 group debug-exempt"
+            style={{ zIndex: 99999 }}
+            aria-label="Mostrar/Ocultar debug"
+            title="Mostrar/Ocultar debug"
+          >
+            <svg
+              className="w-5 h-5"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+            </svg>
+            <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+              {layoutInspectorActive ? 'Ocultar' : 'Mostrar'} debug
+            </span>
+          </button>
+        )}
+
+        {/* Debug Indicator - Hidden on ec-preview page */}
+        {layoutInspectorActive && (
           <div className="debug-indicator debug-exempt">
             <h3>MODE DEBUG ACTIU</h3>
             <p style={{ marginBottom: '12px', fontSize: '11px', color: '#888' }}>
@@ -771,31 +803,6 @@ function App() {
 
           </div>
 
-          {/* Toggle button for Debug Containers - Moved outside debug-containers */}
-          {location.pathname !== '/ec-preview' && (
-            <button
-              onClick={() => setDebugContainers(!debugContainers)}
-              className="fixed bottom-4 left-4 bg-gradient-to-br from-orange-600 to-red-600 text-white rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 group debug-exempt"
-              style={{ zIndex: 99999 }}
-              aria-label="Mostrar/Ocultar mode debug"
-              title="Mostrar/Ocultar mode debug"
-            >
-              <svg
-                className="w-5 h-5"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-              </svg>
-              <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-                {debugContainers ? 'Ocultar' : 'Mostrar'} debug
-              </span>
-            </button>
-          )}
-
-          {/* Ruler Tool - Moved outside debug-containers */}
-          {location.pathname !== '/ec-preview' && <RulerTool />}
         </>
     </ErrorBoundary>
   );

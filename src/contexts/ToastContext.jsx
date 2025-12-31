@@ -66,14 +66,14 @@ const Toast = ({ toast, onClose }) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: -20, scale: 0.95 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
-      className={`pointer-events-auto flex items-center gap-3 px-4 py-3 rounded-lg border shadow-xl ${colors[toast.type]}`}
-      style={{ maxWidth: '380px', minWidth: '320px' }}
+      className={`pointer-events-auto flex items-start gap-3 px-4 py-3 rounded-lg border shadow-xl ${colors[toast.type]}`}
+      style={{ maxWidth: '520px', minWidth: '320px', maxHeight: '70vh' }}
     >
       <div className="flex-shrink-0 text-white">
         {icons[toast.type]}
       </div>
 
-      <p className="text-sm font-roboto font-medium flex-1 leading-snug text-white">
+      <p className="text-sm font-roboto font-medium flex-1 leading-snug text-white whitespace-pre-wrap break-words overflow-auto" style={{ maxHeight: '65vh' }}>
         {toast.message}
       </p>
 
