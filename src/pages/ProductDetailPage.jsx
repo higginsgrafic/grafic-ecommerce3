@@ -14,6 +14,7 @@ import { useProductContext } from '@/contexts/ProductContext';
 import { useToast } from '@/contexts/ToastContext';
 import useProductEpisodes from '@/hooks/useProductEpisodes';
 import { useAdmin } from '@/contexts/AdminContext';
+import { mockupsAPI } from '@/api/mockups';
 
 const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, language = 'ca' }) => {
   const { id } = useParams();
@@ -34,6 +35,7 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
     if (!v.size || !v.color) return false;
     // Treat missing isAvailable as available to keep backwards compatibility
     if (v.isAvailable === false) return false;
+    if (v.is_available === false) return false;
     return true;
   });
 
@@ -59,6 +61,7 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
   const [showShareMenu, setShowShareMenu] = useState(false);
   const [showGalleryModal, setShowGalleryModal] = useState(false);
   const [galleryImageIndex, setGalleryImageIndex] = useState(0);
+  const [supabaseMockups, setSupabaseMockups] = useState([]);
 
   const inferDesignInkColor = (p) => {
     const haystack = `${p?.slug || ''} ${p?.name || ''} ${p?.description || ''}`.toLowerCase();
@@ -83,16 +86,75 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
 
     if (!vv) return null;
 
+    if (vv === 'clar' || vv === 'claro') return 'Blanc';
+    if (vv === 'fosc' || vv === 'oscuro') return 'Negre';
+
     if (vv === 'blanc' || vv === 'white') return 'Blanc';
     if (vv === 'negre' || vv === 'black') return 'Negre';
     if (vv === 'vermell' || vv === 'red') return 'Vermell';
-    if (vv === 'green' || vv.includes('militar') || vv.includes('military') || vv.includes('army')) return 'Militar';
+    if (vv === 'verd' || vv === 'green') return 'Verd';
+    if (vv === 'blau' || vv === 'blue' || vv === 'azul') return 'Blau';
+    if (vv.includes('militar') || vv.includes('military') || vv.includes('army')) return 'Militar';
     if (vv.includes('forest')) return 'Forest';
     if (vv.includes('royal')) return 'Royal';
     if (vv.includes('navy') || vv.includes('marina')) return 'Navy';
 
     return null;
   };
+
+  const normalizeMockupDesignName = (value) => {
+    return (value || '')
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .replace(/['’]/g, '')
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  };
+
+  useEffect(() => {
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        const collection = (product?.collection || '').toString().trim();
+        if (!collection) {
+          if (!cancelled) setSupabaseMockups([]);
+          return;
+        }
+
+        const localSelectedVariant = (Array.isArray(validVariants) ? validVariants : []).find((v) => {
+          if (!v) return false;
+          if (selectedSize && v.size !== selectedSize) return false;
+          const normalizedSelected = normalizeToCanonicalColor(selectedColor);
+          if (normalizedSelected) {
+            return normalizeToCanonicalColor(v.color) === normalizedSelected;
+          }
+          return true;
+        }) || (Array.isArray(validVariants) ? validVariants[0] : null);
+
+        const designRaw = localSelectedVariant?.design || product?.name || '';
+        const designName = normalizeMockupDesignName(designRaw);
+        if (!designName) {
+          if (!cancelled) setSupabaseMockups([]);
+          return;
+        }
+
+        const data = await mockupsAPI.getByDesign(collection, designName);
+        if (cancelled) return;
+        setSupabaseMockups(Array.isArray(data) ? data : []);
+      } catch (err) {
+        if (!cancelled) setSupabaseMockups([]);
+      }
+    };
+
+    load();
+    return () => {
+      cancelled = true;
+    };
+  }, [product?.collection, product?.name, validVariants, selectedSize, selectedColor]);
 
   const extractCanonicalColorFromImageUrl = (url) => {
     const normalized = (url || '').toString().replace(/\\/g, '/');
@@ -174,7 +236,9 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
     const isColorDesign = collectionKey === 'austen' || collectionKey === 'cube' || designKey === 'dj-vader';
 
     const inkColor = inferDesignInkColor(product);
-    const excludedCanonical = isColorDesign ? null : (inkColor === 'white' ? 'Blanc' : 'Negre');
+    const excludedCanonical = (collectionKey === 'outcasted' || collectionKey === 'first-contact' || isColorDesign)
+      ? null
+      : (inkColor === 'white' ? 'Blanc' : 'Negre');
 
     const byColor = new Map();
     for (const v of validVariants) {
@@ -354,6 +418,65 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
       return out;
     };
 
+    const canonicalColorToMockupToken = (canonical) => {
+      const v = (canonical || '').toString().trim();
+      if (!v) return null;
+      if (v === 'Blanc') return 'white';
+      if (v === 'Negre') return 'black';
+      if (v === 'Vermell') return 'red';
+      if (v === 'Militar') return 'militar';
+      if (v === 'Forest') return 'forest';
+      if (v === 'Royal') return 'royal';
+      if (v === 'Navy') return 'navy';
+      return null;
+    };
+
+    const preferredDrawingTokenForBase = (baseToken) => {
+      const b = (baseToken || '').toString().trim().toLowerCase();
+      if (!b) return null;
+      if (b === 'white') return 'black';
+      if (b === 'red') return 'black';
+      if (b === 'black') return 'white';
+      if (b === 'navy') return 'white';
+      if (b === 'forest') return 'white';
+      if (b === 'militar') return 'white';
+      if (b === 'royal') return 'white';
+      return 'white';
+    };
+
+    const supabaseMockupRows = Array.isArray(supabaseMockups) ? supabaseMockups.filter(Boolean) : [];
+    const supabaseMockupUrls = supabaseMockupRows
+      .map((m) => m?.file_path)
+      .filter(Boolean);
+
+    if (supabaseMockupUrls.length > 0) {
+      const collectionKey = (product?.collection || '').toString().trim().toLowerCase();
+      if (collectionKey === 'outcasted' || collectionKey === 'first-contact') {
+        const selectedCanonical = normalizeToCanonicalColor(selectedColor) || normalizeToCanonicalColor(selectedVariant?.color) || null;
+        const baseToken = canonicalColorToMockupToken(selectedCanonical);
+        const drawingToken = preferredDrawingTokenForBase(baseToken);
+
+        const pick = (rows) => {
+          if (!baseToken) return null;
+          const byBase = rows.filter((m) => (m?.base_color || '').toString().trim().toLowerCase() === baseToken);
+          if (byBase.length === 0) return null;
+          if (drawingToken) {
+            const byDrawing = byBase.find((m) => (m?.drawing_color || '').toString().trim().toLowerCase() === drawingToken);
+            if (byDrawing?.file_path) return byDrawing.file_path;
+          }
+          const any = byBase.find((m) => Boolean(m?.file_path));
+          return any?.file_path || null;
+        };
+
+        const primary = pick(supabaseMockupRows);
+        if (primary) {
+          return dedupeUrlsPreserveOrder([primary, ...supabaseMockupUrls]);
+        }
+      }
+
+      return dedupeUrlsPreserveOrder(supabaseMockupUrls);
+    }
+
     const variantImages = (Array.isArray(validVariants) ? validVariants : [])
       .filter((v) => {
         if (!v) return false;
@@ -375,11 +498,8 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
     }
 
     const selectedVariantImage = selectedVariant?.image_url || selectedVariant?.image;
-    if (selectedVariantImage) {
-      return dedupeUrlsPreserveOrder([selectedVariantImage]);
-    }
+    const fallback = selectedVariantImage || product?.image || product?.images?.[0] || '/placeholder-product.svg';
 
-    const fallback = product?.image || '/placeholder-product.svg';
     return dedupeUrlsPreserveOrder([fallback]);
   };
 
@@ -493,6 +613,140 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
       return { images: candidates, thumbnailRows: null };
     }
 
+    const collectionKey = normalizeSlugKey(product?.collection);
+    if (collectionKey === 'first-contact') {
+      const canonicalColorToMockupToken = (canonical) => {
+        const v = (canonical || '').toString().trim();
+        if (!v) return null;
+        if (v === 'Blanc') return 'white';
+        if (v === 'Negre') return 'black';
+        if (v === 'Vermell') return 'red';
+        if (v === 'Militar') return 'green';
+        if (v === 'Verd') return 'green';
+        if (v === 'Forest') return 'forest';
+        if (v === 'Royal') return 'royal';
+        if (v === 'Navy') return 'navy';
+        return null;
+      };
+
+      const rows = Array.isArray(supabaseMockups) ? supabaseMockups.filter(Boolean) : [];
+      if (rows.length > 0) {
+        const fallbackOrder = ['Negre', 'Vermell', 'Militar', 'Forest', 'Royal', 'Navy', 'Blanc'];
+        const present = [...new Set((Array.isArray(availableColors) ? availableColors : [])
+          .map((c) => c?.color)
+          .filter(Boolean))];
+
+        const normalizedPresent = present.map((c) => (c === 'Verd' ? 'Militar' : c));
+
+        const orderedPresent = fallbackOrder
+          .filter((c) => normalizedPresent.includes(c))
+          .concat(normalizedPresent.filter((c) => !fallbackOrder.includes(c)));
+
+        const colorOrder = orderedPresent.length > 0 ? orderedPresent : fallbackOrder;
+
+        const rotateToFront = (arr, target) => {
+          const list = Array.isArray(arr) ? [...arr] : [];
+          const t = (target || '').toString().trim();
+          if (!t) return list;
+          const idx = list.indexOf(t);
+          if (idx <= 0) return list;
+          return [list[idx], ...list.slice(0, idx), ...list.slice(idx + 1)];
+        };
+
+        const orderWhiteInk = rotateToFront(colorOrder, 'Negre');
+        const orderBlackInk = rotateToFront(colorOrder, 'Blanc');
+
+        const pickUrl = ({ canonicalColor, drawingToken }) => {
+          const baseToken = canonicalColorToMockupToken(canonicalColor);
+          if (!baseToken) return null;
+
+          const byBase = rows.filter((m) => (m?.base_color || '').toString().trim().toLowerCase() === baseToken);
+          if (byBase.length === 0) return null;
+
+          const t = (drawingToken || '').toString().trim().toLowerCase();
+          if (t) {
+            const exact = byBase.find((m) => (m?.drawing_color || '').toString().trim().toLowerCase() === t);
+            if (exact?.file_path) return exact.file_path;
+            // Compatibility fallback for potential mislabeled imports:
+            // If a base is "extreme" (white/black), its opposite-ink mockup is effectively unusable.
+            // Some older imports may have flipped drawing_color for these bases; accept the flipped one.
+            if (baseToken === 'black' && t === 'white') {
+              const flipped = byBase.find((m) => (m?.drawing_color || '').toString().trim().toLowerCase() === 'black');
+              if (flipped?.file_path) return flipped.file_path;
+            }
+            if (baseToken === 'white' && t === 'black') {
+              const flipped = byBase.find((m) => (m?.drawing_color || '').toString().trim().toLowerCase() === 'white');
+              if (flipped?.file_path) return flipped.file_path;
+            }
+            // Strict two-row behavior: if we are explicitly asking for an ink (white/black)
+            // and it doesn't exist for this base, do not fall back to the other ink.
+            return null;
+          }
+
+          const any = byBase.find((m) => Boolean(m?.file_path));
+          return any?.file_path || null;
+        };
+
+        const ordered = [];
+        const indexByUrl = new Map();
+        const pushUrl = (u) => {
+          if (!u) return;
+          if (indexByUrl.has(u)) return;
+          indexByUrl.set(u, ordered.length);
+          ordered.push(u);
+        };
+
+        const buildRow = (drawingToken, keyPrefix, order) => {
+          const sequence = Array.isArray(order) && order.length > 0 ? order : colorOrder;
+          return sequence.map((color) => {
+            const url = pickUrl({ canonicalColor: color, drawingToken });
+            if (url) pushUrl(url);
+
+            const label = color === 'Militar' ? 'Green' : color;
+            const ink = (drawingToken || '').toString().trim().toLowerCase();
+            const isIncompatible =
+              (ink === 'white' && color === 'Blanc') ||
+              (ink === 'black' && color === 'Negre');
+            const hidden = isIncompatible && !url;
+            // Important: do NOT inject shirt placeholders into thumbnails for missing combos.
+            // Doing so duplicates shirt thumbnails across ink rows. If a mockup is missing,
+            // we keep url=null so ProductGallery renders a simple swatch/badge.
+
+            return {
+              key: `first-contact-${keyPrefix}-${color}`,
+              color,
+              label,
+              url: url || null,
+              hidden,
+              prefetchOppositeInk: false,
+              hex: resolveHexForColor(color),
+              index: url ? (indexByUrl.get(url) ?? -1) : -1
+            };
+          });
+        };
+
+        // Top row: white ink
+        // Bottom row: black ink
+        const rowWhite = buildRow('white', 'white', orderWhiteInk);
+        const rowBlack = buildRow('black', 'black', orderBlackInk);
+
+        // Compact rows for first-contact so "incompatible" slots don't create empty leading cells.
+        const compact = (row) => (Array.isArray(row) ? row.filter((it) => !it?.hidden) : row);
+        const compactWhite = compact(rowWhite);
+        const compactBlack = compact(rowBlack);
+
+        // Ensure we always show something real even if some colors are missing.
+        // Keep current candidates as fallback ordering.
+        for (const u of candidates) pushUrl(u);
+
+        const result = { images: ordered.length > 0 ? ordered : candidates, thumbnailRows: [compactWhite, compactBlack] };
+        if (import.meta.env.DEV) {
+          window.__PDP_THUMB_ROWS__ = result.thumbnailRows;
+        }
+        return result;
+      }
+    }
+
     const byDesign = new Map();
 
     // For Outcasted, we store two ink sets in two folders:
@@ -589,7 +843,6 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
       if (!byColor.has(canonicalColor)) byColor.set(canonicalColor, imgUrl);
     }
 
-    const collectionKey = normalizeSlugKey(product?.collection);
     const hasOutcastedBases =
       collectionKey === 'outcasted' &&
       byShirtBase.has('Negre') &&

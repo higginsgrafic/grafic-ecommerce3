@@ -192,8 +192,8 @@ const ProductGallery = ({
   const inferInkKeyFromUrl = (url) => {
     const u = (url || '').toString().toLowerCase();
     if (!u) return null;
-    if (u.includes('/blanc/') || u.includes('white-')) return 'white';
-    if (u.includes('/negre/') || u.includes('black-')) return 'black';
+    if (u.includes('/blanc/') || u.includes('/white/') || u.includes('white-')) return 'white';
+    if (u.includes('/negre/') || u.includes('/black/') || u.includes('black-')) return 'black';
     return null;
   };
 
@@ -428,17 +428,87 @@ const ProductGallery = ({
       if (!parent) return;
       const parentRect = parent.getBoundingClientRect();
 
+      const desktopContainer = document.querySelector('[data-pdp-desktop="1"]');
+      const basisRect = desktopContainer?.getBoundingClientRect?.() || parentRect;
+
+      const firstThumbButton = thumbsEl.querySelector('button');
+      const cell = firstThumbButton?.getBoundingClientRect?.().width;
+
+      // If we have thumbnailRows (one or two rows), keep them in the ProductInfo column:
+      // - horizontally aligned between the leftmost size button and the cart button
+      // - vertically positioned BELOW the size buttons
+      // This avoids overlap with checkout/wishlist while not "floating" under the main image.
+      const hasRows =
+        thumbsEl.hasAttribute('data-two-row-thumbs') ||
+        thumbsEl.hasAttribute('data-one-row-thumbs');
+
+      if (hasRows) {
+        const sizeButtons = Array.from(
+          document.querySelectorAll('[data-size-layout="desktop"][data-size-button]')
+        );
+        const cartButton = document.querySelector('[data-cart-button="1"]');
+
+        const sizeRects = sizeButtons
+          .map((el) => el?.getBoundingClientRect?.())
+          .filter((r) => r && Number.isFinite(r.left) && Number.isFinite(r.width) && Number.isFinite(r.bottom));
+
+        const sizeAnchorRect = sizeRects.sort((a, b) => a.left - b.left)[0] || null;
+        const maxSizeBottom = sizeRects.reduce((acc, r) => Math.max(acc, r.bottom), -Infinity);
+
+        const cartRect = cartButton?.getBoundingClientRect?.() || null;
+
+        if (!sizeAnchorRect || !cartRect || !Number.isFinite(cell) || cell <= 0 || !Number.isFinite(maxSizeBottom)) {
+          setThumbsLeft(null);
+          setThumbsWidth(null);
+          setThumbsGap(null);
+          // Still place under main image as a last resort.
+          const mainBottomWithinParent = mainRect.bottom - parentRect.top;
+          const topPx = `${Math.round(mainBottomWithinParent + 12)}px`;
+          setThumbsTop(topPx);
+          window.__GRAFIC_THUMBS_TOP__ = topPx;
+          return;
+        }
+
+        const lCenterX = sizeAnchorRect.left + sizeAnchorRect.width / 2;
+        const cartCenterX = cartRect.left + cartRect.width / 2;
+
+        const cols = 6;
+        const leftFromL = lCenterX - basisRect.left - cell / 2;
+        const cartCenterWithin = cartCenterX - basisRect.left;
+        const desiredWidth = cartCenterWithin - leftFromL + cell / 2;
+
+        const rawGap = (desiredWidth - cols * cell) / (cols - 1);
+        const gap = Number.isFinite(rawGap) ? Math.max(0, rawGap) : 0;
+        const finalWidth = cols * cell + (cols - 1) * gap;
+
+        const maxLeft = Math.max(0, basisRect.width - finalWidth);
+        const clampedLeft = Math.max(0, Math.min(leftFromL, maxLeft));
+
+        const leftPx = `${Math.round(clampedLeft)}px`;
+        const widthPx = `${Math.round(finalWidth)}px`;
+        const gapPx = `${Math.round(gap)}px`;
+
+        const bottomWithinParent = maxSizeBottom - parentRect.top;
+        const topPx = `${Math.round(bottomWithinParent + 12)}px`;
+
+        setThumbsTop(topPx);
+        setThumbsLeft(leftPx);
+        setThumbsWidth(widthPx);
+        setThumbsGap(gapPx);
+        window.__GRAFIC_THUMBS_TOP__ = topPx;
+        window.__GRAFIC_THUMBS_LEFT__ = leftPx;
+        window.__GRAFIC_THUMBS_WIDTH__ = widthPx;
+        window.__GRAFIC_THUMBS_GAP__ = gapPx;
+        return;
+      }
+
+      // Legacy positioning path: align with ProductInfo controls.
       const mainBottomWithinParent = mainRect.bottom - parentRect.top;
       const top = mainBottomWithinParent - thumbsRect.height + 1 - 23;
       const px = `${Math.round(top)}px`;
       setThumbsTop(px);
       window.__GRAFIC_THUMBS_TOP__ = px;
 
-      // Align the first thumbnail column center with the leftmost size button in the
-      // ProductInfo desktop size selector.
-      //
-      // IMPORTANT: we must not anchor to a specific size label (like 'L'), because
-      // size ordering can change (e.g. adding XXS/XS) and would shift thumbnails.
       const sizeButtons = Array.from(
         document.querySelectorAll('[data-size-layout="desktop"][data-size-button]')
       );
@@ -449,11 +519,8 @@ const ProductGallery = ({
         .sort((a, b) => a.rect.left - b.rect.left)[0]?.el;
 
       const cartButton = document.querySelector('[data-cart-button="1"]');
-      const firstThumbButton = thumbsEl.querySelector('button');
 
-      // If anchors are missing (DOM not ready or different layout), reset derived values so
-      // we don't keep stale positioning from a previous render/product.
-      if (!sizeAnchor || !cartButton || !firstThumbButton) {
+      if (!sizeAnchor || !cartButton || !firstThumbButton || !Number.isFinite(cell) || cell <= 0) {
         setThumbsLeft(null);
         setThumbsWidth(null);
         setThumbsGap(null);
@@ -466,56 +533,38 @@ const ProductGallery = ({
       const lCenterX = lRect.left + lRect.width / 2;
       const cartCenterX = cartRect.left + cartRect.width / 2;
 
-      const cell = firstThumbButton.getBoundingClientRect().width;
-      if (!cell) {
+      const cols = 6;
+      const defaultLeft = '655px';
+      const defaultWidth = '400px';
+      const defaultGap = '10px';
+
+      const leftFromL = lCenterX - basisRect.left - cell / 2;
+      const cartCenterWithin = cartCenterX - basisRect.left;
+      const desiredWidth = cartCenterWithin - leftFromL + cell / 2;
+
+      const rawGap = (desiredWidth - cols * cell) / (cols - 1);
+      const gap = Number.isFinite(rawGap) ? Math.max(0, rawGap) : NaN;
+      const finalWidth = cols * cell + (cols - 1) * (Number.isFinite(gap) ? gap : 0);
+
+      if (!Number.isFinite(leftFromL) || !Number.isFinite(desiredWidth) || !Number.isFinite(gap) || finalWidth <= 0) {
         setThumbsLeft(null);
         setThumbsWidth(null);
         setThumbsGap(null);
+        window.__GRAFIC_THUMBS_LEFT__ = defaultLeft;
+        window.__GRAFIC_THUMBS_WIDTH__ = defaultWidth;
+        window.__GRAFIC_THUMBS_GAP__ = defaultGap;
         return;
       }
 
-        // Desired behavior:
-        // - Thumb 1 center aligned with size L (anchor left)
-        // - Thumb 6 center aligned with cart (anchor right)
-        // - Thumbs 2-5 redistribute with equal spacing (uniform gap)
-        const cols = 6;
-        const defaultLeft = '655px';
-        const defaultWidth = '400px';
-        const defaultGap = '10px';
+      const maxLeft = Math.max(0, basisRect.width - finalWidth);
+      const clampedLeft = Math.max(0, Math.min(leftFromL, maxLeft));
 
-        const desktopContainer = document.querySelector('[data-pdp-desktop="1"]');
-        const basisRect = desktopContainer?.getBoundingClientRect?.() || parentRect;
+      const leftPx = `${Math.round(clampedLeft)}px`;
+      const widthPx = `${Math.round(finalWidth)}px`;
+      const gapPx = `${Math.round(gap)}px`;
 
-        const leftFromL = lCenterX - basisRect.left - cell / 2;
-        const cartCenterWithin = cartCenterX - basisRect.left;
-        const desiredWidth = cartCenterWithin - leftFromL + cell / 2;
-
-        // Compute uniform gap from width.
-        const rawGap = (desiredWidth - cols * cell) / (cols - 1);
-        const gap = Number.isFinite(rawGap) ? Math.max(0, rawGap) : NaN;
-        const finalWidth = cols * cell + (cols - 1) * (Number.isFinite(gap) ? gap : 0);
-
-        // Fallback if any part is invalid.
-        if (!Number.isFinite(leftFromL) || !Number.isFinite(desiredWidth) || !Number.isFinite(gap) || finalWidth <= 0) {
-          setThumbsLeft(null);
-          setThumbsWidth(null);
-          setThumbsGap(null);
-          window.__GRAFIC_THUMBS_LEFT__ = defaultLeft;
-          window.__GRAFIC_THUMBS_WIDTH__ = defaultWidth;
-          window.__GRAFIC_THUMBS_GAP__ = defaultGap;
-          return;
-        }
-
-        // Keep wrapper within bounds so it can't disappear.
-        const maxLeft = Math.max(0, basisRect.width - finalWidth);
-        const clampedLeft = Math.max(0, Math.min(leftFromL, maxLeft));
-
-        const leftPx = `${Math.round(clampedLeft)}px`;
-        const widthPx = `${Math.round(finalWidth)}px`;
-        const gapPx = `${Math.round(gap)}px`;
-
-        setThumbsLeft(leftPx);
-        setThumbsWidth(widthPx);
+      setThumbsLeft(leftPx);
+      setThumbsWidth(widthPx);
       setThumbsGap(gapPx);
       window.__GRAFIC_THUMBS_LEFT__ = leftPx;
       window.__GRAFIC_THUMBS_WIDTH__ = widthPx;
@@ -566,6 +615,18 @@ const ProductGallery = ({
       thumbnailRows[0].length > 0;
 
     const renderThumbItem = (item, idx, keyPrefix = 'r0') => {
+      if (item?.hidden) {
+        const itemKey = item?.key || `${keyPrefix}-${idx}`;
+        return (
+          <span
+            key={itemKey}
+            className="block aspect-square"
+            aria-hidden="true"
+            style={{ borderRadius: '3px' }}
+          />
+        );
+      }
+
       const img = item?.url || null;
       const absoluteIndex = typeof item?.index === 'number' ? item.index : -1;
       const itemColorKey = normalizeLoose(item?.color || item?.label);
@@ -598,12 +659,14 @@ const ProductGallery = ({
               prepareFadeForNextSelection({ nextUrl: img, nextColorKey });
 
               // Prefetch opposite ink for same color to make toggling instant
-              const pairs = buildInkPairMap();
-              const bucket = pairs.get(nextColorKey);
-              const thisInk = inferInkKeyFromUrl(img);
-              const otherUrl =
-                thisInk === 'white' ? bucket?.black : thisInk === 'black' ? bucket?.white : null;
-              if (otherUrl) prefetchUrl(otherUrl);
+              if (item?.prefetchOppositeInk !== false) {
+                const pairs = buildInkPairMap();
+                const bucket = pairs.get(nextColorKey);
+                const thisInk = inferInkKeyFromUrl(img);
+                const otherUrl =
+                  thisInk === 'white' ? bucket?.black : thisInk === 'black' ? bucket?.white : null;
+                if (otherUrl) prefetchUrl(otherUrl);
+              }
 
               skipNextColorSyncRef.current = true;
               preloadThenSelect({ nextIndex: absoluteIndex, nextUrl: img });

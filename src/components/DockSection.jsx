@@ -29,14 +29,35 @@ const useResponsiveFontSize = (config) => {
 };
 
 function DockSection({ collectionSlug, onAddToCart, cartItems, onUpdateQuantity }) {
-  const { getRandomProductsByCollection } = useProductContext();
+  const { getRandomProductsByCollection, getProductsByCollection } = useProductContext();
   const { getDebugStyle, isSectionEnabled } = useGridDebug();
   const [collection, setCollection] = useState(null);
 
   const gridTitleFontSize = useResponsiveFontSize(typography.productGrid.title);
   const gridDescriptionFontSize = useResponsiveFontSize(typography.productGrid.description);
 
-  const products = getRandomProductsByCollection(collectionSlug, 4);
+  const isFirstContact = (collectionSlug || '').toString().trim().toLowerCase() === 'first-contact';
+  const c2Slugs = [
+    'first-contact-nx-01',
+    'first-contact-ncc-1701',
+    'first-contact-ncc-1701-d',
+    'first-contact-wormhole',
+    'first-contact-plasma-escape',
+    'first-contact-vulcans-end',
+    'first-contact-the-phoenix'
+  ];
+
+  const products = (() => {
+    if (!isFirstContact) return getRandomProductsByCollection(collectionSlug, 4);
+    const all = getProductsByCollection('first-contact');
+    const bySlug = new Map(
+      (Array.isArray(all) ? all : [])
+        .filter(Boolean)
+        .map((p) => [(p?.slug || '').toString().trim(), p])
+    );
+    const ordered = c2Slugs.map((s) => bySlug.get(s)).filter(Boolean);
+    return ordered.slice(0, 4);
+  })();
   const safeProducts = Array.isArray(products)
     ? products
         .filter(Boolean)

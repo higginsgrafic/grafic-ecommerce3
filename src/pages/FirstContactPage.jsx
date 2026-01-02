@@ -10,7 +10,28 @@ import FullBleedUnderHeader from '@/components/FullBleedUnderHeader';
 function FirstContactPage({ onAddToCart, cartItems, onUpdateQuantity }) {
   const texts = useTexts();
   const { getProductsByCollection } = useProductContext();
-  const collectionProducts = getProductsByCollection('first-contact');
+  const collectionProductsRaw = getProductsByCollection('first-contact');
+  const c2Slugs = [
+    'first-contact-nx-01',
+    'first-contact-ncc-1701',
+    'first-contact-ncc-1701-d',
+    'first-contact-wormhole',
+    'first-contact-plasma-escape',
+    'first-contact-vulcans-end',
+    'first-contact-the-phoenix'
+  ];
+
+  const bySlug = new Map(
+    (collectionProductsRaw || [])
+      .filter(Boolean)
+      .map((p) => [(p?.slug || '').toString().trim(), p])
+  );
+
+  const c2Products = c2Slugs
+    .map((slug) => bySlug.get(slug))
+    .filter(Boolean);
+
+  const collectionProducts = c2Products.length > 0 ? c2Products : collectionProductsRaw;
 
   return (
     <>
