@@ -251,7 +251,7 @@ export default function useProductEpisodes({ product, language = 'ca' }) {
     return () => {
       canceled = true;
     };
-  }, [product, candidateKeys, langFolders, storageBaseKey]);
+  }, [product, candidateKeys, langFolders, fallbackLangFolders, storageBaseKey, language, fallbackLanguage]);
 
   // Persist selected index.
   useEffect(() => {
