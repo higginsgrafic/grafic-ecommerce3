@@ -29,7 +29,7 @@ function FAQPage() {
         },
         {
           question: 'Puc cancel·lar la meva comanda?',
-          answer: 'Pots cancel·lar la teva comanda sense cost si encara no ha entrat en producció (normalment les primeres 24 hores). Contacta\'ns immediatament a orders@grafic.cat amb el teu número de comanda. Un cop el producte està en producció, no es pot cancel·lar, però pots fer ús del dret de desistiment de 14 dies una vegada el rebis.'
+          answer: 'Pots cancel·lar la teva comanda sense cost si encara no ha entrat en producció (normalment les primeres 24 hores). Contacta\'ns immediatament a higginsgrafic@gmail.com amb el teu número de comanda. Un cop el producte està en producció, no es pot cancel·lar, però pots fer ús del dret de desistiment de 14 dies una vegada el rebis.'
         },
         {
           question: 'Rebré una factura?',
@@ -54,7 +54,7 @@ function FAQPage() {
         },
         {
           question: 'Puc fer seguiment de la meva comanda?',
-          answer: 'Sí! Un cop el teu paquet s\'enviï, rebràs un email amb un número de seguiment que et permetrà veure exactament on és el teu paquet en tot moment. També pots contactar-nos a orders@grafic.cat si tens qualsevol dubte.'
+          answer: 'Sí! Un cop el teu paquet s\'enviï, rebràs un email amb un número de seguiment que et permetrà veure exactament on és el teu paquet en tot moment. També pots contactar-nos a higginsgrafic@gmail.com si tens qualsevol dubte.'
         }
       ]
     },
@@ -88,7 +88,7 @@ function FAQPage() {
         },
         {
           question: 'Com puc fer una devolució?',
-          answer: 'Segueix aquests passos:\n\n1. Envia un email a returns@grafic.cat amb el teu número de comanda\n2. Indica quin producte vols tornar i el motiu\n3. T\'enviarem les instruccions de devolució\n4. Envia el producte segons les instruccions\n5. Rebràs el reemborsament en 14 dies des que rebem la devolució\n\nEl reemborsament es farà pel mateix mètode de pagament utilitzat a la compra.'
+          answer: 'Segueix aquests passos:\n\n1. Envia un email a higginsgrafic@gmail.com amb el teu número de comanda\n2. Indica quin producte vols tornar i el motiu\n3. T\'enviarem les instruccions de devolució\n4. Envia el producte segons les instruccions\n5. Rebràs el reemborsament en 14 dies des que rebem la devolució\n\nEl reemborsament es farà pel mateix mètode de pagament utilitzat a la compra.'
         },
         {
           question: 'Puc canviar un producte per una altra talla?',
@@ -96,7 +96,7 @@ function FAQPage() {
         },
         {
           question: 'Què passa si el producte arriba defectuós?',
-          answer: 'Si el producte arriba amb defectes de fabricació, danys durant el transport o error en la comanda:\n\n1. Contacta\'ns en un màxim de 7 dies a quality@grafic.cat\n2. Envia\'ns fotos clares del defecte/dany\n3. T\'enviarem un reemplaçament sense cap cost addicional\n4. NO cal que tornis el producte defectuós (tret que ho sol·licitem)\n\nEls costos d\'enviament i devolució van a càrrec nostre.'
+          answer: 'Si el producte arriba amb defectes de fabricació, danys durant el transport o error en la comanda:\n\n1. Contacta\'ns en un màxim de 7 dies a higginsgrafic@gmail.com\n2. Envia\'ns fotos clares del defecte/dany\n3. T\'enviarem un reemplaçament sense cap cost addicional\n4. NO cal que tornis el producte defectuós (tret que ho sol·licitem)\n\nEls costos d\'enviament i devolució van a càrrec nostre.'
         }
       ]
     },

@@ -42,19 +42,19 @@ function ContactPage() {
     {
       icon: Mail,
       title: 'Email General',
-      detail: 'info@grafic.cat',
+      detail: 'higginsgrafic@gmail.com',
       description: 'Per consultes generals i informació'
     },
     {
       icon: MessageSquare,
       title: 'Comandes',
-      detail: 'orders@grafic.cat',
+      detail: 'higginsgrafic@gmail.com',
       description: 'Seguiment i preguntes sobre comandes'
     },
     {
       icon: MessageSquare,
       title: 'Devolucions',
-      detail: 'returns@grafic.cat',
+      detail: 'higginsgrafic@gmail.com',
       description: 'Devolucions i canvis de productes'
     },
     {

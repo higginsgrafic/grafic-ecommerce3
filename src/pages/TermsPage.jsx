@@ -13,14 +13,14 @@ function TermsPage() {
       content: `**Raó Social:** GRÀFIC
 **NIF:** [Pendent]
 **Domicili:** [Adreça completa]
-**Email:** info@grafic.cat
+**Email:** higginsgrafic@gmail.com
 **Telèfon:** [Número de telèfon]
 
 GRÀFIC és una marca de roba amb missatge que opera a través d'aquest lloc web per oferir productes de moda sostenible amb impressió sota demanda.`
     },
     {
       title: '2. Objecte i Àmbit d\'Aplicació',
-      content: `Aquestes Condicions Generals regulen l'accés i ús del lloc web www.grafic.cat (d'ara endavant, "el Lloc Web") i la compra de productes ofererts per GRÀFIC.
+      content: `Aquestes Condicions Generals regulen l'accés i ús del lloc web higginsgrafic.com (d'ara endavant, "el Lloc Web") i la compra de productes ofererts per GRÀFIC.
 
 L'ús del Lloc Web i la realització de comandes implica l'acceptació plena i sense reserves d'aquestes Condicions Generals, així com de la Política de Privacitat.
 
@@ -111,7 +111,7 @@ Segons la normativa europea de protecció dels consumidors, tens 14 dies natural
 
 **7.2 Com Exercir el Dret**
 Per exercir el dret de desistiment has de:
-1. Notificar-nos per email a returns@grafic.cat
+1. Notificar-nos per email a higginsgrafic@gmail.com
 2. Indicar número de comanda i producte(s) a retornar
 3. Enviar el producte en condicions originals
 
@@ -134,7 +134,7 @@ Tots els productes tenen una garantia legal de 2 anys contra defectes de fabrica
 **8.2 Productes Defectuosos**
 Si el producte arriba amb defectes o danys:
 1. Notifica'ns en un màxim de 7 dies des de la recepció
-2. Envia fotos del defecte a quality@grafic.cat
+2. Envia fotos del defecte a higginsgrafic@gmail.com
 3. T'enviarem un reemplaçament sense cost addicional
 
 **8.3 Errors en la Comanda**
@@ -172,7 +172,7 @@ Queda prohibit:
 
 En utilitzar aquest Lloc Web i realitzar comandes, acceptes el tractament de les teves dades segons s'especifica a la Política de Privacitat, en compliment amb el RGPD i la LOPDGDD.
 
-Per exercir els teus drets (accés, rectificació, supressió, etc.), contacta'ns a privacy@grafic.cat`
+Per exercir els teus drets (accés, rectificació, supressió, etc.), contacta'ns a higginsgrafic@gmail.com`
     },
     {
       title: '11. Responsabilitat',
@@ -218,10 +218,7 @@ Totes les comunicacions relacionades amb comandes s'enviaran per email a l'adre�
       title: '14. Contacte',
       content: `Per qualsevol qüestió relacionada amb aquestes Condicions Generals o amb les teves comandes, pots contactar-nos:
 
-**Email General:** info@grafic.cat
-**Email Comandes:** orders@grafic.cat
-**Email Devolucions:** returns@grafic.cat
-**Email Qualitat:** quality@grafic.cat
+**Email:** higginsgrafic@gmail.com
 **Telèfon:** [Número de telèfon]
 **Horari d'atenció:** Dilluns a Divendres, 9:00h - 18:00h (CET)
 

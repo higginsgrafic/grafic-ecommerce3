@@ -200,7 +200,7 @@ function ShippingPage() {
                 {
                   step: 1,
                   title: 'Contacta\'ns',
-                  description: 'Envia un email a returns@grafic.cat amb el teu número de comanda i el motiu de la devolució (opcional).'
+                  description: 'Envia un email a higginsgrafic@gmail.com amb el teu número de comanda i el motiu de la devolució (opcional).'
                 },
                 {
                   step: 2,
@@ -263,7 +263,7 @@ function ShippingPage() {
                 Si el teu producte arriba amb defectes de fabricació o danys durant el transport:
               </p>
               <ul className="font-roboto text-[13pt] text-red-800 leading-relaxed space-y-2 ml-6 mb-3">
-                <li>• Contacta'ns en un <strong>màxim de 7 dies</strong> a quality@grafic.cat</li>
+                <li>• Contacta'ns en un <strong>màxim de 7 dies</strong> a higginsgrafic@gmail.com</li>
                 <li>• Envia'ns fotos clares del defecte o dany</li>
                 <li>• T'enviarem un <strong>reemplaçament gratuït</strong></li>
                 <li>• NO cal que tornis el producte defectuós</li>

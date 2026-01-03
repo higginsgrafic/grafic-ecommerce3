@@ -1,8 +1,8 @@
 import React from 'react';
-import { Helmet } from 'react-helmet';
 import { Link } from 'react-router-dom';
 import { useTexts } from '@/hooks/useTexts';
 import { ExternalLink } from 'lucide-react';
+import SEO from '@/components/SEO';
 
 const CreativeCommonsPage = () => {
   const texts = useTexts();
@@ -10,15 +10,12 @@ const CreativeCommonsPage = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Helmet>
-        <title>{cc.seo.title}</title>
-        <meta name="description" content={cc.seo.description} />
-        <meta name="robots" content="index, follow" />
-        <meta property="og:title" content={cc.seo.title} />
-        <meta property="og:description" content={cc.seo.description} />
-        <meta property="og:type" content="website" />
-        <link rel="canonical" href="https://grafic.cat/cc" />
-      </Helmet>
+      <SEO
+        title={cc.seo.title}
+        description={cc.seo.description}
+        type="website"
+        url="/cc"
+      />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 lg:py-20">
         {/* Header */}

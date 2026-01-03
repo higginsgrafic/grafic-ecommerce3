@@ -77,7 +77,7 @@ Utilitzem xifratge SSL per protegir la informació sensible durant la transmissi
 • **Oposició:** Oposar-te al tractament de les teves dades
 • **No ser objecte de decisions automatitzades**
 
-Per exercir aquests drets, contacta'ns a privacy@grafic.cat`
+Per exercir aquests drets, contacta'ns a higginsgrafic@gmail.com`
     },
     {
       title: '7. Retenció de Dades',
@@ -115,7 +115,7 @@ Et recomanem que revisis aquesta política periòdicament per estar informat sob
       title: '11. Contacte',
       content: `Si tens preguntes o preocupacions sobre aquesta Política de Privacitat o sobre com gestionem les teves dades personals, pots contactar-nos:
 
-**Email:** privacy@grafic.cat
+**Email:** higginsgrafic@gmail.com
 **Correu postal:** GRÀFIC, [Adreça completa]
 **Telèfon:** [Número de telèfon]
 

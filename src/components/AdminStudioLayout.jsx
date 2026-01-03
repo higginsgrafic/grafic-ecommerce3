@@ -4,7 +4,7 @@ import { LayoutDashboard } from 'lucide-react';
 import { useAdmin } from '@/contexts/AdminContext';
 
 export default function AdminStudioLayout() {
-  const { isAdmin } = useAdmin();
+  const { isAdmin, authReady } = useAdmin();
   const location = useLocation();
 
   const redirectTo = useMemo(() => {
@@ -12,6 +12,7 @@ export default function AdminStudioLayout() {
     return `/admin-login?next=${encodeURIComponent(path)}`;
   }, [location.pathname, location.search, location.hash]);
 
+  if (!authReady) return null;
   if (!isAdmin) return <Navigate to={redirectTo} replace />;
 
   return (

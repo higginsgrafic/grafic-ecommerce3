@@ -1,5 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
+import { SITE_ORIGIN, buildSiteUrl } from '@/config/siteOrigin';
 
 /**
  * Component SEO reutilitzable amb suport per:
@@ -23,11 +24,13 @@ function SEO({
   schema = null, // Custom Schema.org data
 }) {
 
+  const contactEmail = (import.meta?.env?.VITE_CONTACT_EMAIL || 'higginsgrafic@gmail.com').toString().trim();
+
   // URL completa per Open Graph
-  const fullUrl = url || `https://grafic.cat${typeof window !== 'undefined' ? window.location.pathname : ''}`;
+  const fullUrl = buildSiteUrl(url || (typeof window !== 'undefined' ? window.location.pathname : '/'));
 
   // Imatge completa per Open Graph
-  const fullImage = image.startsWith('http') ? image : `https://grafic.cat${image}`;
+  const fullImage = image.startsWith('http') ? image : buildSiteUrl(image);
 
   // Robots meta tag
   const robotsContent = [];
@@ -41,8 +44,8 @@ function SEO({
     "@context": "https://schema.org",
     "@type": "Organization",
     "name": "GRÀFIC",
-    "url": "https://grafic.cat",
-    "logo": "https://grafic.cat/custom_logos/brand/marca-grafic-logo.svg",
+    "url": SITE_ORIGIN,
+    "logo": buildSiteUrl('/custom_logos/brand/marca-grafic-logo.svg'),
     "description": "Roba amb disseny únic. Samarretes amb dissenys exclusius que combinen art, ciència-ficció i filosofia.",
     "sameAs": [
       // Xarxes socials (afegir quan estiguin disponibles)
@@ -50,7 +53,7 @@ function SEO({
     "contactPoint": {
       "@type": "ContactPoint",
       "contactType": "Customer Service",
-      "email": "info@grafic.cat",
+      "email": contactEmail,
       "availableLanguage": ["ca"]
     }
   };
@@ -60,10 +63,10 @@ function SEO({
     "@context": "https://schema.org",
     "@type": "WebSite",
     "name": "GRÀFIC",
-    "url": "https://grafic.cat",
+    "url": SITE_ORIGIN,
     "potentialAction": {
       "@type": "SearchAction",
-      "target": "https://grafic.cat/search?q={search_term_string}",
+      "target": buildSiteUrl('/search?q={search_term_string}'),
       "query-input": "required name=search_term_string"
     }
   };

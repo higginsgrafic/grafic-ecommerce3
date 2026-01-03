@@ -4,9 +4,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "vite --host 0.0.0.0 --port 3000",
+    "dev": "vite --host 0.0.0.0 --port 3003",
     "build": "vite build",
-    "preview": "vite preview --host 0.0.0.0 --port 3000",
+    "preview": "vite preview --host 0.0.0.0 --port 3003",
     "generate-download": "bash scripts/create-download.sh",
     "sync-gelato": "node --experimental-modules scripts/sync-gelato-products.js",
     "fetch-blank": "node scripts/fetch-blank-product.js",

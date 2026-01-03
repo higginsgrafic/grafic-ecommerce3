@@ -15,7 +15,8 @@ export default defineConfig({
   },
   server: {
     host: '0.0.0.0',
-    port: 3000,
+    port: 3003,
+    strictPort: true,
     headers: {
       'Cache-Control': 'no-store',
     },
@@ -23,7 +24,7 @@ export default defineConfig({
   },
   preview: {
     host: '0.0.0.0',
-    port: 3000,
+    port: 3003,
   },
   build: {
     target: 'es2015',

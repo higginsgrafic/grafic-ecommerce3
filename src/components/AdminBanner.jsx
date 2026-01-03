@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ChevronLeft, ChevronRight, LogOut, Lock, Eye, EyeOff, Download } from 'lucide-react';
+import { LayoutDashboard, ChevronLeft, ChevronRight, LogOut, Lock, Eye, EyeOff, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -11,37 +11,39 @@ export default function AdminBanner() {
   const { isAdmin, disableAdmin, bypassUnderConstruction, toggleBypassUnderConstruction } = useAdmin();
   const { info, error } = useToast();
 
-  const handleLogout = () => {
-    disableAdmin();
+  const handleLogout = async () => {
+    await disableAdmin();
     window.location.href = '/';
   };
 
-  const downloadRouteTxt = () => {
-    const pathname = location.pathname;
+  const copyRouteToClipboard = async () => {
     const fullUrl = `${window.location.origin}${location.pathname}${location.search || ''}${location.hash || ''}`;
+
+    const fallbackCopy = () => {
+      const ta = document.createElement('textarea');
+      ta.value = fullUrl;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    };
+
     try {
-      const content = `pathname: ${pathname}\nurl: ${fullUrl}\n`;
-      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-      const objectUrl = URL.createObjectURL(blob);
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(fullUrl);
+        info('URL copiada al porta-retalls');
+        return;
+      }
 
-      // File names cannot contain '/' on macOS (it's the path separator). To preserve the
-      // visual structure of routes, we replace it with the fullwidth slash '／'.
-      const safeName = (pathname || '/')
-        .replace(/^\//, '')
-        .replace(/\//g, '／')
-        .replace(/[^a-zA-Z0-9._\-／]+/g, '-');
-      const filename = safeName ? `${safeName}.txt` : 'route.txt';
-
-      const a = document.createElement('a');
-      a.href = objectUrl;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(objectUrl);
-      info(`Ruta descarregada (${filename})`);
+      const ok = fallbackCopy();
+      if (!ok) throw new Error('copy_failed');
+      info('URL copiada al porta-retalls');
     } catch (err) {
-      error('No s\'ha pogut descarregar la ruta');
+      error('No s\'ha pogut copiar la URL');
     }
   };
 
@@ -109,12 +111,12 @@ export default function AdminBanner() {
           <Button
             variant="ghost"
             size="icon"
-            onClick={downloadRouteTxt}
+            onClick={copyRouteToClipboard}
             className="h-7 w-7 hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-            aria-label="Descarregar ruta"
-            title="Descarregar ruta"
+            aria-label="Copiar URL"
+            title="Copiar URL"
           >
-            <Download className="h-4 w-4 text-white" />
+            <Copy className="h-4 w-4 text-white" />
           </Button>
           <span className="text-xs text-white/70 font-mono">
             {location.pathname}

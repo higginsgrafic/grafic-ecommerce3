@@ -243,7 +243,7 @@ export const ca = {
     contact: {
       title: 'Contacte',
       content: 'Tens preguntes, suggeriments o vols saber més sobre GRÀFIC? Estem aquí per ajudar-te.',
-      email: 'Email: info@grafic.cat',
+      email: 'Email: higginsgrafic@gmail.com',
       phone: 'Telèfon: +34 XXX XXX XXX',
       hours: 'Horari: Dilluns a Divendres, 9:00 - 18:00',
       response: 'Et respondrem en menys de 24 hores laborables.',

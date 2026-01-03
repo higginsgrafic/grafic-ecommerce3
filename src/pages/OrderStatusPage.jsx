@@ -252,7 +252,7 @@ function OrderStatusPage() {
                     </h4>
                     <p className="font-roboto text-[13pt] text-blue-800 leading-relaxed">
                       Si tens alguna pregunta sobre la teva comanda, contacta amb el nostre servei d'atenció al client
-                      a <a href="mailto:orders@grafic.cat" className="underline font-medium">orders@grafic.cat</a>
+                      a <a href="mailto:higginsgrafic@gmail.com" className="underline font-medium">higginsgrafic@gmail.com</a>
                     </p>
                   </div>
                 </div>
