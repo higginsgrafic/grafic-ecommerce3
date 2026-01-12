@@ -1,0 +1,69 @@
+{
+  "processedAt": "2026-01-08T15:06:39.328Z",
+  "options": {
+    "maxSize": 320,
+    "quality": 0.82,
+    "includeOriginals": false
+  },
+  "files": [
+    {
+      "input": "6. VULCAN'S END b.svg",
+      "type": "image",
+      "output": "6. VULCAN'S END b.webp",
+      "inputBytes": 21643,
+      "outputBytes": 9642
+    },
+    {
+      "input": "THE PHOENIX 004 022 negre.png",
+      "type": "image",
+      "output": "THE PHOENIX 004 022 negre.webp",
+      "inputBytes": 4551191,
+      "outputBytes": 10042
+    },
+    {
+      "input": "6. VULCAN'S END b.png",
+      "type": "image",
+      "output": "6. VULCAN'S END b.webp",
+      "inputBytes": 600647,
+      "outputBytes": 4022
+    },
+    {
+      "input": "3. NCC-1701-D BLACK.png",
+      "type": "image",
+      "output": "3. NCC-1701-D BLACK.webp",
+      "inputBytes": 1077424,
+      "outputBytes": 686
+    },
+    {
+      "input": "5. PLASMA ESCAPE b.png",
+      "type": "image",
+      "output": "5. PLASMA ESCAPE b.webp",
+      "inputBytes": 924804,
+      "outputBytes": 7478
+    },
+    {
+      "input": "4. WORMHOLE b.png",
+      "type": "image",
+      "output": "4. WORMHOLE b.webp",
+      "inputBytes": 1276969,
+      "outputBytes": 10346
+    },
+    {
+      "input": "2. NCC-1701 b.png",
+      "type": "image",
+      "output": "2. NCC-1701 b.webp",
+      "inputBytes": 119375,
+      "outputBytes": 830
+    },
+    {
+      "input": "1. NX-01 b.png",
+      "type": "image",
+      "output": "1. NX-01 b.webp",
+      "inputBytes": 110429,
+      "outputBytes": 1142
+    }
+  ],
+  "notes": {
+    "video": "Els vídeos s’inclouen sense recompressió. Per optimitzar vídeo cal una eina tipus ffmpeg (més pesada)."
+  }
+}

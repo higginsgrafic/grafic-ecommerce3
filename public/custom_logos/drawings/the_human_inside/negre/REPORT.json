@@ -1,0 +1,104 @@
+{
+  "processedAt": "2026-01-08T14:52:21.721Z",
+  "options": {
+    "maxSize": 320,
+    "quality": 0.82,
+    "includeOriginals": false
+  },
+  "files": [
+    {
+      "input": "10. MAZINGER b4.png",
+      "type": "image",
+      "output": "10. MAZINGER b4.webp",
+      "inputBytes": 760401,
+      "outputBytes": 5982
+    },
+    {
+      "input": "19. ROBBIE THE ROBOT b1.png",
+      "type": "image",
+      "output": "19. ROBBIE THE ROBOT b1.webp",
+      "inputBytes": 1278272,
+      "outputBytes": 10146
+    },
+    {
+      "input": "18. TERMINATOR b4.png",
+      "type": "image",
+      "output": "18. TERMINATOR b4.webp",
+      "inputBytes": 975483,
+      "outputBytes": 7464
+    },
+    {
+      "input": "17. ROBOCOP b4.png",
+      "type": "image",
+      "output": "17. ROBOCOP b4.webp",
+      "inputBytes": 417051,
+      "outputBytes": 3756
+    },
+    {
+      "input": "16. MASCHINENMENSCH b1.png",
+      "type": "image",
+      "output": "16. MASCHINENMENSCH b1.webp",
+      "inputBytes": 523914,
+      "outputBytes": 4668
+    },
+    {
+      "input": "15. CYBERMAN b4.png",
+      "type": "image",
+      "output": "15. CYBERMAN b4.webp",
+      "inputBytes": 600129,
+      "outputBytes": 5490
+    },
+    {
+      "input": "14. IRONMAN 08 b4.png",
+      "type": "image",
+      "output": "14. IRONMAN 08 b4.webp",
+      "inputBytes": 543512,
+      "outputBytes": 4634
+    },
+    {
+      "input": "13. IRON MAN 68 b1.png",
+      "type": "image",
+      "output": "13. IRON MAN 68 b1.webp",
+      "inputBytes": 486482,
+      "outputBytes": 4382
+    },
+    {
+      "input": "12. CYLON 03 b1.png",
+      "type": "image",
+      "output": "12. CYLON 03 b1.webp",
+      "inputBytes": 795610,
+      "outputBytes": 7106
+    },
+    {
+      "input": "11. CYLON 78 b4.png",
+      "type": "image",
+      "output": "11. CYLON 78 b4.webp",
+      "inputBytes": 554738,
+      "outputBytes": 4000
+    },
+    {
+      "input": "9. AFRODITA-A b3.png",
+      "type": "image",
+      "output": "9. AFRODITA-A b3.webp",
+      "inputBytes": 641450,
+      "outputBytes": 5940
+    },
+    {
+      "input": "8. VADER b4.png",
+      "type": "image",
+      "output": "8. VADER b4.webp",
+      "inputBytes": 490273,
+      "outputBytes": 4314
+    },
+    {
+      "input": "7. C3P0 b4.png",
+      "type": "image",
+      "output": "7. C3P0 b4.webp",
+      "inputBytes": 627343,
+      "outputBytes": 5636
+    }
+  ],
+  "notes": {
+    "video": "Els vídeos s’inclouen sense recompressió. Per optimitzar vídeo cal una eina tipus ffmpeg (més pesada)."
+  }
+}
