@@ -1,4 +1,4 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useRef, useMemo, Suspense, lazy } from 'react';
 import { Routes, Route, useLocation, useNavigate, Navigate } from 'react-router-dom';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
@@ -14,14 +14,15 @@ import SkipLink from '@/components/SkipLink';
 import OffersHeader from '@/components/OffersHeader';
 import AdminBanner from '@/components/AdminBanner';
 import Header from '@/components/Header';
-
+import NikeInspiredHeader from '@/components/NikeInspiredHeader';
 import ScrollToTop from '@/components/ScrollToTop';
 import Footer from '@/components/Footer';
 import Cart from '@/components/Cart';
 import UserSidebar from '@/components/UserSidebar';
 import Checkout from '@/components/Checkout';
-import ViewportIndicator from '@/components/ViewportIndicator';
 import AdminStudioLayout from '@/components/AdminStudioLayout';
+import SupabaseCollectionRoute from '@/pages/SupabaseCollectionRoute';
+import DevGuidesOverlay from '@/components/DevGuidesOverlay';
 
 const FulfillmentPage = lazy(() => import('@/pages/FulfillmentPage'));
 const FulfillmentSettingsPage = lazy(() => import('@/pages/FulfillmentSettingsPage'));
@@ -30,7 +31,6 @@ const ProductPage = lazy(() => import('@/pages/ProductPage'));
 
 // Lazy loading de pàgines per millorar performance (code splitting)
 const Home = lazy(() => import('@/pages/Home'));
-const FirstContactPage = lazy(() => import('@/pages/FirstContactPage'));
 const NewPage = lazy(() => import('@/pages/NewPage'));
 const OrderStatusPage = lazy(() => import('@/pages/OrderStatusPage'));
 const OrderTrackingPage = lazy(() => import('@/pages/OrderTrackingPage'));
@@ -41,6 +41,8 @@ const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const OffersPage = lazy(() => import('@/pages/OffersPage'));
 const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
+const ProvesCollectionPage = lazy(() => import('@/pages/ProvesCollectionPage'));
+const ProvesProductDetailPage = lazy(() => import('@/pages/ProvesProductDetailPage'));
 const OrderConfirmationPage = lazy(() => import('@/pages/OrderConfirmationPage'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
@@ -52,9 +54,10 @@ const PrivacyPage = lazy(() => import('@/pages/PrivacyPage'));
 const TermsPage = lazy(() => import('@/pages/TermsPage'));
 const CreativeCommonsPage = lazy(() => import('@/pages/CreativeCommonsPage'));
 
-const OutcastedPage = lazy(() => import('@/pages/OutcastedPage'));
+// Outcasted now uses the config-driven CollectionPage
 
 const AdminStudioHomePage = lazy(() => import('@/pages/AdminStudioHomePage'));
+const AdminDemosPage = lazy(() => import('@/pages/AdminDemosPage'));
 const IndexPage = lazy(() => import('@/pages/IndexPage'));
 const ECPreviewPage = lazy(() => import('@/pages/ECPreviewPage'));
 const PromotionsManagerPage = lazy(() => import('@/pages/PromotionsManagerPage'));
@@ -72,6 +75,15 @@ const GelatoProductsManagerPage = lazy(() => import('@/pages/GelatoProductsManag
 const ProductsOverviewPage = lazy(() => import('@/pages/ProductsOverviewPage'));
 const GelatoBlankProductsPage = lazy(() => import('@/pages/GelatoBlankProductsPage'));
 const AdminUploadPage = lazy(() => import('@/pages/AdminUploadPage'));
+const AdminVisualOptimizerPage = lazy(() => import('@/pages/AdminVisualOptimizerPage'));
+
+const NikeHeroDemoPage = lazy(() => import('@/pages/NikeHeroDemoPage'));
+const NikeHeaderDemoPage = lazy(() => import('@/pages/NikeHeaderDemoPage'));
+const NikeTambePage = lazy(() => import('@/pages/NikeTambePage'));
+const AppleDemoPage = lazy(() => import('@/pages/AppleDemoPage'));
+const AdidasDemoPage = lazy(() => import('@/pages/AdidasDemoPage'));
+const AdidasDemoTmpPage = lazy(() => import('@/pages/AdidasDemoTmpPage'));
+const AdidasStripeZoomDevPage = lazy(() => import('@/pages/AdidasStripeZoomDevPage'));
 
 // Pàgines administratives
 const AppsPage = lazy(() => import('@/pages/AppsPage'));
@@ -82,9 +94,37 @@ function App() {
   const [isUserSidebarOpen, setIsUserSidebarOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
-  const [showViewportIndicator, setShowViewportIndicator] = useState(false);
   const [selectedElement, setSelectedElement] = useState(null);
+  const [selectedContainerToken, setSelectedContainerToken] = useState('');
+  const [copyContainerStatus, setCopyContainerStatus] = useState('idle');
+  const [selectionStatus, setSelectionStatus] = useState('idle');
+  const [layoutInspectorEnabled, setLayoutInspectorEnabled] = useState(true);
+  const [debugCaptureClicks, setDebugCaptureClicks] = useState(() => {
+    try {
+      const saved = localStorage.getItem('debugCaptureClicks');
+      return saved === null ? false : JSON.parse(saved);
+    } catch {
+      return false;
+    }
+  });
+  const [guidesEnabled, setGuidesEnabled] = useState(false);
+  const debugButtonsWrapRef = useRef(null);
+  const [debugButtonsRect, setDebugButtonsRect] = useState({ left: 16, top: 0, width: 150, height: 60 });
+  const selectedElementNodeRef = useRef(null);
+  const lastCopiedTokenRef = useRef('');
+  const pickCycleRef = useRef({ x: null, y: null, idx: 0, sig: '' });
+  const [contentContainerLeft, setContentContainerLeft] = useState(null);
+  const [contentContainerRight, setContentContainerRight] = useState(null);
   const [isLargeScreen, setIsLargeScreen] = useState(window.innerWidth >= 1024);
+  const [layoutInspectorPickEnabled, setLayoutInspectorPickEnabled] = useState(() => {
+    try {
+      const saved = localStorage.getItem('layoutInspectorPickEnabled');
+      return saved === null ? true : JSON.parse(saved);
+    } catch {
+      return true;
+    }
+  });
+
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -161,6 +201,10 @@ function App() {
   useEffect(() => {
     if (redirectLoading) return;
 
+    const enableInDev = String(import.meta?.env?.VITE_ENABLE_GLOBAL_REDIRECT_IN_DEV || '').toLowerCase() === 'true';
+    const hostname = (typeof window !== 'undefined' ? window.location?.hostname : '') || '';
+    const isLocalhost = hostname === 'localhost' || hostname === '127.0.0.1' || hostname === '0.0.0.0';
+
     const adminRoutes = [
       '/admin',
       '/admin-login',
@@ -170,7 +214,6 @@ function App() {
       '/promotions',
       '/ec-config',
       '/system-messages',
-      '/hero-settings',
       '/colleccio-settings',
       '/mockups',
       '/fulfillment',
@@ -187,6 +230,9 @@ function App() {
     // If global redirect is enabled and an external target is configured,
     // always send non-admin routes (including /ec-preview) outside.
     if (shouldRedirect && hasExternalTarget && !isAdminRoute) {
+      if ((import.meta?.env?.DEV || isLocalhost) && !enableInDev) {
+        return;
+      }
       window.location.replace(redirectUrl);
       return;
     }
@@ -204,110 +250,340 @@ function App() {
     }
   }, [shouldRedirect, redirectUrl, redirectLoading, location.pathname, navigate, bypassUnderConstruction]);
 
-  const layoutInspectorActive = isAdmin && location.pathname !== '/ec-preview' && !!tools?.layoutInspector;
+  const isNikeDemoRoute = location.pathname === '/nike-hero-demo' || location.pathname === '/nike-tambe';
+  const isNikeHeroDemoRoute = location.pathname === '/nike-hero-demo';
+  const isAdidasDemoRoute = location.pathname === '/adidas-demo' || location.pathname.startsWith('/adidas-demo/');
+  const isAppleDemoRoute = location.pathname === '/apple-demo';
+  const isDevDemoRoute = isNikeDemoRoute || isAdidasDemoRoute || isAppleDemoRoute;
+  const layoutInspectorActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && layoutInspectorEnabled;
+
+  const [nikeDemoManualEnabled, setNikeDemoManualEnabled] = useState(false);
+  const [nikeDemoPhaseOverride, setNikeDemoPhaseOverride] = useState(null);
+
+  useEffect(() => {
+    if (!isDevDemoRoute) {
+      setNikeDemoManualEnabled(false);
+      setNikeDemoPhaseOverride(null);
+      return undefined;
+    }
+
+    const readControls = () => {
+      try {
+        const enabled = window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1';
+        const phase = window.localStorage.getItem('NIKE_DEMO_PHASE');
+        setNikeDemoManualEnabled(enabled);
+        setNikeDemoPhaseOverride(phase === 'rest' || phase === 'expanded' ? phase : null);
+      } catch {
+        setNikeDemoManualEnabled(false);
+        setNikeDemoPhaseOverride(null);
+      }
+    };
+
+    const onStorage = (e) => {
+      if (!e || !e.key) return;
+      if (e.key === 'NIKE_DEMO_MANUAL' || e.key === 'NIKE_DEMO_PHASE') {
+        readControls();
+      }
+    };
+
+    readControls();
+    window.addEventListener('storage', onStorage);
+    return () => window.removeEventListener('storage', onStorage);
+  }, [isDevDemoRoute]);
+
+  const writeNikeDemoControls = ({ enabled, phase }) => {
+    try {
+      window.localStorage.setItem('NIKE_DEMO_MANUAL', enabled ? '1' : '0');
+      if (enabled) {
+        window.localStorage.setItem('NIKE_DEMO_PHASE', phase);
+      } else {
+        window.localStorage.removeItem('NIKE_DEMO_PHASE');
+      }
+    } catch {
+      // ignore
+    }
+
+    try {
+      window.dispatchEvent(new Event('nike-demo-controls-changed'));
+    } catch {
+      // ignore
+    }
+
+    setNikeDemoManualEnabled(enabled);
+    setNikeDemoPhaseOverride(phase === 'rest' || phase === 'expanded' ? phase : null);
+  };
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('layoutInspectorPickEnabled', JSON.stringify(layoutInspectorPickEnabled));
+    } catch {
+      // ignore
+    }
+  }, [layoutInspectorPickEnabled]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('debugCaptureClicks', JSON.stringify(debugCaptureClicks));
+    } catch {
+      // ignore
+    }
+  }, [debugCaptureClicks]);
+
+  useEffect(() => {
+    const el = debugButtonsWrapRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      if (!rect?.width || !rect?.height) return;
+      setDebugButtonsRect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
+    };
+
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    window.addEventListener('resize', update);
+    return () => {
+      ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [isAdmin, isDevDemoRoute, location.pathname]);
+
+  useEffect(() => {
+    const update = () => {
+      const candidates = Array.from(document.querySelectorAll('.mx-auto[class*="max-w-[1400px]"]'));
+      const best = candidates
+        .map((el) => ({ el, rect: el?.getBoundingClientRect?.() }))
+        .filter((x) => x.rect && Number.isFinite(x.rect.left) && Number.isFinite(x.rect.width) && x.rect.width > 0)
+        .sort((a, b) => b.rect.width - a.rect.width)[0];
+
+      const rect = best?.rect;
+      if (!rect || !Number.isFinite(rect.left) || rect.left <= 0) {
+        setContentContainerLeft(null);
+        setContentContainerRight(null);
+        return;
+      }
+      setContentContainerLeft(rect.left);
+      setContentContainerRight(rect.left + rect.width);
+    };
+
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [location.pathname]);
 
   // Handle layout inspector element click
   useEffect(() => {
     if (!layoutInspectorActive) {
       setSelectedElement(null);
+      selectedElementNodeRef.current = null;
+      setSelectedContainerToken('');
+      setCopyContainerStatus('idle');
+      setSelectionStatus('idle');
+      lastCopiedTokenRef.current = '';
       return;
     }
 
-    const handleElementClick = (e) => {
-      // Check if the clicked element or any parent has debug-exempt class
-      let element = e.target;
-      while (element && element !== document.body) {
-        // Check for debug-exempt class using multiple methods for SVG compatibility
-        if (
-          (element.classList && element.classList.contains('debug-exempt')) ||
-          (element.className && typeof element.className === 'string' && element.className.includes('debug-exempt')) ||
-          element.hasAttribute('data-debug-exempt')
-        ) {
-          // Allow the click to pass through for exempt elements
-          return;
-        }
-        element = element.parentElement;
+    const isFixedElement = (el) => {
+      if (!el || !(el instanceof Element)) return false;
+      try {
+        return window.getComputedStyle(el).position === 'fixed';
+      } catch {
+        return false;
+      }
+    };
+
+    const isDevOverlay = (el) => !!(el && el instanceof Element && el.closest('[data-dev-overlay="true"]'));
+
+    const pickElementInMain = (clientX, clientY) => {
+      const main = document.getElementById('main-content');
+      if (!main) return null;
+      if (!document.elementsFromPoint) return null;
+      const stack = document.elementsFromPoint(clientX, clientY);
+      const toolbar = debugButtonsWrapRef.current;
+
+      const filtered = stack
+        .filter((el) => el instanceof Element)
+        .filter((el) => main.contains(el))
+        .filter((el) => !isDevOverlay(el))
+        .filter((el) => !(toolbar && toolbar.contains(el)))
+        .filter((el) => !isFixedElement(el))
+        .filter((el) => {
+          try {
+            const cs = window.getComputedStyle(el);
+            if (cs.pointerEvents === 'none') return false;
+            if (cs.visibility === 'hidden') return false;
+            if (cs.display === 'none') return false;
+          } catch {
+            // ignore
+          }
+          return true;
+        });
+
+      if (!filtered.length) return null;
+
+      const signature = filtered
+        .slice(0, 12)
+        .map((el) => {
+          const tag = (el.tagName || '').toLowerCase();
+          const id = (el.getAttribute('id') || '').trim();
+          const cls = (el.getAttribute('class') || '').toString();
+          return `${tag}#${id}.${cls}`;
+        })
+        .join('|');
+
+      const samePoint = pickCycleRef.current.x === clientX && pickCycleRef.current.y === clientY && pickCycleRef.current.sig === signature;
+      const nextIdx = samePoint ? pickCycleRef.current.idx + 1 : 0;
+      const idx = nextIdx % filtered.length;
+      pickCycleRef.current = { x: clientX, y: clientY, idx, sig: signature };
+
+      return filtered[idx];
+    };
+
+    const clearSelection = () => {
+      const previousSelected = document.querySelector('.debug-selected');
+      if (previousSelected) previousSelected.classList.remove('debug-selected');
+      setSelectedElement(null);
+      selectedElementNodeRef.current = null;
+      setSelectedContainerToken('');
+      setCopyContainerStatus('idle');
+      setSelectionStatus('idle');
+    };
+
+    const onPointerDown = (e) => {
+      if (!(e.target instanceof Element)) return;
+      const toolbar = debugButtonsWrapRef.current;
+      if (toolbar && toolbar.contains(e.target)) return;
+      if (isDevOverlay(e.target)) return;
+      if (typeof e.clientX !== 'number' || typeof e.clientY !== 'number') return;
+      const main = document.getElementById('main-content');
+      const pickedFromPoint = pickElementInMain(e.clientX, e.clientY);
+      const pickedFromTarget = (main && main.contains(e.target) && !isDevOverlay(e.target) && !isFixedElement(e.target)) ? e.target : null;
+      const picked = pickedFromPoint || pickedFromTarget;
+      if (!picked) {
+        clearSelection();
+        return;
       }
 
+      if (debugCaptureClicks) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      const target = picked;
+      const previousSelected = document.querySelector('.debug-selected');
+      if (previousSelected) previousSelected.classList.remove('debug-selected');
+      if (target.classList) target.classList.add('debug-selected');
+
+      selectedElementNodeRef.current = target;
+      const token = buildContainerToken(target);
+      setSelectedContainerToken((prev) => {
+        const isSame = prev && prev === token;
+        setSelectionStatus(isSame ? 'selected_same' : 'selected_new');
+        window.setTimeout(() => setSelectionStatus('idle'), 900);
+        return token;
+      });
+      setCopyContainerStatus('ready');
+    };
+
+    const onClickCapture = (e) => {
+      if (!debugCaptureClicks) return;
+      if (!(e.target instanceof Element)) return;
+      const toolbar = debugButtonsWrapRef.current;
+      if (toolbar && toolbar.contains(e.target)) return;
+      if (isDevOverlay(e.target)) return;
       e.preventDefault();
       e.stopPropagation();
-
-      // Remove previous selection
-      const previousSelected = document.querySelector('.debug-selected');
-      if (previousSelected) {
-        previousSelected.classList.remove('debug-selected');
-      }
-
-      // Add selection to clicked element
-      e.target.classList.add('debug-selected');
-
-      // Get element info
-      const tagName = e.target.tagName.toLowerCase();
-      const className = e.target.className.replace('debug-selected', '').trim();
-      const id = e.target.id;
-
-      // Determine element type and color
-      let type = 'Element';
-      let color = 'rgba(255, 0, 0, 0.3)';
-
-      if (tagName === 'header') {
-        type = 'Header';
-        color = 'rgba(0, 150, 255, 0.8)';
-      } else if (tagName === 'main') {
-        type = 'Main';
-        color = 'rgba(0, 255, 0, 0.8)';
-      } else if (tagName === 'footer') {
-        type = 'Footer';
-        color = 'rgba(255, 140, 0, 0.8)';
-      } else if (className.includes('container')) {
-        type = 'Container';
-        color = 'rgba(255, 0, 255, 0.6)';
-      } else if (className.includes('grid')) {
-        type = 'Grid';
-        color = 'rgba(0, 255, 255, 0.6)';
-      } else if (className.includes('flex')) {
-        type = 'Flex';
-        color = 'rgba(255, 255, 0, 0.6)';
-      }
-
-      // Get hierarchy (parents)
-      const getHierarchy = (el) => {
-        const hierarchy = [];
-        let current = el.parentElement;
-        let depth = 0;
-        while (current && depth < 5) {
-          const tag = current.tagName.toLowerCase();
-          const cls = current.className ? `.${current.className.split(' ')[0]}` : '';
-          hierarchy.push(`${tag}${cls}`);
-          current = current.parentElement;
-          depth++;
-        }
-        return hierarchy.join(' > ');
-      };
-
-      setSelectedElement({
-        tagName,
-        className,
-        id,
-        type,
-        color,
-        hierarchy: getHierarchy(e.target),
-        width: e.target.offsetWidth,
-        height: e.target.offsetHeight
-      });
     };
 
-    // Add click listeners to all elements (in capture phase to intercept before React)
-    document.addEventListener('click', handleElementClick, { capture: true });
+    window.addEventListener('pointerdown', onPointerDown, { capture: true, passive: !debugCaptureClicks });
+    window.addEventListener('click', onClickCapture, { capture: true, passive: false });
 
     return () => {
-      document.removeEventListener('click', handleElementClick, { capture: true });
+      window.removeEventListener('pointerdown', onPointerDown, { capture: true });
+      window.removeEventListener('click', onClickCapture, { capture: true });
       const selected = document.querySelector('.debug-selected');
-      if (selected) {
-        selected.classList.remove('debug-selected');
-      }
+      if (selected) selected.classList.remove('debug-selected');
+      selectedElementNodeRef.current = null;
     };
-  }, [layoutInspectorActive]);
+  }, [layoutInspectorActive, layoutInspectorPickEnabled, debugCaptureClicks]);
+
+  const buildContainerToken = (el) => {
+    if (!el || !(el instanceof Element)) return '';
+    const tagNameRaw = (el.tagName || '').toLowerCase();
+    const idRaw = (el.getAttribute('id') || '').trim();
+    const classRaw = (el.getAttribute('class') || '').replace(/\bdebug-selected\b/g, '').trim();
+    const firstClass = classRaw ? String(classRaw).split(/\s+/).filter(Boolean)[0] : '';
+
+    const buildPath = () => {
+      const parts = [];
+      let cur = el;
+      while (cur && cur instanceof Element && cur !== document.body) {
+        const tag = (cur.tagName || '').toLowerCase();
+        const parent = cur.parentElement;
+        const idx = parent ? Math.max(0, Array.from(parent.children).indexOf(cur)) : 0;
+        parts.unshift(`${tag}[${idx}]`);
+        if (cur.getAttribute('id')) break;
+        cur = parent;
+      }
+      return parts.join('>');
+    };
+
+    const hint = idRaw
+      ? `#${idRaw}`
+      : firstClass
+        ? `.${firstClass}`
+        : '';
+
+    return `${buildPath()}${hint ? ` ${tagNameRaw}${hint}` : ''}`.trim();
+  };
+
+  const copySelectedContainer = async () => {
+    const mainContent = document.getElementById('main-content');
+    const node = selectedElementNodeRef.current;
+    const nodeIsValid = !!(mainContent && node && node instanceof Element && mainContent.contains(node) && !node.closest('[data-dev-overlay="true"]') && (window.getComputedStyle(node).position !== 'fixed'));
+
+    const tokenNow = nodeIsValid ? buildContainerToken(node) : '';
+    if (!tokenNow) return;
+    const text = tokenNow;
+    if (text !== selectedContainerToken) {
+      setSelectedContainerToken(text);
+    }
+
+    const fallbackCopy = () => {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.setAttribute('readonly', '');
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.select();
+      const ok = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return ok;
+    };
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(text);
+      } else {
+        const ok = fallbackCopy();
+        if (!ok) throw new Error('copy_failed');
+      }
+      setCopyContainerStatus((prev) => {
+        const isRepeat = lastCopiedTokenRef.current && lastCopiedTokenRef.current === text;
+        return isRepeat ? 'copied_again' : 'copied';
+      });
+      lastCopiedTokenRef.current = text;
+      window.setTimeout(() => setCopyContainerStatus('ready'), 1200);
+    } catch {
+      setCopyContainerStatus('ready');
+    }
+  };
 
   if (loading) {
     return <LoadingScreen />;
@@ -345,58 +621,84 @@ function App() {
   };
 
   const isFullScreenRoute = location.pathname === '/ec-preview';
-  const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/hero-settings', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
+  const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
+  const isHeroSettingsDevRoute = location.pathname === '/hero-settings';
+  // DEV layout routes: hide offers/footer, show AdminBanner, etc.
+  const isDevLayoutRoute = isHeroSettingsDevRoute || isDevDemoRoute;
+  // DEV header routes: inject the global white DEV header with links.
+  // EXCEPTIONS: header-demo pages keep their own headers, so don't override them.
+  const isDevHeaderRoute =
+    isHeroSettingsDevRoute ||
+    (isDevDemoRoute && !isAdidasDemoRoute && !isNikeHeroDemoRoute);
 
-  const offersHeaderVisible = !isAdminRoute && !isFullScreenRoute && offersEnabled && !offersLoading;
+  const offersHeaderVisible = !isAdminRoute && !isFullScreenRoute && !isDevLayoutRoute && offersEnabled && !offersLoading;
 
   const baseHeaderHeight = isLargeScreen ? 80 : 64;
+  const heroSettingsDevHeaderHeight = isDevHeaderRoute ? baseHeaderHeight : 0;
   const offersHeaderHeight = offersHeaderVisible ? 40 : 0;
-  const adminBannerHeight = isAdmin ? 40 : 0;
-  const appHeaderOffset = `${baseHeaderHeight + offersHeaderHeight + adminBannerHeight}px`;
+  const adminBannerVisible = isAdmin || isDevDemoRoute;
+  const adminBannerHeight = adminBannerVisible ? 40 : 0;
+  const appHeaderOffset = `${(isDevHeaderRoute ? heroSettingsDevHeaderHeight : baseHeaderHeight) + offersHeaderHeight + adminBannerHeight}px`;
+  const adidasHeaderOffset = `${adminBannerHeight}px`;
 
   return (
-    <ErrorBoundary>
-      <>
-        <SkipLink />
-        {isNavigating && !isAdminRoute && <LoadingScreen />}
+  <ErrorBoundary>
+    <>
+      <SkipLink />
+      {isNavigating && !isAdminRoute && <LoadingScreen />}
 
+      {adminBannerVisible && <AdminBanner />}
 
+      {!isFullScreenRoute && !isAdminRoute && !isDevLayoutRoute && offersHeaderVisible && (
+        <OffersHeader adminBannerVisible={adminBannerVisible} />
+      )}
 
-          <div
-            className={`${isAdminRoute ? 'min-h-screen' : 'min-h-screen'} bg-white flex flex-col overflow-x-hidden ${layoutInspectorActive ? 'debug-containers' : ''}`}
-          >
-        {/* AdminBanner - només visible per a administradors */}
-        {isAdmin && (
-          <div className="fixed top-0 left-0 right-0 z-[10001] pointer-events-auto">
-            <AdminBanner />
+      {!isFullScreenRoute && !isAdminRoute && isDevHeaderRoute && (
+        <div className="fixed left-0 right-0 top-[40px] z-[20000] bg-white border-b border-gray-200">
+          <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-16 lg:h-20 flex items-center gap-2 text-xs text-gray-700">
+            <button type="button" onClick={() => navigate('/nike-hero-demo')} className="hover:text-black">Nike Hero</button>
+            <span className="text-gray-300">/</span>
+            <button type="button" onClick={() => navigate('/nike-tambe')} className="hover:text-black">Nike També</button>
+            <span className="text-gray-300">/</span>
+            <button type="button" onClick={() => navigate('/adidas-demo')} className="hover:text-black">Adidas</button>
+            <span className="text-gray-300">/</span>
+            <button type="button" onClick={() => navigate('/apple-demo')} className="hover:text-black">Apple</button>
+            <span className="text-gray-300">/</span>
+            <button type="button" onClick={() => navigate('/hero-settings')} className="hover:text-black">Hero Settings</button>
           </div>
-        )}
+        </div>
+      )}
 
-        {/* OffersHeader només visible a pàgines no admin ni full-screen */}
-        {offersHeaderVisible && (
-          <OffersHeader adminBannerVisible={isAdmin} />
-        )}
-
-        {/* Main Header - NO mostrar a pàgines full-screen ni admin */}
-        {!isFullScreenRoute && !isAdminRoute && (
+      {/* Main Header - NO mostrar a pàgines full-screen ni admin ni a dev tools */}
+      {!isFullScreenRoute && !isAdminRoute && !isAdidasDemoRoute && !isDevHeaderRoute && (
+        isNikeDemoRoute ? (
+          <NikeInspiredHeader
+            cartItemCount={getTotalItems()}
+            onCartClick={() => setIsCartOpen(true)}
+            onUserClick={() => setIsUserSidebarOpen(true)}
+            offersHeaderVisible={offersHeaderVisible}
+            adminBannerVisible={adminBannerVisible}
+          />
+        ) : (
           <Header
             cartItemCount={getTotalItems()}
             onCartClick={() => setIsCartOpen(true)}
             onUserClick={() => setIsUserSidebarOpen(true)}
             offersHeaderVisible={offersHeaderVisible}
-            adminBannerVisible={isAdmin}
+            adminBannerVisible={adminBannerVisible}
           />
-        )}
+        )
+      )}
 
         <main
           id="main-content"
-          className={`flex-grow ${isAdminRoute ? 'overflow-y-auto' : ''} ${!isFullScreenRoute ? 'transition-[padding-top] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]' : ''}`}
+          className={`flex-grow ${isAdminRoute ? 'overflow-y-auto' : ''} ${!isFullScreenRoute ? 'transition-[padding-top] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]' : ''} ${layoutInspectorActive ? 'debug-containers' : ''}`}
           style={!isFullScreenRoute ? (
             isAdminRoute
               ? { paddingTop: '40px', '--appHeaderOffset': '40px' }
               : {
-                  paddingTop: appHeaderOffset,
-                  '--appHeaderOffset': appHeaderOffset,
+                  paddingTop: isAdidasDemoRoute ? adidasHeaderOffset : appHeaderOffset,
+                  '--appHeaderOffset': isAdidasDemoRoute ? adidasHeaderOffset : appHeaderOffset,
                 }
           ) : {}}
           tabIndex={-1}
@@ -421,7 +723,7 @@ function App() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <FirstContactPage {...pageProps} />
+                    <SupabaseCollectionRoute collectionKey="first-contact" {...pageProps} />
                   </motion.div>
                 } />
 
@@ -432,9 +734,34 @@ function App() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
-                    <OutcastedPage {...pageProps} />
+                    <SupabaseCollectionRoute collectionKey="outcasted" {...pageProps} />
                   </motion.div>
                 } />
+
+                <Route path="/proves" element={
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <ProvesCollectionPage {...pageProps} />
+                  </motion.div>
+                } />
+
+                <Route
+                  path="/proves/product/:id"
+                  element={
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.3, ease: "easeInOut" }}
+                    >
+                      <ProvesProductDetailPage {...pageProps} />
+                    </motion.div>
+                  }
+                />
 
                 {/* Product Detail Page */}
                 <Route
@@ -447,20 +774,6 @@ function App() {
                       transition={{ duration: 0.3, ease: "easeInOut" }}
                     >
                       <ProductDetailPage {...pageProps} />
-                    </motion.div>
-                  }
-                />
-
-                <Route
-                  path="/en/product/:id"
-                  element={
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <ProductDetailPage {...pageProps} language="en" />
                     </motion.div>
                   }
                 />
@@ -575,6 +888,12 @@ function App() {
                 <Route path="/offers" element={<OffersPage />} />
 
                 <Route path="/new" element={<NewPage />} />
+                <Route path="/apple-demo" element={<AppleDemoPage />} />
+                <Route path="/adidas-demo" element={<AdidasDemoPage />} />
+                <Route path="/adidas-demo/tmp" element={<AdidasDemoTmpPage />} />
+                <Route path="/adidas-stripe-zoom-dev" element={<AdidasStripeZoomDevPage />} />
+                <Route path="/nike-hero-demo" element={<NikeHeroDemoPage />} />
+                <Route path="/nike-tambe" element={<NikeTambePage />} />
                 <Route path="/status" element={<OrderStatusPage />} />
                 <Route path="/track" element={<OrderTrackingPage />} />
 
@@ -598,11 +917,13 @@ function App() {
                 {/* Admin Studio - Multi-page under /admin/... */}
                 <Route path="/admin" element={<AdminStudioLayout />}>
                   <Route index element={<AdminStudioHomePage />} />
+                  <Route path="demos" element={<AdminDemosPage />} />
                   <Route path="index" element={<IndexPage />} />
                   <Route path="promotions" element={<PromotionsManagerPage />} />
                   <Route path="ec-config" element={<ECConfigPage />} />
                   <Route path="system-messages" element={<SystemMessagesPage />} />
                   <Route path="media" element={<AdminMediaPage />} />
+                  <Route path="visual-optimizer" element={<AdminVisualOptimizerPage />} />
                   <Route path="hero" element={<HeroSettingsPage />} />
                   <Route path="collections" element={<ColleccioSettingsPage {...pageProps} />} />
                   <Route path="mockups" element={<MockupsManagerPage />} />
@@ -622,7 +943,7 @@ function App() {
                 <Route path="/promotions" element={<Navigate to="/admin/promotions" replace />} />
                 <Route path="/ec-config" element={<Navigate to="/admin/ec-config" replace />} />
                 <Route path="/system-messages" element={<Navigate to="/admin/system-messages" replace />} />
-                <Route path="/hero-settings" element={<Navigate to="/admin/hero" replace />} />
+                <Route path="/hero-settings" element={<HeroSettingsPage />} />
                 <Route path="/colleccio-settings" element={<Navigate to="/admin/collections" replace />} />
                 <Route path="/mockups" element={<Navigate to="/admin/mockups" replace />} />
                 <Route path="/fulfillment" element={<Navigate to="/admin/fulfillment" replace />} />
@@ -654,7 +975,7 @@ function App() {
         </main>
 
         {/* Footer - NO mostrar a pàgines full-screen ni admin */}
-        {!isFullScreenRoute && !isAdminRoute && <Footer />}
+        {!isFullScreenRoute && !isAdminRoute && !isDevLayoutRoute && <Footer />}
 
         <ScrollToTop />
 
@@ -684,126 +1005,120 @@ function App() {
           }}
         />
 
-        {/* Viewport Indicator - Hidden on ec-preview page */}
-        {location.pathname !== '/ec-preview' && (
-          <ViewportIndicator
-            visible={showViewportIndicator}
-            onClose={() => setShowViewportIndicator(false)}
-          />
-        )}
-
         {/* Toggle button for Debug - Moved outside debug-containers */}
-        {isAdmin && location.pathname !== '/ec-preview' && (
-          <button
-            onClick={() => toggleTool('layoutInspector')}
-            className="fixed bottom-4 left-4 bg-gradient-to-br from-orange-600 to-red-600 text-white rounded-full p-3 shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 group debug-exempt"
-            style={{ zIndex: 99999 }}
-            aria-label="Mostrar/Ocultar debug"
-            title="Mostrar/Ocultar debug"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
-            </svg>
-            <span className="absolute left-full ml-2 top-1/2 -translate-y-1/2 bg-gray-900 text-white text-xs px-2 py-1 rounded whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
-              {layoutInspectorActive ? 'Ocultar' : 'Mostrar'} debug
-            </span>
-          </button>
-        )}
+        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && (
+          <>
+            <div ref={debugButtonsWrapRef} className="fixed bottom-4 left-4 z-[99999] flex items-center gap-2 debug-exempt">
+              <button
+                onClick={() => setLayoutInspectorEnabled((v) => !v)}
+                className="h-12 w-12 bg-gradient-to-br from-orange-600 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 flex items-center justify-center debug-exempt"
+                aria-label="Mostrar/Ocultar debug"
+              >
+                <svg
+                  className="block w-5 h-5"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+                </svg>
+              </button>
 
-        {/* Debug Indicator - Hidden on ec-preview page */}
-        {layoutInspectorActive && (
-          <div className="debug-indicator debug-exempt">
-            <h3>MODE DEBUG ACTIU</h3>
-            <p style={{ marginBottom: '12px', fontSize: '11px', color: '#888' }}>
-              Clica el botó taronja per desactivar
-            </p>
-            <ul>
-              <li>
-                <div className="color-box" style={{ background: 'rgba(0, 150, 255, 0.8)' }}></div>
-                <span>Header</span>
-              </li>
-              <li>
-                <div className="color-box" style={{ background: 'rgba(0, 255, 0, 0.8)' }}></div>
-                <span>Main</span>
-              </li>
-              <li>
-                <div className="color-box" style={{ background: 'rgba(255, 140, 0, 0.8)' }}></div>
-                <span>Footer</span>
-              </li>
-              <li>
-                <div className="color-box" style={{ background: 'rgba(255, 0, 255, 0.6)' }}></div>
-                <span>Containers</span>
-              </li>
-              <li>
-                <div className="color-box" style={{ background: 'rgba(0, 255, 255, 0.6)' }}></div>
-                <span>Grid</span>
-              </li>
-              <li>
-                <div className="color-box" style={{ background: 'rgba(255, 255, 0, 0.6)' }}></div>
-                <span>Flex</span>
-              </li>
-              <li>
-                <div className="color-box" style={{ background: 'rgba(255, 0, 0, 0.3)' }}></div>
-                <span>Altres elements</span>
-              </li>
-            </ul>
+              <button
+                type="button"
+                className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
+                  debugCaptureClicks
+                    ? 'border-slate-900/15 bg-slate-900 text-white hover:bg-slate-800'
+                    : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setDebugCaptureClicks((v) => !v);
+                }}
+              >
+                {debugCaptureClicks ? 'Clicks OFF' : 'Clicks ON'}
+              </button>
 
-            {selectedElement && (
-              <div className="selected-info">
-                <h4>Element seleccionat</h4>
-                <p>
-                  <span className="tag">&lt;{selectedElement.tagName}&gt;</span>
-                </p>
-                <p>
-                  <strong>Tipus:</strong> {selectedElement.type}
-                </p>
-                {selectedElement.id && (
-                  <p>
-                    <strong>ID:</strong> {selectedElement.id}
-                  </p>
-                )}
-                {selectedElement.className && (
-                  <p>
-                    <strong>Classes:</strong>
-                    <br />
-                    <span className="class">{selectedElement.className}</span>
-                  </p>
-                )}
-                <p>
-                  <strong>Dimensions:</strong> {selectedElement.width}x{selectedElement.height}px
-                </p>
-                <p>
-                  <strong>Color:</strong>
-                  <div
-                    className="color-box"
-                    style={{
-                      background: selectedElement.color,
-                      display: 'inline-block',
-                      marginLeft: '8px',
-                      verticalAlign: 'middle'
+              <button
+                type="button"
+                className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
+                  guidesEnabled
+                    ? 'border-[#337AC6]/40 bg-[#337AC6]/10 text-[#0f172a] hover:bg-[#337AC6]/15'
+                    : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
+                }`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setGuidesEnabled((v) => !v);
+                }}
+              >
+                Guides
+              </button>
+
+              <button
+                type="button"
+                className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed debug-exempt ${
+                  selectedContainerToken
+                    ? 'border-emerald-500/50 bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
+                    : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
+                } ${selectionStatus === 'selected_new' ? 'ring-2 ring-emerald-400/60' : ''} ${selectionStatus === 'selected_same' ? 'ring-2 ring-amber-400/60' : ''}`}
+                disabled={!layoutInspectorActive || !selectedContainerToken}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  copySelectedContainer();
+                }}
+                aria-label="Copiar contenidor seleccionat"
+              >
+                {copyContainerStatus === 'copied'
+                  ? 'Copied'
+                  : copyContainerStatus === 'copied_again'
+                    ? 'Copied again'
+                    : selectionStatus === 'selected_new'
+                      ? 'Selected'
+                      : selectionStatus === 'selected_same'
+                        ? 'Same'
+                        : 'Copy container'}
+              </button>
+
+              {isDevDemoRoute && (
+                <div className="flex items-center gap-2">
+                  {isNikeHeroDemoRoute && (
+                    <button
+                      type="button"
+                      className="h-12 rounded-full border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5 disabled:opacity-40"
+                      disabled={!nikeDemoManualEnabled}
+                      onClick={() => {
+                        const current = (nikeDemoPhaseOverride === 'rest' || nikeDemoPhaseOverride === 'expanded') ? nikeDemoPhaseOverride : 'expanded';
+                        const next = current === 'expanded' ? 'rest' : 'expanded';
+                        writeNikeDemoControls({ enabled: nikeDemoManualEnabled, phase: next });
+                      }}
+                    >
+                      {(nikeDemoPhaseOverride || 'expanded') === 'expanded' ? 'Repòs' : 'Expandir'}
+                    </button>
+                  )}
+
+                  <button
+                    type="button"
+                    className="h-12 rounded-full border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5"
+                    onClick={() => {
+                      const nextEnabled = !nikeDemoManualEnabled;
+                      const phase = (nikeDemoPhaseOverride === 'rest' || nikeDemoPhaseOverride === 'expanded') ? nikeDemoPhaseOverride : 'expanded';
+                      writeNikeDemoControls({ enabled: nextEnabled, phase });
                     }}
-                  ></div>
-                </p>
-                {selectedElement.hierarchy && (
-                  <p>
-                    <strong>Jerarquia:</strong>
-                    <br />
-                    <span className="hierarchy">{selectedElement.hierarchy}</span>
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+                  >
+                    Manual: {nikeDemoManualEnabled ? 'ON' : 'OFF'}
+                  </button>
+                </div>
+              )}
+            </div>
+          </>
         )}
-
-          </div>
-
-        </>
+        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && guidesEnabled && (
+          <DevGuidesOverlay />
+        )}
+      </>
     </ErrorBoundary>
   );
 }
