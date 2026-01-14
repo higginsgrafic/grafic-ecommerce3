@@ -39,3 +39,5 @@ test-results
 
 public/bolt_tmp/
 public/tmp/
+.tmp/
+mockups-supabase-*.csv
