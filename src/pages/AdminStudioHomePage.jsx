@@ -13,7 +13,8 @@ import {
   Settings,
   ImageIcon,
   Database,
-  Upload
+  Upload,
+  ClipboardList
 } from 'lucide-react';
 import SEO from '@/components/SEO';
 
@@ -89,6 +90,13 @@ const toolsColumn4 = [
     path: '/admin/studio/promotions',
     icon: Megaphone,
     color: 'from-orange-500 to-orange-600',
+  },
+  {
+    title: 'Unitats de Canvi',
+    description: 'Organitza la feina per unitats i categories (start/status/finish)',
+    path: '/admin/studio/unitats',
+    icon: ClipboardList,
+    color: 'from-slate-600 to-slate-800',
   },
   {
     title: 'Configuració del Hero',

@@ -73,6 +73,7 @@ const GelatoProductsManagerPage = lazy(() => import('@/pages/GelatoProductsManag
 const ProductsOverviewPage = lazy(() => import('@/pages/ProductsOverviewPage'));
 const GelatoBlankProductsPage = lazy(() => import('@/pages/GelatoBlankProductsPage'));
 const AdminUploadPage = lazy(() => import('@/pages/AdminUploadPage'));
+const UnitatsCanviPage = lazy(() => import('@/pages/UnitatsCanviPage'));
 
 const NikeTambePage = lazy(() => import('@/pages/NikeTambePage.jsx'));
 const AdidasDemoPage = lazy(() => import('@/pages/AdidasDemoPage'));
@@ -660,14 +661,14 @@ function App() {
 
       {devHeaderVisible && (
         <div className="fixed left-0 right-0 z-[20000] bg-white border-b border-gray-200" style={{ top: `${adminBannerHeight}px` }}>
-          <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-16 lg:h-20 flex items-center gap-2 text-xs text-gray-700">
-            <button type="button" onClick={() => navigate('/nike-tambe')} className="hover:text-black">Nike També</button>
-            <span className="text-gray-300">/</span>
-            <button type="button" onClick={() => navigate('/adidas-demo')} className="hover:text-black">Adidas</button>
-            <span className="text-gray-300">/</span>
-            <button type="button" onClick={() => navigate('/hero-settings')} className="hover:text-black">Hero Settings</button>
-          </div>
+        <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-16 lg:h-20 flex items-center gap-2 text-xs text-gray-700">
+          <button type="button" onClick={() => navigate('/nike-tambe')} className="hover:text-black">Nike També</button>
+          <span className="text-gray-300">/</span>
+          <button type="button" onClick={() => navigate('/adidas-demo')} className="hover:text-black">Adidas</button>
+          <span className="text-gray-300">/</span>
+          <button type="button" onClick={() => navigate('/hero-settings')} className="hover:text-black">Hero Settings</button>
         </div>
+      </div>
       )}
 
       {/* Main Header - NO mostrar a pàgines full-screen ni admin ni a dev tools */}
@@ -934,6 +935,7 @@ function App() {
                   <Route path="gelato-blank" element={<GelatoBlankProductsPage />} />
                   <Route path="gelato-templates" element={<GelatoTemplatesPage />} />
                   <Route path="products-overview" element={<ProductsOverviewPage />} />
+                  <Route path="unitats" element={<UnitatsCanviPage />} />
                   <Route path="draft" element={<Navigate to="/admin/studio" replace />} />
                   <Route path="draft/fulfillment-settings" element={<FulfillmentSettingsPage />} />
                   <Route path="draft/mockup-settings" element={<Navigate to="/admin/studio" replace />} />

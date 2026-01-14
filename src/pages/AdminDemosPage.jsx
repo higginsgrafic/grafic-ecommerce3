@@ -30,6 +30,7 @@ const routes = [
     group: 'Admin Studio',
     items: [
       { title: 'Admin Studio', description: 'Home (eines)', path: '/admin/studio' },
+      { title: 'Unitats de Canvi', description: 'Gestió d\'unitats (work units)', path: '/admin/studio/unitats' },
       { title: 'Promotions', description: 'Gestor de promocions', path: '/admin/studio/promotions' },
       { title: 'EC Config', description: 'Configuració e-commerce', path: '/admin/studio/ec-config' },
       { title: 'System Messages', description: 'Missatges del sistema', path: '/admin/studio/system-messages' },

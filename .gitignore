@@ -37,7 +37,8 @@ store_products_full.csv
 .windsurf
 !.windsurf/
 !.windsurf/workflows/
-!.windsurf/workflows/**
+.windsurf/workflows/*
+!.windsurf/workflows/task.md
 test-results
 
 public/bolt_tmp/
