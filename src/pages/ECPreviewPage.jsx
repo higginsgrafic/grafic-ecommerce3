@@ -12,8 +12,176 @@ function ECPreviewPage() {
   const { isAdmin } = useAdmin();
 
   useEffect(() => {
+    const shouldMatch = (value) => /\bbolt\b|bolt\.com|bolt\.new|made in bolt/i.test(String(value || ''));
+
+    const looksLikeBottomRightBadge = (el) => {
+      try {
+        const cs = window.getComputedStyle(el);
+        const pos = cs.position;
+        if (pos !== 'fixed' && pos !== 'sticky' && pos !== 'absolute') return false;
+
+        const rect = el.getBoundingClientRect();
+        if (!rect || !Number.isFinite(rect.width) || !Number.isFinite(rect.height)) return false;
+        if (rect.width < 20 || rect.height < 12) return false;
+        if (rect.width > 240 || rect.height > 120) return false;
+
+        const vw = window.innerWidth || 0;
+        const vh = window.innerHeight || 0;
+        if (!vw || !vh) return false;
+
+        const distRight = vw - rect.right;
+        const distBottom = vh - rect.bottom;
+        if (distRight < -2 || distBottom < -2) return false;
+        if (distRight > 40 || distBottom > 40) return false;
+
+        const z = Number.parseInt(cs.zIndex || '0', 10);
+        if (Number.isFinite(z) && z > 0 && z < 10) {
+          // low z-index overlays are unlikely to be watermarks
+          return false;
+        }
+
+        // The Bolt badge is typically a small clickable element.
+        if (el.tagName === 'A' || el.tagName === 'BUTTON') return true;
+
+        const role = el.getAttribute('role');
+        if (role === 'button' || role === 'link') return true;
+
+        // If it contains an SVG and is in bottom-right, it's very likely a watermark.
+        if (el.querySelector && el.querySelector('svg')) return true;
+
+        return false;
+      } catch {
+        return false;
+      }
+    };
+
+    const getAttr = (el, name) => {
+      try {
+        return el && typeof el.getAttribute === 'function' ? el.getAttribute(name) : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const cleanupBoltNodes = (root) => {
+      const scope = root && root.querySelectorAll ? root : document;
+      if (!scope || !scope.querySelectorAll) return;
+
+      const nodes = Array.from(scope.querySelectorAll('*'));
+      for (const el of nodes) {
+        if (!(el instanceof HTMLElement)) continue;
+        const href = getAttr(el, 'href');
+        const src = getAttr(el, 'src');
+        const alt = getAttr(el, 'alt');
+        const title = getAttr(el, 'title');
+        const ariaLabel = getAttr(el, 'aria-label');
+        const dataTestId = getAttr(el, 'data-testid');
+        const id = el.id;
+        const className = el.className;
+        const text = (el.innerText || el.textContent || '').trim();
+
+        // Some badges are injected as compact HTML with no visible text at the element level.
+        // outerHTML is more expensive but /ec-preview is a simple page.
+        const html = el.outerHTML || '';
+
+        if (
+          shouldMatch(href) ||
+          shouldMatch(src) ||
+          shouldMatch(alt) ||
+          shouldMatch(title) ||
+          shouldMatch(ariaLabel) ||
+          shouldMatch(dataTestId) ||
+          shouldMatch(id) ||
+          shouldMatch(className) ||
+          shouldMatch(text) ||
+          shouldMatch(html)
+        ) {
+          el.style.display = 'none';
+          el.style.visibility = 'hidden';
+          if (el.parentNode) el.parentNode.removeChild(el);
+          continue;
+        }
+
+        // Fallback: some badges render the text via SVG paths / shadow DOM and won't match text/html.
+        // On /ec-preview we can safely remove bottom-right watermark-like overlays.
+        if (looksLikeBottomRightBadge(el)) {
+          el.style.display = 'none';
+          el.style.visibility = 'hidden';
+          if (el.parentNode) el.parentNode.removeChild(el);
+          continue;
+        }
+
+        if (el.shadowRoot) {
+          cleanupBoltNodes(el.shadowRoot);
+        }
+      }
+    };
+
+    cleanupBoltNodes(document);
+
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type !== 'childList' && m.type !== 'attributes' && m.type !== 'characterData') continue;
+        if (m.type === 'childList') {
+          for (const node of Array.from(m.addedNodes || [])) {
+            if (!(node instanceof HTMLElement)) continue;
+            cleanupBoltNodes(node);
+            if (node.shadowRoot) cleanupBoltNodes(node.shadowRoot);
+          }
+        } else {
+          // attribute/text mutation: rescan around the target
+          const t = m.target;
+          if (t instanceof HTMLElement) cleanupBoltNodes(t);
+          if (t && t.parentNode instanceof HTMLElement) cleanupBoltNodes(t.parentNode);
+        }
+      }
+    });
+
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+    }
+
+    const startedAt = Date.now();
+    const aggressiveIntervalId = window.setInterval(() => {
+      cleanupBoltNodes(document);
+      // Stop after 10s to avoid wasting CPU forever.
+      if (Date.now() - startedAt > 10_000) {
+        window.clearInterval(aggressiveIntervalId);
+      }
+    }, 100);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(aggressiveIntervalId);
+    };
+  }, []);
+
+  useEffect(() => {
     loadECPage();
   }, []);
+
+  useEffect(() => {
+    if (!config) return;
+    if (isAdmin) return;
+
+    const target = String(config.redirectUrl || '').trim();
+    if (!target) return;
+
+    const effectiveAutoRedirect = !!(config.autoRedirect || config.globalRedirect);
+    if (!effectiveAutoRedirect) return;
+
+    // Redirect immediately (even if there's no video, or the video is looping).
+    // This page acts as an under-construction bridge (e.g. to Etsy).
+    const timeoutId = window.setTimeout(() => {
+      if (target.startsWith('http://') || target.startsWith('https://')) {
+        window.location.replace(target);
+        return;
+      }
+      navigate(target);
+    }, 50);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [config, navigate, isAdmin]);
 
   const loadECPage = async () => {
     try {
@@ -42,7 +210,8 @@ function ECPreviewPage() {
           showButton: data.show_button ?? false,
           textColor: data.text_color || '#ffffff',
           redirectUrl: data.redirect_url ?? '',
-          autoRedirect: data.auto_redirect ?? false
+          autoRedirect: data.auto_redirect ?? false,
+          globalRedirect: data.global_redirect ?? false
         });
       }
     } catch (error) {
@@ -110,12 +279,61 @@ function ECPreviewPage() {
       <Helmet>
         <title>En Construcció - GRÀFIC</title>
         <meta name="description" content="Pàgina en construcció" />
+        <style>{`
+          /* Defensive: hide Bolt watermark/ads if injected (Bolt.new / Bolt.com). */
+          a[href*="bolt"],
+          iframe[src*="bolt"],
+          img[src*="bolt"],
+          script[src*="bolt"],
+          [data-bolt],
+          [data-provider*="bolt" i],
+          [aria-label*="bolt" i],
+          [title*="bolt" i] {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+          }
+        `}</style>
+        <meta
+          httpEquiv="Content-Security-Policy"
+          content={
+            [
+              "default-src 'self'",
+              "base-uri 'self'",
+              "object-src 'none'",
+              "frame-src 'none'",
+              "script-src 'self'",
+              "style-src 'self' 'unsafe-inline'",
+              "img-src 'self' data: blob: https:",
+              "media-src 'self' data: blob: https:",
+              "font-src 'self' data: https:",
+              "connect-src 'self' https: ws:",
+              "report-to csp",
+            ].join('; ')
+          }
+        />
       </Helmet>
 
       <div
         className="relative w-full h-screen overflow-hidden cursor-pointer"
         onClick={handleScreenClick}
       >
+        <div
+          className="fixed bottom-0 right-0 z-[2147483647]"
+          style={{ width: 220, height: 90, pointerEvents: 'auto', background: '#000000' }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onMouseDown={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+          onTouchStart={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+          }}
+        />
         {showDevNote && (
           <div className="fixed inset-0 z-20 flex items-center justify-center pointer-events-none">
             <div
@@ -141,7 +359,7 @@ function ECPreviewPage() {
             style={{ filter: 'contrast(1.5)', zIndex: 0 }}
             autoPlay
             muted
-            loop={!config.autoRedirect}
+            loop={!(String(config.redirectUrl || '').trim() && (config.autoRedirect || config.globalRedirect))}
             playsInline
             preload="auto"
             src={config.videoUrl}

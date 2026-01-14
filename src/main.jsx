@@ -40,7 +40,22 @@ console.log('✅ React app rendered');
 // Registre del Service Worker per PWA
 if ('serviceWorker' in navigator) {
   if (import.meta.env.PROD) {
+    const pathname = (typeof window !== 'undefined' ? window.location?.pathname : '') || '';
+    const search = (typeof window !== 'undefined' ? window.location?.search : '') || '';
+    const bypassSW = pathname === '/ec-preview' || /[?&]no_sw=1\b/.test(search);
+
+    if (bypassSW) {
+      // /ec-preview is a live iteration surface; SW caching can serve stale JS/CSS and break rapid fixes.
+      navigator.serviceWorker.getRegistrations().then((regs) => {
+        regs.forEach((reg) => reg.unregister());
+      });
+      if ('caches' in window) {
+        caches.keys().then((names) => names.forEach((n) => caches.delete(n)));
+      }
+    }
+
     window.addEventListener('load', () => {
+      if (bypassSW) return;
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
