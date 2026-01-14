@@ -48,7 +48,7 @@ export default function AdminBanner() {
   };
 
   return (
-    <div className="bg-red-600 h-[40px] w-full flex items-center relative">
+    <div className="fixed left-0 right-0 top-0 z-[30000] bg-red-600 h-[40px] w-full flex items-center debug-exempt" data-debug-exempt="true">
       {/* Left: Navigation Arrows */}
       <div className="flex items-center gap-1.5 pl-4">
         {/* Back Arrow */}
@@ -101,7 +101,7 @@ export default function AdminBanner() {
           </Button>
         )}
         <Link
-          to="/admin"
+          to="/admin/studio"
           className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:bg-red-700 transition-all px-3 py-1.5 rounded group"
         >
           <LayoutDashboard className="w-4 h-4 group-hover:scale-110 transition-transform" />

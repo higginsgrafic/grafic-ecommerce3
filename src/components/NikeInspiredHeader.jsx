@@ -797,7 +797,7 @@ function NikeInspiredHeader({
 
       <div
         ref={headerBarRef}
-        className={`relative bg-white/90 backdrop-blur-lg ${activeMenu === 'collections' ? '' : 'border-b border-gray-200'}`}
+        className={`relative bg-white ${activeMenu === 'collections' ? '' : 'border-b border-gray-200'}`}
       >
         {collectionsVisible && expansionPhase === 'expanded' && navHoverBridgeTopPx != null && (
           <div

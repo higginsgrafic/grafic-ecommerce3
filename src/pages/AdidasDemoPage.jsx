@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import AdidasInspiredHeader from '@/components/AdidasInspiredHeader';
-import NikeHeroSlider from '@/components/NikeHeroSlider';
+import NikeHeroSlider from '@/components/NikeHeroSlider.jsx';
 
 function Tile({ title, body }) {
   return (
@@ -70,7 +70,8 @@ export default function AdidasDemoPage() {
                 slides={[
                   {
                     id: 'adidas-demo-1',
-                    imageSrc: '/placeholders/Gildan-5000-Unisex-royal.jpg',
+                    imageSrc:
+                      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_royal_gpr-4-0_front.png',
                     kicker: 'Per marcar la diferència',
                     headline: 'Mou-te i marca la diferència',
                     primaryCta: { label: 'Compra', href: '#' },
@@ -78,7 +79,8 @@ export default function AdidasDemoPage() {
                   },
                   {
                     id: 'adidas-demo-2',
-                    imageSrc: '/placeholders/Gildan-5000-Unisex-black.jpg',
+                    imageSrc:
+                      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_black_gpr-4-0_front.png',
                     kicker: 'Essencials',
                     headline: 'Minimalisme que combina amb tot',
                     primaryCta: { label: 'Compra', href: '#' },
@@ -86,7 +88,8 @@ export default function AdidasDemoPage() {
                   },
                   {
                     id: 'adidas-demo-3',
-                    imageSrc: '/placeholders/Gildan-5000-Unisex-forest.jpg',
+                    imageSrc:
+                      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_forest-green_gpr-4-0_front.png',
                     kicker: 'Studio',
                     headline: 'Confort i presència, sense soroll',
                     primaryCta: { label: 'Compra', href: '#' },

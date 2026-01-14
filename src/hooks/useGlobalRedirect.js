@@ -9,14 +9,6 @@ export function useGlobalRedirect(bypassEnabled = false) {
   useEffect(() => {
     const checkGlobalRedirect = async () => {
       try {
-        // Si el bypass està activat, no redirigim
-        if (bypassEnabled) {
-          setShouldRedirect(false);
-          setRedirectUrl(null);
-          setLoading(false);
-          return;
-        }
-
         if (!supabase) {
           setShouldRedirect(false);
           setRedirectUrl(null);
@@ -35,8 +27,10 @@ export function useGlobalRedirect(bypassEnabled = false) {
         if (error) throw error;
 
         const redirect = !!data;
-        setShouldRedirect(redirect);
+        // Always expose the configured target (useful for debugging in admin/bypass mode)
         setRedirectUrl(data?.redirect_url || null);
+        // But when bypass is enabled, never activate the redirect.
+        setShouldRedirect(bypassEnabled ? false : redirect);
       } catch (error) {
         console.error('Error checking global redirect:', error);
         setShouldRedirect(false);

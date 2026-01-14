@@ -20,14 +20,7 @@ export function AdminToolsProvider({ children }) {
 
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (!raw) return;
-      const parsed = JSON.parse(raw);
-      if (!parsed || typeof parsed !== 'object') return;
-      setTools((prev) => ({
-        ...prev,
-        ...parsed
-      }));
+      localStorage.removeItem(STORAGE_KEY);
     } catch {
       // ignore
     }

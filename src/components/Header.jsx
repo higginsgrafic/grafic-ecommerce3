@@ -31,7 +31,7 @@ function Header({
 
   return (
     <motion.header
-      className="fixed left-0 right-0 z-[10000] bg-white/80 backdrop-blur-lg border-b border-gray-200"
+      className="fixed left-0 right-0 z-[10000] bg-white border-b border-gray-200"
       initial={false}
       animate={{
         top: adminBannerVisible && offersHeaderVisible ? '80px' : adminBannerVisible ? '40px' : offersHeaderVisible ? '40px' : '0px'

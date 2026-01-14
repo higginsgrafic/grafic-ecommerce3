@@ -120,7 +120,8 @@ const sanitizeOutcastedProducts = (items) => {
 
     // If product has no variants (common for Gelato store products in this app), do NOT guess/override images.
     // We'll only fallback if the image is missing.
-    const fallbackImage = '/placeholders/Gildan-5000-Unisex-black.jpg';
+    const fallbackImage =
+      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_black_gpr-4-0_front.png';
     const hasAnyImage =
       (typeof p?.image === 'string' && p.image.length > 0) ||
       (Array.isArray(p?.images) && p.images.length > 0);

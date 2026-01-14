@@ -1,50 +1,50 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, UserRound, ChevronDown, ChevronLeft, ChevronRight, Layers, LayoutGrid } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
-import { getGildan5000Catalog } from '../utils/placeholders';
-import AdidasColorStripeButtons from './AdidasColorStripeButtons';
-import AdidasCatalogPanel from './AdidasCatalogPanel';
-import AdidasHumanInsideSlider from './AdidasHumanInsideSlider';
+import { getGildan5000Catalog } from '../utils/placeholders.js';
+import AdidasColorStripeButtons from './AdidasColorStripeButtons.jsx';
+import AdidasCatalogPanel from './AdidasCatalogPanel.jsx';
+import AdidasHumanInsideSlider from './AdidasHumanInsideSlider.jsx';
 
 const FIRST_CONTACT_MEDIA = {
-  'NX-01': '/custom_logos/drawings/first_contact/negre/1. NX-01 b.png',
-  'NCC-1701': '/custom_logos/drawings/first_contact/negre/2. NCC-1701 b.png',
-  'NCC-1701-D': '/custom_logos/drawings/first_contact/negre/3. NCC-1701-D BLACK.png',
-  'Wormhole': '/custom_logos/drawings/first_contact/negre/4. WORMHOLE b.png',
-  'Plasma Escape': '/custom_logos/drawings/first_contact/negre/5. PLASMA ESCAPE b.png',
-  "Vulcan's End": "/custom_logos/drawings/first_contact/negre/6. VULCAN'S END b.webp",
-  'The Phoenix': '/custom_logos/drawings/first_contact/negre/THE PHOENIX 004 022 negre.png',
+  'NX-01': '/custom_logos/drawings/first_contact/negre/1-nx-01-b.webp',
+  'NCC-1701': '/custom_logos/drawings/first_contact/negre/2-ncc-1701-b.webp',
+  'NCC-1701-D': '/custom_logos/drawings/first_contact/negre/3-ncc-1701-d-b.webp',
+  'Wormhole': '/custom_logos/drawings/first_contact/negre/4-wormhole-b.webp',
+  'Plasma Escape': '/custom_logos/drawings/first_contact/negre/5-plasma-escape-b.webp',
+  "Vulcan's End": '/custom_logos/drawings/first_contact/negre/6-vulcans-end-b.webp',
+  'The Phoenix': '/custom_logos/drawings/first_contact/negre/7-the-phoenix-b.webp',
 };
 
 const CONTROL_TILE_BN = 'botonera-bn';
 const CONTROL_TILE_ARROWS = 'botonera-fletxes';
 
 const FIRST_CONTACT_MEDIA_WHITE = {
-  'NX-01': '/custom_logos/drawings/first_contact/blanc/1. NX-01 w.png',
-  'NCC-1701': '/custom_logos/drawings/first_contact/blanc/2. NCC-1701 w.png',
-  'NCC-1701-D': '/custom_logos/drawings/first_contact/blanc/3. NCC-1701-D WHITE.png',
-  'Wormhole': '/custom_logos/drawings/first_contact/blanc/4. WORMHOLE w.png',
-  'Plasma Escape': '/custom_logos/drawings/first_contact/blanc/5. PLASMA ESCAPE w.png',
-  "Vulcan's End": "/custom_logos/drawings/first_contact/blanc/6. VULCAN'S END w.webp",
-  'The Phoenix': '/custom_logos/drawings/first_contact/blanc/THE PHOENIX 004 022 blanc.png',
+  'NX-01': '/custom_logos/drawings/first_contact/blanc/1-nx-01-w.webp',
+  'NCC-1701': '/custom_logos/drawings/first_contact/blanc/2-ncc-1701-w.webp',
+  'NCC-1701-D': '/custom_logos/drawings/first_contact/blanc/3-ncc-1701-d-w.webp',
+  'Wormhole': '/custom_logos/drawings/first_contact/blanc/4-wormhole-w.webp',
+  'Plasma Escape': '/custom_logos/drawings/first_contact/blanc/5-plasma-escape-w.webp',
+  "Vulcan's End": '/custom_logos/drawings/first_contact/blanc/6-vulcans-end-w.webp',
+  'The Phoenix': '/custom_logos/drawings/first_contact/blanc/7-the-phoenix-w.webp',
 };
 
 const THE_HUMAN_INSIDE_MEDIA = {
-  'C3P0': '/custom_logos/drawings/the_human_inside/negre/7. C3P0 b4.png',
-  'Vader': '/custom_logos/drawings/the_human_inside/negre/8. VADER b4.png',
-  'Afrodita': '/custom_logos/drawings/the_human_inside/negre/9. AFRODITA-A b3.png',
-  'Mazinger': '/custom_logos/drawings/the_human_inside/negre/10. MAZINGER b4.png',
-  'Cylon 78': '/custom_logos/drawings/the_human_inside/negre/11. CYLON 78 b4.png',
-  'Cylon 03': '/custom_logos/drawings/the_human_inside/negre/12. CYLON 03 b1.png',
-  'Iron Man 68': '/custom_logos/drawings/the_human_inside/negre/13. IRON MAN 68 b1.png',
-  'Iron Man 08': '/custom_logos/drawings/the_human_inside/negre/14. IRONMAN 08 b4.png',
-  'Cyberman': '/custom_logos/drawings/the_human_inside/negre/15. CYBERMAN b4.png',
-  'Maschinenmensch': '/custom_logos/drawings/the_human_inside/negre/16. MASCHINENMENSCH b1.png',
-  'Robocop': '/custom_logos/drawings/the_human_inside/negre/17. ROBOCOP b4.png',
-  'Terminator': '/custom_logos/drawings/the_human_inside/negre/18. TERMINATOR b4.png',
-  'Robbie the Robot': '/custom_logos/drawings/the_human_inside/negre/19. ROBBIE THE ROBOT b1.png',
+  'C3P0': '/custom_logos/drawings/the_human_inside/negre/7. C3P0 b4.webp',
+  'Vader': '/custom_logos/drawings/the_human_inside/negre/8. VADER b4.webp',
+  'Afrodita': '/custom_logos/drawings/the_human_inside/negre/9. AFRODITA-A b3.webp',
+  'Mazinger': '/custom_logos/drawings/the_human_inside/negre/10. MAZINGER b4.webp',
+  'Cylon 78': '/custom_logos/drawings/the_human_inside/negre/11. CYLON 78 b4.webp',
+  'Cylon 03': '/custom_logos/drawings/the_human_inside/negre/12. CYLON 03 b1.webp',
+  'Iron Man 68': '/custom_logos/drawings/the_human_inside/negre/13. IRON MAN 68 b1.webp',
+  'Iron Man 08': '/custom_logos/drawings/the_human_inside/negre/14. IRONMAN 08 b4.webp',
+  'Cyberman': '/custom_logos/drawings/the_human_inside/negre/15. CYBERMAN b4.webp',
+  'Maschinenmensch': '/custom_logos/drawings/the_human_inside/negre/16. MASCHINENMENSCH b1.webp',
+  'Robocop': '/custom_logos/drawings/the_human_inside/negre/17. ROBOCOP b4.webp',
+  'Terminator': '/custom_logos/drawings/the_human_inside/negre/18. TERMINATOR b4.webp',
+  'Robbie the Robot': '/custom_logos/drawings/the_human_inside/negre/19. ROBBIE THE ROBOT b1.webp',
 };
 
 const THE_HUMAN_INSIDE_MEDIA_WHITE = {
@@ -205,45 +205,13 @@ function MegaColumn({
   onHumanNext,
   onTileSize,
 }) {
-  const nxImgRef = useRef(null);
-  const nccImgRef = useRef(null);
-  const [nxScale, setNxScale] = useState(0.75);
   const tileSizeRef = useRef(null);
   const [tileSize, setTileSize] = useState(null);
   const scrollRowRef = useRef(null);
   const humanInsideEnabled = Boolean(isHumanInside);
   const effectiveTileSize = megaTileSize || tileSize;
 
-  useEffect(() => {
-    if (!row) return;
-    const nxEl = nxImgRef.current;
-    const nccEl = nccImgRef.current;
-    if (!nxEl || !nccEl) return;
-
-    const recompute = () => {
-      const baseScale = 0.75;
-      const nxH = getContainContentHeightPx(nxEl);
-      const nccH = getContainContentHeightPx(nccEl);
-      if (!nxH || !nccH) return;
-      const target = nccH * baseScale;
-      const next = target / nxH;
-      setNxScale(Math.max(0.2, Math.min(1.5, next)));
-    };
-
-    recompute();
-    const ro = new ResizeObserver(recompute);
-    ro.observe(nxEl);
-    ro.observe(nccEl);
-    nxEl.addEventListener('load', recompute);
-    nccEl.addEventListener('load', recompute);
-    return () => {
-      ro.disconnect();
-      nxEl.removeEventListener('load', recompute);
-      nccEl.removeEventListener('load', recompute);
-    };
-  }, [row]);
-
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!row) return;
     const el = tileSizeRef.current;
     if (!el) return;
@@ -352,24 +320,20 @@ function MegaColumn({
                           alt={it}
                           className={
                             it === 'The Phoenix'
-                              ? 'h-full w-full object-contain'
+                              ? 'h-full w-full object-contain scale-[0.825]'
                               : it === 'NX-01'
-                                ? 'h-full w-full object-contain origin-center'
+                                ? 'h-full w-full object-contain scale-[0.47]'
                               : it === 'NCC-1701'
-                                ? 'h-full w-full object-contain origin-center'
-                              : it === 'NCC-1701-D'
-                                ? 'h-full w-full object-contain'
-                              : it === 'Wormhole' || it === 'Plasma Escape'
-                                ? 'h-full w-full object-contain scale-[0.6]'
-                              : 'h-full w-full object-contain scale-75'
-                          }
-                          ref={it === 'NX-01' ? nxImgRef : it === 'NCC-1701' ? nccImgRef : undefined}
-                          style={
-                            it === 'NX-01'
-                              ? { transform: `scale(${nxScale})` }
-                              : it === 'NCC-1701'
-                                ? { transform: 'scale(0.75)' }
-                                : undefined
+                                  ? 'h-full w-full object-contain scale-[0.75]'
+                                  : it === 'NCC-1701-D'
+                                    ? 'h-full w-full object-contain scale-100'
+                                  : it === 'Wormhole'
+                                    ? 'h-full w-full object-contain scale-[0.54]'
+                                  : it === 'Plasma Escape'
+                                    ? 'h-full w-full object-contain scale-[0.54]'
+                                  : it === "Vulcan's End"
+                                    ? 'h-full w-full object-contain scale-[0.66]'
+                                  : 'h-full w-full object-contain scale-[0.6]'
                           }
                         />
 
@@ -380,21 +344,22 @@ function MegaColumn({
                             className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ease-in-out ${
                               firstContactVariant === 'white' ? 'opacity-100' : 'opacity-0'
                             } ${
-                              it === 'NX-01' || it === 'NCC-1701' ? 'origin-center' : ''
-                            } ${
-                              it === 'Wormhole' || it === 'Plasma Escape'
-                                ? 'scale-[0.6]'
-                                : it === 'NX-01' || it === 'NCC-1701' || it === 'NCC-1701-D' || it === 'The Phoenix'
-                                  ? ''
-                                  : 'scale-75'
+                              it === 'The Phoenix'
+                                ? 'scale-[0.825]'
+                                : it === 'NX-01'
+                                  ? 'scale-[0.47]'
+                                  : it === 'NCC-1701'
+                                    ? 'scale-[0.75]'
+                                    : it === 'NCC-1701-D'
+                                      ? 'scale-100'
+                                    : it === 'Wormhole'
+                                      ? 'scale-[0.54]'
+                                    : it === 'Plasma Escape'
+                                      ? 'scale-[0.54]'
+                                    : it === "Vulcan's End"
+                                      ? 'scale-[0.66]'
+                                    : 'scale-[0.6]'
                             }`}
-                            style={
-                              it === 'NX-01'
-                                ? { transform: `scale(${nxScale})` }
-                              : it === 'NCC-1701'
-                                  ? { transform: 'scale(0.75)' }
-                                  : undefined
-                            }
                           />
                         ) : null}
                       </div>
@@ -467,9 +432,21 @@ export default function AdidasInspiredHeader({
   forceStripeDebugHit = false,
   ignoreStripeDebugFromUrl = false,
 }) {
-  const [active, setActive] = useState(null);
+  const [active, setActive] = useState(() => {
+    try {
+      return window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1' ? 'first_contact' : null;
+    } catch {
+      return null;
+    }
+  });
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [demoManualEnabled, setDemoManualEnabled] = useState(false);
+  const [demoManualEnabled, setDemoManualEnabled] = useState(() => {
+    try {
+      return window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1';
+    } catch {
+      return false;
+    }
+  });
   const [firstContactVariant, setFirstContactVariant] = useState('black');
   const [humanInsideVariant, setHumanInsideVariant] = useState('black');
   const [selectedColorSlug, setSelectedColorSlug] = useState('white');
@@ -479,10 +456,7 @@ export default function AdidasInspiredHeader({
   const [rootRemPx, setRootRemPx] = useState(16);
   const headerRef = useRef(null);
   const megaMenuRef = useRef(null);
-  const mobileNxImgRef = useRef(null);
-  const mobileNccImgRef = useRef(null);
   const mobileHumanScrollRef = useRef(null);
-  const [mobileNxScale, setMobileNxScale] = useState(0.75);
 
   const selectedColorHex = useMemo(
     () => ({
@@ -654,9 +628,9 @@ export default function AdidasInspiredHeader({
     const readControls = () => {
       try {
         const enabled = window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1';
-        setDemoManualEnabled(enabled);
+        setDemoManualEnabled((prev) => (prev === enabled ? prev : enabled));
       } catch {
-        setDemoManualEnabled(false);
+        setDemoManualEnabled((prev) => (prev === false ? prev : false));
       }
     };
 
@@ -681,34 +655,6 @@ export default function AdidasInspiredHeader({
   }, []);
 
   useEffect(() => {
-    const nxEl = mobileNxImgRef.current;
-    const nccEl = mobileNccImgRef.current;
-    if (!nxEl || !nccEl) return;
-
-    const recompute = () => {
-      const baseScale = 0.75;
-      const nxH = getContainContentHeightPx(nxEl);
-      const nccH = getContainContentHeightPx(nccEl);
-      if (!nxH || !nccH) return;
-      const target = nccH * baseScale;
-      const next = target / nxH;
-      setMobileNxScale(Math.max(0.2, Math.min(1.5, next)));
-    };
-
-    recompute();
-    const ro = new ResizeObserver(recompute);
-    ro.observe(nxEl);
-    ro.observe(nccEl);
-    nxEl.addEventListener('load', recompute);
-    nccEl.addEventListener('load', recompute);
-    return () => {
-      ro.disconnect();
-      nxEl.removeEventListener('load', recompute);
-      nccEl.removeEventListener('load', recompute);
-    };
-  }, [mobileOpen, active]);
-
-  useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') {
         if (demoManualEnabled) return;
@@ -720,7 +666,7 @@ export default function AdidasInspiredHeader({
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [demoManualEnabled]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!active) return;
     const el = megaMenuRef.current;
     if (!el) return;
@@ -743,9 +689,8 @@ export default function AdidasInspiredHeader({
     };
 
     recompute();
-    const ro = new ResizeObserver(recompute);
-    ro.observe(el);
-    return () => ro.disconnect();
+    window.addEventListener('resize', recompute);
+    return () => window.removeEventListener('resize', recompute);
   }, [active]);
 
   useEffect(() => {
@@ -1041,24 +986,20 @@ export default function AdidasInspiredHeader({
                                   alt={it}
                                   className={
                                     it === 'The Phoenix'
-                                      ? 'relative z-10 h-full w-full object-contain'
+                                      ? 'relative z-10 h-full w-full object-contain scale-[0.825]'
                                       : it === 'NX-01'
-                                        ? 'relative z-10 h-full w-full object-contain origin-center'
+                                        ? 'relative z-10 h-full w-full object-contain scale-[0.47]'
                                         : it === 'NCC-1701'
-                                          ? 'relative z-10 h-full w-full object-contain origin-center'
+                                          ? 'relative z-10 h-full w-full object-contain scale-[0.75]'
                                           : it === 'NCC-1701-D'
-                                            ? 'relative z-10 h-full w-full object-contain'
-                                            : it === 'Wormhole' || it === 'Plasma Escape'
-                                              ? 'relative z-10 h-full w-full object-contain scale-[0.6]'
-                                              : 'relative z-10 h-full w-full object-contain scale-75'
-                                  }
-                                  ref={it === 'NX-01' ? mobileNxImgRef : it === 'NCC-1701' ? mobileNccImgRef : undefined}
-                                  style={
-                                    it === 'NX-01'
-                                      ? { transform: `scale(${mobileNxScale})` }
-                                      : it === 'NCC-1701'
-                                        ? { transform: 'scale(0.75)' }
-                                        : undefined
+                                            ? 'relative z-10 h-full w-full object-contain scale-100'
+                                          : it === 'Wormhole'
+                                            ? 'relative z-10 h-full w-full object-contain scale-[0.54]'
+                                          : it === 'Plasma Escape'
+                                            ? 'relative z-10 h-full w-full object-contain scale-[0.54]'
+                                          : it === "Vulcan's End"
+                                            ? 'relative z-10 h-full w-full object-contain scale-[0.66]'
+                                          : 'relative z-10 h-full w-full object-contain scale-[0.6]'
                                   }
                                 />
 
@@ -1070,24 +1011,21 @@ export default function AdidasInspiredHeader({
                                       firstContactVariant === 'white' ? 'opacity-100' : 'opacity-0'
                                     } ${
                                       it === 'The Phoenix'
-                                        ? ''
+                                        ? 'scale-[0.825]'
                                         : it === 'NX-01'
-                                          ? 'origin-center'
-                                        : it === 'NCC-1701'
-                                          ? 'origin-center'
-                                        : it === 'NCC-1701-D'
-                                          ? ''
-                                        : it === 'Wormhole' || it === 'Plasma Escape'
-                                          ? 'scale-[0.6]'
-                                          : 'scale-75'
+                                          ? 'scale-[0.47]'
+                                          : it === 'NCC-1701'
+                                            ? 'scale-[0.75]'
+                                            : it === 'NCC-1701-D'
+                                              ? 'scale-100'
+                                            : it === 'Wormhole'
+                                              ? 'scale-[0.54]'
+                                            : it === 'Plasma Escape'
+                                              ? 'scale-[0.54]'
+                                            : it === "Vulcan's End"
+                                              ? 'scale-[0.66]'
+                                            : 'scale-[0.6]'
                                     }`}
-                                    style={
-                                      it === 'NX-01'
-                                        ? { transform: `scale(${mobileNxScale})` }
-                                        : it === 'NCC-1701'
-                                          ? { transform: 'scale(0.75)' }
-                                          : undefined
-                                    }
                                   />
                                 ) : null}
                               </div>

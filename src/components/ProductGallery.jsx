@@ -113,15 +113,15 @@ const ProductGallery = ({
   };
 
   const placeholderByCanonicalColor = {
-    Blanc: '/placeholders/Gildan-5000-Unisex-white.jpg',
-    Negre: '/placeholders/Gildan-5000-Unisex-black.jpg',
-    Vermell: '/placeholders/Gildan-5000-Unisex-red.jpg',
-    Militar: '/placeholders/Gildan-5000-Unisex-militar.jpg',
-    Forest: '/placeholders/Gildan-5000-Unisex-forest.jpg',
-    Royal: '/placeholders/Gildan-5000-Unisex-royal.jpg',
-    Navy: '/placeholders/Gildan-5000-Unisex-navy.jpg',
-    Blau: '/placeholders/Gildan-5000-Unisex-royal.jpg',
-    Verd: '/placeholders/Gildan-5000-Unisex-forest.jpg'
+    Blanc: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_white_gpr-4-0_front.png',
+    Negre: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_black_gpr-4-0_front.png',
+    Vermell: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_red_gpr-4-0_front.png',
+    Militar: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_military-green_gpr-4-0_front.png',
+    Forest: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_forest-green_gpr-4-0_front.png',
+    Royal: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_royal_gpr-4-0_front.png',
+    Navy: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_navy_gpr-4-0_front.png',
+    Blau: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_royal_gpr-4-0_front.png',
+    Verd: '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_forest-green_gpr-4-0_front.png'
   };
 
   const fallbackHexByCanonicalColor = {

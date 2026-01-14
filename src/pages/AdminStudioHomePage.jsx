@@ -16,20 +16,19 @@ import {
   Upload
 } from 'lucide-react';
 import SEO from '@/components/SEO';
-import { useAdminTools } from '@/contexts/AdminToolsContext';
 
 const toolsColumn1 = [
   {
     title: 'Editor de Textos',
     description: 'Edita els textos del lloc web, seccions i contingut estàtic',
-    path: '/admin/index',
+    path: '/admin/studio/index',
     icon: FileText,
     color: 'from-blue-500 to-blue-600',
   },
   {
     title: 'Textos de Sistema',
     description: 'Gestiona missatges del sistema, notificacions i feedback de l\'aplicació',
-    path: '/admin/system-messages',
+    path: '/admin/studio/system-messages',
     icon: MessageSquare,
     color: 'from-pink-500 to-pink-600',
   },
@@ -39,14 +38,14 @@ const toolsColumn2 = [
   {
     title: 'Configuració "En Construcció"',
     description: 'Gestiona la pàgina de manteniment i missatges temporals',
-    path: '/admin/ec-config',
+    path: '/admin/studio/ec-config',
     icon: Construction,
     color: 'from-yellow-500 to-yellow-600',
   },
   {
     title: 'Gestor de Contingut Visual',
     description: 'Administra imatges, vídeos i altres elements multimèdia',
-    path: '/admin/media',
+    path: '/admin/studio/media',
     icon: Image,
     color: 'from-green-500 to-green-600',
   },
@@ -56,28 +55,28 @@ const toolsColumn3 = [
   {
     title: 'Gestió de Productes Gelato',
     description: 'Sincronitza i gestiona productes amb el servei de fulfillment',
-    path: '/admin/fulfillment',
+    path: '/admin/studio/fulfillment',
     icon: Package,
     color: 'from-teal-500 to-teal-600',
   },
   {
     title: 'Visualització de Productes',
     description: 'Veure tots els productes mock de Supabase per col·leccions',
-    path: '/admin/products-overview',
+    path: '/admin/studio/products-overview',
     icon: Database,
     color: 'from-emerald-500 to-emerald-600',
   },
   {
     title: 'Plantilles Gelato',
     description: 'Explora i configura plantilles de productes disponibles',
-    path: '/admin/gelato-templates',
+    path: '/admin/studio/gelato-templates',
     icon: Boxes,
     color: 'from-blue-500 to-blue-600',
   },
   {
     title: 'Configuració de Fulfillment',
     description: 'Configura l\'API key i el Store ID de Gelato',
-    path: '/admin/fulfillment-settings',
+    path: '/admin/studio/fulfillment-settings',
     icon: Settings,
     color: 'from-cyan-500 to-cyan-600',
   },
@@ -87,71 +86,47 @@ const toolsColumn4 = [
   {
     title: 'Gestor de Promocions',
     description: 'Gestiona el banner de promocions i ofertes destacades',
-    path: '/admin/promotions',
+    path: '/admin/studio/promotions',
     icon: Megaphone,
     color: 'from-orange-500 to-orange-600',
   },
   {
     title: 'Configuració del Hero',
     description: 'Gestiona els slides del hero, vídeos i contingut principal',
-    path: '/admin/hero',
+    path: '/admin/studio/hero',
     icon: Film,
     color: 'from-red-500 to-red-600',
   },
   {
     title: 'Configuració de Col·leccions',
     description: 'Gestiona l\'ordre, visibilitat i configuració de les col·leccions',
-    path: '/admin/collections',
+    path: '/admin/studio/collections',
     icon: Layers,
     color: 'from-cyan-500 to-cyan-600',
   },
   {
     title: 'Gestor de Mockups',
     description: 'Gestiona les imatges de previsualització dels productes per colors i variants',
-    path: '/admin/mockups',
+    path: '/admin/studio/mockups',
     icon: ImageIcon,
     color: 'from-teal-500 to-teal-600',
   },
   {
     title: 'Upload de Fitxers',
     description: 'Puja fitxers, arxius .zip i carpetes al sistema',
-    path: '/admin/upload',
+    path: '/admin/studio/upload',
     icon: Upload,
     color: 'from-green-500 to-green-600',
   },
 ];
 
 export default function AdminStudioHomePage() {
-  const { tools, toggleTool } = useAdminTools();
-
   return (
     <>
       <SEO
         title="Administració"
         description="Panell d'administració i gestió de contingut"
       />
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:col-span-1">
-          <h2 className="text-base font-semibold text-gray-900 mb-3">Eines ràpides</h2>
-
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={() => toggleTool('layoutInspector')}
-              className={`w-full flex items-center justify-between px-3 py-2 rounded-lg border transition-colors ${tools.layoutInspector ? 'border-orange-300 bg-orange-50' : 'border-gray-200 bg-white'}`}
-            >
-              <span className="text-sm text-gray-900">Debug</span>
-              <span className={`text-xs font-medium ${tools.layoutInspector ? 'text-orange-700' : 'text-gray-500'}`}>{tools.layoutInspector ? 'Activat' : 'Desactivat'}</span>
-            </button>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-xl shadow-md border border-gray-200 p-4 lg:col-span-2">
-          <h2 className="text-base font-semibold text-gray-900 mb-2">Drecera</h2>
-          <p className="text-sm text-gray-600">Les icones flotants es mostren a qualsevol pantalla quan estàs en mode admin.</p>
-        </div>
-      </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
         {[toolsColumn1, toolsColumn2, toolsColumn3, toolsColumn4].map((column, colIndex) => (
@@ -178,6 +153,10 @@ export default function AdminStudioHomePage() {
                     <p className="text-gray-600 text-xs leading-relaxed">
                       {tool.description}
                     </p>
+
+                    <div className="mt-2 text-[11px] text-gray-400 font-mono">
+                      {tool.path}
+                    </div>
 
                     <div className="mt-3 flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-600 transition-colors">
                       Accedir

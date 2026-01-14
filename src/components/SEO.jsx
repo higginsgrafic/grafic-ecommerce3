@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { SITE_ORIGIN, buildSiteUrl } from '@/config/siteOrigin';
+import { SITE_ORIGIN, buildSiteUrl } from '@/config/siteOrigin.js';
 
 /**
  * Component SEO reutilitzable amb suport per:

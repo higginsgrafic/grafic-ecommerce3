@@ -1,47 +1,70 @@
 import { supabase } from './supabase-products';
 
 export const mockupsAPI = {
+  _applyFilters(query, filters = {}) {
+    const f = filters || {};
+
+    if (f.collection) {
+      query = query.eq('collection', f.collection);
+    }
+
+    if (f.subcategory) {
+      query = query.eq('subcategory', f.subcategory);
+    }
+
+    if (f.sub_subcategory) {
+      query = query.eq('sub_subcategory', f.sub_subcategory);
+    }
+
+    if (f.design_name) {
+      const d = String(f.design_name);
+      // Some legacy rows stored design_name like: "wormhole-black".
+      // Include both exact and "design-color" forms.
+      query = query.or(`design_name.eq.${d},design_name.ilike.${d}-%`);
+    }
+
+    if (f.base_color) {
+      query = query.eq('base_color', f.base_color);
+    }
+
+    if (f.drawing_color) {
+      query = query.eq('drawing_color', f.drawing_color);
+    }
+
+    if (f.product_type) {
+      query = query.eq('product_type', f.product_type);
+    }
+
+    if (f.variant_id) {
+      query = query.eq('variant_id', f.variant_id);
+    }
+
+    if (f.is_active !== undefined) {
+      query = query.eq('is_active', f.is_active);
+    }
+
+    return query;
+  },
+
+  async countAll(filters = {}) {
+    let query = supabase
+      .from('product_mockups')
+      .select('*', { count: 'exact', head: true });
+
+    query = this._applyFilters(query, filters);
+
+    const { count, error } = await query;
+    if (error) throw error;
+    return count || 0;
+  },
+
   async getAll(filters = {}) {
     let query = supabase
       .from('product_mockups')
       .select('*')
       .order('display_order', { ascending: true });
 
-    if (filters.collection) {
-      query = query.eq('collection', filters.collection);
-    }
-
-    if (filters.subcategory) {
-      query = query.eq('subcategory', filters.subcategory);
-    }
-
-    if (filters.sub_subcategory) {
-      query = query.eq('sub_subcategory', filters.sub_subcategory);
-    }
-
-    if (filters.design_name) {
-      query = query.eq('design_name', filters.design_name);
-    }
-
-    if (filters.base_color) {
-      query = query.eq('base_color', filters.base_color);
-    }
-
-    if (filters.drawing_color) {
-      query = query.eq('drawing_color', filters.drawing_color);
-    }
-
-    if (filters.product_type) {
-      query = query.eq('product_type', filters.product_type);
-    }
-
-    if (filters.variant_id) {
-      query = query.eq('variant_id', filters.variant_id);
-    }
-
-    if (filters.is_active !== undefined) {
-      query = query.eq('is_active', filters.is_active);
-    }
+    query = this._applyFilters(query, filters);
 
     const { data, error } = await query;
 

@@ -122,7 +122,7 @@ function ProductCard({ product, onAddToCart, cartItems = [], variant = 'default'
   if (variant === 'horizontal') {
     return (
       <div
-        className="flex flex-row w-full p-3 rounded-sm transition-all duration-300 gap-4 bg-gray-50"
+        className="flex flex-row w-full p-3 rounded-sm transition-all duration-300 gap-4 bg-white"
       >
         {/* Imatge petita a l'esquerra */}
         <Link to={productUrl} className="flex-shrink-0">
@@ -177,7 +177,7 @@ function ProductCard({ product, onAddToCart, cartItems = [], variant = 'default'
   // Variants vertical (default, compact, expanded, featured)
   return (
     <div
-      className="flex flex-col w-full rounded-sm transition-all duration-300 relative bg-gray-50"
+      className="flex flex-col w-full rounded-sm transition-all duration-300 relative bg-white"
       style={{ padding: styles.padding }}
     >
       {/* Imatge amb ombra a 45º només en hover */}

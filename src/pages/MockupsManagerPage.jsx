@@ -1,12 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { mockupsAPI } from '../api/mockups';
 import { useToast } from '../components/ui/use-toast';
 import { Plus, Pencil, Trash2, Eye, EyeOff, Search, Filter, Upload, Download } from 'lucide-react';
+import { getPublicUrl as getMediaPublicUrl } from '@/api/storage';
 
 export default function MockupsManagerPage() {
   const [mockups, setMockups] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [totalCount, setTotalCount] = useState(0);
+  const [filteredCount, setFilteredCount] = useState(0);
+  const [allMockups, setAllMockups] = useState([]);
+  const [showDiagnostics, setShowDiagnostics] = useState(false);
+  const [showGridView, setShowGridView] = useState(false);
+  const [gridSource, setGridSource] = useState('auto');
   const [filters, setFilters] = useState({
     collection: '',
     design_name: '',
@@ -22,14 +29,357 @@ export default function MockupsManagerPage() {
   const [showAddForm, setShowAddForm] = useState(false);
   const { toast } = useToast();
 
+  const normalizeMockupRow = (row) => {
+    const m = row && typeof row === 'object' ? row : {};
+    const design = (m.design_name || '').toString().trim();
+    const base = (m.base_color || '').toString().trim();
+    const knownColors = new Set([
+      'white', 'blanc',
+      'black', 'negre',
+      'navy',
+      'royal',
+      'forest',
+      'militar', 'military',
+      'red', 'vermell',
+      'blue', 'blau',
+      'natural'
+    ]);
+
+    const splitColorSuffix = (value) => {
+      const raw = (value || '').toString().trim();
+      if (!raw) return null;
+      const parts = raw.split('-').filter(Boolean);
+      if (parts.length < 2) return null;
+      const last = parts[parts.length - 1].toLowerCase();
+      if (!knownColors.has(last)) return null;
+      return { name: parts.slice(0, -1).join('-'), color: last };
+    };
+
+    const a = splitColorSuffix(design);
+    const b = splitColorSuffix(base);
+
+    if (design && base && design === base && a) {
+      return { ...m, design_name: a.name, base_color: a.color };
+    }
+
+    if (a && base && a.color && base.toLowerCase() === a.color.toLowerCase()) {
+      return { ...m, design_name: a.name };
+    }
+
+    if (base && !knownColors.has(base.toLowerCase()) && b && !a) {
+      return { ...m, base_color: b.color };
+    }
+
+    return m;
+  };
+
+  const normalizeMediaKey = (inputKey, colorCtx = {}) => {
+    let key = (inputKey || '').toString().trim();
+    if (!key) return '';
+
+    const normalizeToStorageColor = (c) => {
+      const v = (c || '').toString().trim().toLowerCase();
+      if (!v) return null;
+      if (['white', 'blanc', 'blanco'].includes(v)) return 'blanc';
+      if (['black', 'negre', 'negro'].includes(v)) return 'negre';
+      return null;
+    };
+
+    key = key.startsWith('/') ? key.slice(1) : key;
+    if (key.startsWith('media/')) key = key.slice('media/'.length);
+
+    key = key.replace(/^first-contact\//i, 'first_contact/');
+    key = key.replace(/^the-human-inside\//i, 'the_human_inside/');
+
+    key = key.replace(/\/(white)\//gi, '/blanc/');
+    key = key.replace(/\/(black)\//gi, '/negre/');
+
+    const baseFolder = normalizeToStorageColor(colorCtx?.base_color);
+    const drawingFolder = normalizeToStorageColor(colorCtx?.drawing_color);
+    if (baseFolder && drawingFolder) {
+      key = key.replace(
+        /\/(blanc|negre)\/(blanc|negre)\//gi,
+        `/${baseFolder}/${drawingFolder}/`
+      );
+    }
+
+    key = key
+      .split('/')
+      .map((seg, idx) => {
+        if (seg.includes('.')) return seg;
+        if (idx === 0) return seg;
+        return seg.replace(/-/g, '_');
+      })
+      .join('/');
+
+    const parts = key.split('/').filter(Boolean);
+    const dedup = [];
+    for (const p of parts) {
+      if (dedup.length && dedup[dedup.length - 1] === p) continue;
+      dedup.push(p);
+    }
+    key = dedup.join('/');
+    return key;
+  };
+
+  const getPreviewSrc = (value, ctx = {}) => {
+    const raw = (value || '').toString().trim();
+    if (!raw) return '';
+    if (/^https?:\/\//i.test(raw)) return encodeURI(raw);
+
+    // Already a public media URL path
+    if (raw.startsWith('/storage/v1/object/public/') || raw.startsWith('storage/v1/object/public/')) {
+      const path = raw.startsWith('/') ? raw : `/${raw}`;
+      const base = (import.meta?.env?.VITE_SUPABASE_URL || '').toString().replace(/\/+$/, '');
+      const marker = '/storage/v1/object/public/media/';
+      const idx = path.indexOf(marker);
+      if (idx !== -1) {
+        const key = path.slice(idx + marker.length);
+        const normalizedKey = normalizeMediaKey(key, ctx);
+        if (normalizedKey) {
+          const fixedPath = `${marker}${normalizedKey}`;
+          if (base) return encodeURI(`${base}${fixedPath}`);
+          return encodeURI(fixedPath);
+        }
+      }
+      if (base) return encodeURI(`${base}${path}`);
+      return encodeURI(path);
+    }
+
+    // Local public assets
+    if (raw.startsWith('/mockups/') || raw.startsWith('/placeholders/') || raw.startsWith('/custom_logos/')) {
+      return encodeURI(raw);
+    }
+
+    // Supabase media bucket key (common for mockups): mockups/... or media/mockups/...
+    let key = raw;
+    key = normalizeMediaKey(key, ctx);
+
+    try {
+      const publicUrl = getMediaPublicUrl(key);
+      return encodeURI(publicUrl);
+    } catch {
+      // Fallback to relative (might still work for local dev if served)
+      return encodeURI(`/${key}`);
+    }
+  };
+
   useEffect(() => {
     loadMockups();
     loadCollections();
+    loadCounts({});
+    loadAllMockups();
   }, []);
 
   useEffect(() => {
     loadMockups();
+    loadCounts({});
   }, [filters]);
+
+  const normalizeMediaKeyForDiagnostics = (value, ctx = {}) => {
+    const raw = (value || '').toString().trim();
+    if (!raw) return '';
+
+    const base = (import.meta?.env?.VITE_SUPABASE_URL || '').toString().replace(/\/+$/, '');
+    const marker = '/storage/v1/object/public/media/';
+
+    if (raw.startsWith('/storage/v1/object/public/') || raw.startsWith('storage/v1/object/public/')) {
+      const path = raw.startsWith('/') ? raw : `/${raw}`;
+      const idx = path.indexOf(marker);
+      if (idx !== -1) {
+        return normalizeMediaKey(path.slice(idx + marker.length), ctx);
+      }
+      if (base && raw.startsWith(base)) {
+        const idx2 = raw.indexOf(marker);
+        if (idx2 !== -1) return normalizeMediaKey(raw.slice(idx2 + marker.length), ctx);
+      }
+      return '';
+    }
+
+    if (/^https?:\/\//i.test(raw)) {
+      const idx = raw.indexOf(marker);
+      if (idx !== -1) return normalizeMediaKey(raw.slice(idx + marker.length), ctx);
+      return '';
+    }
+
+    let key = raw;
+    key = key.startsWith('/') ? key.slice(1) : key;
+    if (key.startsWith('media/')) key = key.slice('media/'.length);
+    return normalizeMediaKey(key, ctx);
+  };
+
+  const diagnostics = useMemo(() => {
+    const rows = Array.isArray(allMockups) ? allMockups : [];
+
+    const normalizedRows = rows.map((r) => normalizeMockupRow(r));
+
+    const totalRows = normalizedRows.length;
+    const activeRows = normalizedRows.filter((r) => r?.is_active === true).length;
+    const inactiveRows = normalizedRows.filter((r) => r?.is_active === false).length;
+
+    const classifyFilePath = (fp) => {
+      const s = String(fp || '');
+      if (!s.trim()) return 'empty';
+      if (s.includes('/mockups/') || s.startsWith('/mockups/') || s.startsWith('mockups/')) return 'mockups';
+      if (s.includes('/storage/v1/object/public/media/') || s.startsWith('media/')) return 'media';
+      return 'other';
+    };
+
+    const bySource = { mockups: 0, media: 0, other: 0, empty: 0 };
+    for (const r of normalizedRows) {
+      const k = classifyFilePath(r?.file_path);
+      bySource[k] = (bySource[k] || 0) + 1;
+    }
+
+    const byCollectionCounts = new Map();
+    for (const r of normalizedRows) {
+      const c = String(r?.collection || '').toLowerCase().trim();
+      const next = (byCollectionCounts.get(c) || 0) + 1;
+      byCollectionCounts.set(c, next);
+    }
+    const collectionsTop = [...byCollectionCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20);
+
+    const byKey = new Map();
+    for (const r of normalizedRows) {
+      const k = normalizeMediaKeyForDiagnostics(r?.file_path, r);
+      if (!k) continue;
+      const arr = byKey.get(k) || [];
+      arr.push(r);
+      byKey.set(k, arr);
+    }
+
+    const uniqueKeys = byKey.size;
+
+    const duplicateKeyGroups = [...byKey.entries()]
+      .filter(([, arr]) => arr.length > 1)
+      .sort((a, b) => b[1].length - a[1].length);
+
+    const bySemantic = new Map();
+    for (const r of normalizedRows) {
+      const parts = [
+        String(r?.collection || '').toLowerCase().replace(/^first-contact$/, 'first_contact').replace(/^the-human-inside$/, 'the_human_inside'),
+        r?.design_name || '',
+        r?.product_type || '',
+        r?.base_color || '',
+        r?.drawing_color || ''
+      ].map((v) => String(v).toLowerCase().trim());
+      const k = parts.join('|');
+      const arr = bySemantic.get(k) || [];
+      arr.push(r);
+      bySemantic.set(k, arr);
+    }
+
+    const uniqueSemantic = bySemantic.size;
+
+    const duplicateSemanticGroups = [...bySemantic.entries()]
+      .filter(([, arr]) => arr.length > 1)
+      .sort((a, b) => b[1].length - a[1].length);
+
+    return {
+      totalRows,
+      activeRows,
+      inactiveRows,
+      bySource,
+      collectionsTop,
+      uniqueKeys,
+      uniqueSemantic,
+      duplicateKeyGroups,
+      duplicateSemanticGroups
+    };
+  }, [allMockups]);
+
+  const gridData = useMemo(() => {
+    const allRows = (Array.isArray(allMockups) ? allMockups : []).map((r) => normalizeMockupRow(r));
+
+    const isMockups = (fp) => {
+      const s = String(fp || '');
+      return s.includes('/mockups/') || s.startsWith('/mockups/') || s.startsWith('mockups/');
+    };
+    const isMedia = (fp) => {
+      const s = String(fp || '');
+      return s.includes('/storage/v1/object/public/media/') || s.startsWith('media/');
+    };
+
+    const mockupsCount = allRows.filter((r) => isMockups(r?.file_path)).length;
+    const mediaCount = allRows.filter((r) => isMedia(r?.file_path)).length;
+
+    const effectiveSource = (() => {
+      if (gridSource === 'mockups' || gridSource === 'media' || gridSource === 'all') return gridSource;
+      // auto
+      if (mockupsCount > 0) return 'mockups';
+      if (mediaCount > 0) return 'media';
+      return 'all';
+    })();
+
+    const rows = allRows.filter((r) => {
+      const fp = r?.file_path;
+      if (effectiveSource === 'mockups') return isMockups(fp);
+      if (effectiveSource === 'media') return isMedia(fp);
+      return true;
+    });
+
+    const normalizeInk = (v) => {
+      const s = String(v || '').toLowerCase().trim();
+      if (['white', 'blanc', 'blanco'].includes(s)) return 'white';
+      if (['black', 'negre', 'negro'].includes(s)) return 'black';
+      return 'other';
+    };
+
+    const normalizeCollection = (v) => {
+      const s = String(v || '').toLowerCase().trim();
+      if (s === 'first-contact') return 'first_contact';
+      if (s === 'the-human-inside') return 'the_human_inside';
+      return s;
+    };
+
+    const byCollection = new Map();
+    for (const r of rows) {
+      const collection = normalizeCollection(r?.collection);
+      const design = String(r?.design_name || '').toLowerCase().trim();
+      const ink = normalizeInk(r?.drawing_color);
+      const cMap = byCollection.get(collection) || new Map();
+      const entry = cMap.get(design) || { white: [], black: [], other: [] };
+      entry[ink].push(r);
+      cMap.set(design, entry);
+      byCollection.set(collection, cMap);
+    }
+
+    const collections = [...byCollection.entries()]
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([collection, designsMap]) => {
+        const designs = [...designsMap.entries()]
+          .sort((a, b) => a[0].localeCompare(b[0]))
+          .map(([design, entry]) => {
+            const sortFn = (x, y) => {
+              const bx = String(x?.base_color || '').toLowerCase();
+              const by = String(y?.base_color || '').toLowerCase();
+              if (bx !== by) return bx.localeCompare(by);
+              const fx = String(x?.file_path || '');
+              const fy = String(y?.file_path || '');
+              return fx.localeCompare(fy);
+            };
+            return {
+              design,
+              white: [...entry.white].sort(sortFn),
+              black: [...entry.black].sort(sortFn),
+              other: [...entry.other].sort(sortFn)
+            };
+          });
+
+        return { collection, designs };
+      });
+
+    return {
+      effectiveSource,
+      total: allRows.length,
+      mockupsCount,
+      mediaCount,
+      shown: rows.length,
+      collections
+    };
+  }, [allMockups, gridSource]);
 
   useEffect(() => {
     if (filters.collection) {
@@ -43,8 +393,36 @@ export default function MockupsManagerPage() {
       const cleanFilters = Object.fromEntries(
         Object.entries(filters).filter(([_, v]) => v !== '' && v !== undefined)
       );
-      const data = await mockupsAPI.getAll(cleanFilters);
-      setMockups(data);
+
+      // Apply base/drawing color filtering client-side after normalization.
+      // This keeps legacy rows like design_name/base_color="wormhole-black" discoverable.
+      const {
+        base_color: baseColorFilter,
+        drawing_color: drawingColorFilter,
+        design_name: designFilter,
+        ...serverFilters
+      } = cleanFilters;
+
+      const data = await mockupsAPI.getAll(serverFilters);
+      const normalized = (Array.isArray(data) ? data : []).map(normalizeMockupRow);
+      const filtered = normalized.filter((m) => {
+        if (designFilter && String(m?.design_name || '').toLowerCase() !== String(designFilter).toLowerCase()) {
+          return false;
+        }
+        if (baseColorFilter && String(m?.base_color || '').toLowerCase() !== String(baseColorFilter).toLowerCase()) {
+          return false;
+        }
+        if (
+          drawingColorFilter &&
+          String(m?.drawing_color || '').toLowerCase() !== String(drawingColorFilter).toLowerCase()
+        ) {
+          return false;
+        }
+        return true;
+      });
+
+      setMockups(filtered);
+      setFilteredCount(filtered.length);
     } catch (error) {
       toast({
         title: 'Error',
@@ -53,6 +431,26 @@ export default function MockupsManagerPage() {
       });
     } finally {
       setLoading(false);
+    }
+  }
+
+  async function loadAllMockups() {
+    try {
+      const data = await mockupsAPI.getAll({});
+      setAllMockups(Array.isArray(data) ? data : []);
+    } catch (error) {
+      console.error('Error loading all mockups:', error);
+      setAllMockups([]);
+    }
+  }
+
+  async function loadCounts(nextFilters) {
+    try {
+      const total = await mockupsAPI.countAll({});
+      setTotalCount(total);
+    } catch (error) {
+      // Keep page usable even if count endpoint fails
+      console.error('Error loading mockup counts:', error);
     }
   }
 
@@ -82,6 +480,8 @@ export default function MockupsManagerPage() {
         description: 'Estat del mockup actualitzat'
       });
       loadMockups();
+      loadCounts(filters);
+      loadAllMockups();
     } catch (error) {
       toast({
         title: 'Error',
@@ -101,6 +501,8 @@ export default function MockupsManagerPage() {
         description: 'Mockup eliminat correctament'
       });
       loadMockups();
+      loadCounts(filters);
+      loadAllMockups();
     } catch (error) {
       toast({
         title: 'Error',
@@ -129,6 +531,8 @@ export default function MockupsManagerPage() {
       });
       cancelEdit();
       loadMockups();
+      loadCounts(filters);
+      loadAllMockups();
     } catch (error) {
       toast({
         title: 'Error',
@@ -149,6 +553,8 @@ export default function MockupsManagerPage() {
       setShowAddForm(false);
       setEditForm({});
       loadMockups();
+      loadCounts(filters);
+      loadAllMockups();
     } catch (error) {
       toast({
         title: 'Error',
@@ -196,7 +602,7 @@ export default function MockupsManagerPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="w-full max-w-none mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-8">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Gestió de Mockups</h1>
@@ -223,7 +629,83 @@ export default function MockupsManagerPage() {
               <Plus className="w-4 h-4" />
               Afegir Mockup
             </button>
+            <button
+              onClick={() => setShowGridView((v) => !v)}
+              className="px-4 py-2 text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+              {showGridView ? 'Amagar grid' : 'Veure grid'}
+            </button>
           </div>
+        </div>
+
+        <div className="bg-white rounded-lg shadow p-4 mb-6">
+          <div className="flex justify-between items-center">
+            <div className="text-sm text-gray-700">
+              Registres: {diagnostics.totalRows} (actius: {diagnostics.activeRows}, inactius: {diagnostics.inactiveRows}) · Keys úniques: {diagnostics.uniqueKeys} · Combinacions úniques: {diagnostics.uniqueSemantic} · Duplicats (mateix key): {diagnostics.duplicateKeyGroups.length} · Duplicats (mateixa combinació): {diagnostics.duplicateSemanticGroups.length}
+            </div>
+            <button
+              onClick={() => setShowDiagnostics((v) => !v)}
+              className="text-sm text-blue-600 hover:text-blue-700"
+            >
+              {showDiagnostics ? 'Amagar diagnosi' : 'Veure diagnosi'}
+            </button>
+          </div>
+
+          {showDiagnostics && (
+            <div className="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <div className="border rounded-lg p-3">
+                <div className="text-sm font-semibold text-gray-900 mb-2">Resum</div>
+                <div className="text-xs text-gray-700">
+                  mockups: {diagnostics.bySource.mockups} · media: {diagnostics.bySource.media} · other: {diagnostics.bySource.other} · empty: {diagnostics.bySource.empty}
+                </div>
+
+                <div className="mt-3 text-xs text-gray-700">
+                  <div className="font-semibold text-gray-900 mb-1">Top col·leccions (per nombre de registres)</div>
+                  <div className="space-y-1">
+                    {diagnostics.collectionsTop.map(([c, n]) => (
+                      <div key={c} className="font-mono break-all">{n} · {c || '(buit)'}</div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div className="border rounded-lg p-3">
+                <div className="text-sm font-semibold text-gray-900 mb-2">Duplicats per key normalitzat</div>
+                {diagnostics.duplicateKeyGroups.length === 0 ? (
+                  <div className="text-sm text-gray-500">Cap</div>
+                ) : (
+                  <div className="space-y-3">
+                    {diagnostics.duplicateKeyGroups.slice(0, 20).map(([key, items]) => (
+                      <div key={key} className="text-xs">
+                        <div className="font-mono break-all text-gray-800">{items.length}x · {key}</div>
+                        <div className="text-gray-600 mt-1">
+                          {items.map((m) => `${m.id}:${m.collection}/${m.design_name}/${m.product_type}/${m.base_color}/${m.drawing_color}`).join(' · ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <div className="border rounded-lg p-3 lg:col-span-2">
+                <div className="text-sm font-semibold text-gray-900 mb-2">Duplicats per combinació (collection+design+type+colors)</div>
+                {diagnostics.duplicateSemanticGroups.length === 0 ? (
+                  <div className="text-sm text-gray-500">Cap</div>
+                ) : (
+                  <div className="space-y-3">
+                    {diagnostics.duplicateSemanticGroups.slice(0, 20).map(([key, items]) => (
+                      <div key={key} className="text-xs">
+                        <div className="font-mono break-all text-gray-800">{items.length}x · {key}</div>
+                        <div className="text-gray-600 mt-1">
+                          {items.map((m) => `${m.id}:${m.file_path || ''}`).join(' · ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="bg-white rounded-lg shadow p-6 mb-6">
@@ -314,7 +796,7 @@ export default function MockupsManagerPage() {
 
           <div className="mt-4 flex justify-between items-center">
             <p className="text-sm text-gray-600">
-              {mockups.length} mockup{mockups.length !== 1 ? 's' : ''} trobat{mockups.length !== 1 ? 's' : ''}
+              {filteredCount} / {totalCount} mockup{totalCount !== 1 ? 's' : ''}
             </p>
             <button
               onClick={() => setFilters({
@@ -480,10 +962,14 @@ export default function MockupsManagerPage() {
                       <>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <img
-                            src={editForm.file_path}
+                            src={getPreviewSrc(editForm.file_path, editForm)}
                             alt="Preview"
                             className="w-16 h-16 object-cover rounded"
-                            onError={(e) => { e.target.style.display = 'none'; }}
+                            onError={(e) => {
+                              if (e?.currentTarget?.dataset?.failed === '1') return;
+                              e.currentTarget.dataset.failed = '1';
+                              e.currentTarget.src = '/placeholder-product.svg';
+                            }}
                           />
                         </td>
                         <td className="px-6 py-4">
@@ -558,10 +1044,14 @@ export default function MockupsManagerPage() {
                       <>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <img
-                            src={mockup.file_path}
+                            src={getPreviewSrc(mockup.file_path, mockup)}
                             alt={mockup.design_name}
                             className="w-16 h-16 object-cover rounded"
-                            onError={(e) => { e.target.style.display = 'none'; }}
+                            onError={(e) => {
+                              if (e?.currentTarget?.dataset?.failed === '1') return;
+                              e.currentTarget.dataset.failed = '1';
+                              e.currentTarget.src = '/placeholder-product.svg';
+                            }}
                           />
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
@@ -623,6 +1113,145 @@ export default function MockupsManagerPage() {
             </div>
           )}
         </div>
+
+        {showGridView && (
+          <div className="mt-6 bg-white rounded-lg shadow p-4">
+            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+              <div className="text-sm text-gray-700">
+                Vista per col·lecció → disseny, dividida per color de dibuix (white vs black)
+              </div>
+
+              <div className="flex items-center gap-2">
+                <div className="text-xs text-gray-600">
+                  total: {gridData.total} · mockups: {gridData.mockupsCount} · media: {gridData.mediaCount} · mostrats: {gridData.shown}
+                </div>
+                <select
+                  value={gridSource}
+                  onChange={(e) => setGridSource(e.target.value)}
+                  className="px-2 py-1 border border-gray-300 rounded text-sm"
+                >
+                  <option value="auto">Auto</option>
+                  <option value="mockups">/mockups</option>
+                  <option value="media">media</option>
+                  <option value="all">Tots</option>
+                </select>
+              </div>
+            </div>
+
+            {gridData.shown === 0 ? (
+              <div className="text-sm text-gray-600">
+                No hi ha registres per aquesta font: <span className="font-mono">{gridData.effectiveSource}</span>.
+                Prova a canviar el selector (Auto / /mockups / media / Tots).
+              </div>
+            ) : (
+              <div className="space-y-8">
+                {gridData.collections.map((c) => (
+                  <div key={c.collection}>
+                    <div className="text-lg font-semibold text-gray-900 mb-3">{c.collection}</div>
+
+                    <div className="space-y-6">
+                      {c.designs.map((d) => (
+                        <div key={`${c.collection}-${d.design}`} className="border rounded-lg p-3">
+                          <div className="flex justify-between items-center mb-3">
+                            <div className="text-sm font-semibold text-gray-900">{d.design}</div>
+                            <div className="text-xs text-gray-600">
+                              white: {d.white.length} · black: {d.black.length}{d.other.length ? ` · other: ${d.other.length}` : ''}
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                            <div>
+                              <div className="text-xs font-medium text-gray-700 mb-2">Dibuix blanc</div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                {d.white.map((m) => (
+                                  <a
+                                    key={m.id}
+                                    href={getPreviewSrc(m.file_path, m)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="block"
+                                    title={`${m.id} · ${m.base_color} · ${m.product_type}`}
+                                  >
+                                    <img
+                                      src={getPreviewSrc(m.file_path, m)}
+                                      alt={m.design_name}
+                                      className="w-full aspect-square object-cover rounded border"
+                                      onError={(e) => {
+                                        if (e?.currentTarget?.dataset?.failed === '1') return;
+                                        e.currentTarget.dataset.failed = '1';
+                                        e.currentTarget.src = '/placeholder-product.svg';
+                                      }}
+                                    />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+
+                            <div>
+                              <div className="text-xs font-medium text-gray-700 mb-2">Dibuix negre</div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                {d.black.map((m) => (
+                                  <a
+                                    key={m.id}
+                                    href={getPreviewSrc(m.file_path, m)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="block"
+                                    title={`${m.id} · ${m.base_color} · ${m.product_type}`}
+                                  >
+                                    <img
+                                      src={getPreviewSrc(m.file_path, m)}
+                                      alt={m.design_name}
+                                      className="w-full aspect-square object-cover rounded border"
+                                      onError={(e) => {
+                                        if (e?.currentTarget?.dataset?.failed === '1') return;
+                                        e.currentTarget.dataset.failed = '1';
+                                        e.currentTarget.src = '/placeholder-product.svg';
+                                      }}
+                                    />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {d.other.length > 0 && (
+                            <div className="mt-4">
+                              <div className="text-xs font-medium text-gray-700 mb-2">Altres colors de dibuix</div>
+                              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-2">
+                                {d.other.map((m) => (
+                                  <a
+                                    key={m.id}
+                                    href={getPreviewSrc(m.file_path, m)}
+                                    target="_blank"
+                                    rel="noreferrer"
+                                    className="block"
+                                    title={`${m.id} · ${m.drawing_color}/${m.base_color} · ${m.product_type}`}
+                                  >
+                                    <img
+                                      src={getPreviewSrc(m.file_path, m)}
+                                      alt={m.design_name}
+                                      className="w-full aspect-square object-cover rounded border"
+                                      onError={(e) => {
+                                        if (e?.currentTarget?.dataset?.failed === '1') return;
+                                        e.currentTarget.dataset.failed = '1';
+                                        e.currentTarget.src = '/placeholder-product.svg';
+                                      }}
+                                    />
+                                  </a>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
 
         <div className="mt-6 bg-blue-50 border border-blue-200 rounded-lg p-4">
           <h3 className="font-semibold text-blue-900 mb-2">Com importar mockups:</h3>

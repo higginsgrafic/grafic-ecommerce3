@@ -1,6 +1,6 @@
 import React from 'react';
 import { Helmet } from 'react-helmet';
-import { buildSiteUrl } from '@/config/siteOrigin';
+import { buildSiteUrl } from '@/config/siteOrigin.js';
 
 /**
  * Component per afegir structured data (JSON-LD) a les pàgines de producte
