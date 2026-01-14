@@ -496,15 +496,24 @@ async function main() {
 
       const best = pickBestSweepCandidate(outDir, 'sweep');
       if (best?.bestJsonPath) {
-        const bestJsonOut = path.join(outDir, 'best.json');
-        copyFileSafe(best.bestJsonPath, bestJsonOut);
-        const bestPngOut = path.join(outDir, 'best.png');
+        // Resultat Posició: copy of the chosen calibrator (one of the sweep_*.json/png)
+        const resultJsonOut = path.join(outDir, 'resultat-posicio.json');
+        copyFileSafe(best.bestJsonPath, resultJsonOut);
+        const resultPngOut = path.join(outDir, 'resultat-posicio.png');
         if (best.bestPngPath && fs.existsSync(best.bestPngPath)) {
-          copyFileSafe(best.bestPngPath, bestPngOut);
+          copyFileSafe(best.bestPngPath, resultPngOut);
         }
 
-        if (openBest && fs.existsSync(bestPngOut)) {
-          spawnSync('open', [bestPngOut], { stdio: 'ignore' });
+        // Backward-compat: keep best.json/best.png for older tooling.
+        const bestJsonOut = path.join(outDir, 'best.json');
+        copyFileSafe(resultJsonOut, bestJsonOut);
+        const bestPngOut = path.join(outDir, 'best.png');
+        if (fs.existsSync(resultPngOut)) {
+          copyFileSafe(resultPngOut, bestPngOut);
+        }
+
+        if (openBest && fs.existsSync(resultPngOut)) {
+          spawnSync('open', [resultPngOut], { stdio: 'ignore' });
         }
       }
     }
