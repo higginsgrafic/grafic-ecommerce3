@@ -35,6 +35,9 @@ store_products_full.csv
 .netlify
 
 .windsurf
+!.windsurf/
+!.windsurf/workflows/
+!.windsurf/workflows/**
 test-results
 
 public/bolt_tmp/
