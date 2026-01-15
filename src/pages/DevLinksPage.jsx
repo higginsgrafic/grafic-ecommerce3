@@ -96,7 +96,7 @@ export default function DevLinksPage() {
           { path: '/wishlist', label: 'Wishlist' },
           { path: '/profile', label: 'Profile' },
           { path: '/search', label: 'Search' },
-          { path: '/ec-preview', label: 'EC Preview' },
+          { path: '/ec-preview-lite', label: 'EC Preview' },
           { path: '/user-icon-picker', label: 'User Icon Picker' },
           { path: '/documentation-files', label: 'Documentation Files' },
         ],

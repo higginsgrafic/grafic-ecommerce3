@@ -900,16 +900,7 @@ function App() {
                 <Route path="/track" element={<OrderTrackingPage />} />
 
                 {/* Full Screen Media Page */}
-                <Route path="/ec-preview" element={
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    transition={{ duration: 0.5 }}
-                  >
-                    <ECPreviewPage />
-                  </motion.div>
-                } />
+                <Route path="/ec-preview" element={<Navigate to="/ec-preview-lite" replace />} />
 
                 <Route path="/ec-preview-lite" element={
                   <motion.div
@@ -1022,7 +1013,7 @@ function App() {
         />
 
         {/* Toggle button for Debug - Moved outside debug-containers */}
-        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && (
+        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && (
           <>
             <div ref={debugButtonsWrapRef} className="fixed bottom-4 left-4 z-[99999] flex items-center gap-2 debug-exempt">
               <button
@@ -1131,7 +1122,7 @@ function App() {
             </div>
           </>
         )}
-        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && guidesEnabled && (
+        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && guidesEnabled && (
           <DevGuidesOverlay />
         )}
       </>

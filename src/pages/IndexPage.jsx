@@ -113,7 +113,7 @@ export default function IndexPage() {
     especials: {
       label: 'Pàgines Especials',
       items: [
-        { label: 'Previsualització EC', path: '/ec-preview', status: '✓ Activa' },
+        { label: 'Previsualització EC', path: '/ec-preview-lite', status: '✓ Activa' },
         { label: 'Pàgina no trobada (404)', path: '*', status: '✓ Activa' }
       ]
     },
