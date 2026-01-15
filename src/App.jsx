@@ -249,7 +249,7 @@ function App() {
   const isNikeHeroDemoRoute = false;
   const isAdidasDemoRoute = location.pathname === '/adidas-demo' || location.pathname.startsWith('/adidas-demo/');
   const isDevDemoRoute = isNikeDemoRoute || isAdidasDemoRoute;
-  const layoutInspectorActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && layoutInspectorEnabled;
+  const layoutInspectorActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && layoutInspectorEnabled;
 
   const [nikeDemoManualEnabled, setNikeDemoManualEnabled] = useState(false);
   const [nikeDemoPhaseOverride, setNikeDemoPhaseOverride] = useState(null);
@@ -623,7 +623,7 @@ function App() {
     onUpdateQuantity: updateQuantity
   };
 
-  const isFullScreenRoute = location.pathname === '/ec-preview';
+  const isFullScreenRoute = location.pathname === '/ec-preview' || location.pathname === '/ec-preview-lite';
   const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
   const isHeroSettingsDevRoute = location.pathname === '/hero-settings';
   // DEV layout routes: hide offers/footer, show AdminBanner, etc.
