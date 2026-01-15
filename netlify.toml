@@ -23,6 +23,26 @@
   status = 200
 
 [[redirects]]
-  from = "/*"
+  from = "/admin/studio/*"
   to = "/index.html"
   status = 200
+
+[[redirects]]
+  from = "/admin/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/admin-login"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/higginsgrafic.com/*"
+  to = "/index.html"
+  status = 200
+
+[[redirects]]
+  from = "/*"
+  to = "https://www.etsy.com/shop/HigginsGrafic"
+  status = 302
