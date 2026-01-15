@@ -170,7 +170,11 @@ function ECPreviewPage() {
     const effectiveAutoRedirect = !!(config.autoRedirect || config.globalRedirect);
     if (!effectiveAutoRedirect) return;
 
-    // Redirect immediately (even if there's no video, or the video is looping).
+    // If we have a video background, let it play and redirect onEnded.
+    // This avoids an instant redirect that makes the video appear to play "at full speed".
+    if (config.backgroundType === 'video' && config.videoUrl) return;
+
+    // Otherwise redirect immediately.
     // This page acts as an under-construction bridge (e.g. to Etsy).
     const timeoutId = window.setTimeout(() => {
       if (target.startsWith('http://') || target.startsWith('https://')) {
@@ -222,7 +226,8 @@ function ECPreviewPage() {
   };
 
   const handleVideoEnd = () => {
-    if (config?.autoRedirect && config?.redirectUrl) {
+    const shouldRedirect = !!(config?.autoRedirect || config?.globalRedirect);
+    if (shouldRedirect && config?.redirectUrl) {
       if (config.redirectUrl.startsWith('http://') || config.redirectUrl.startsWith('https://')) {
         window.location.href = config.redirectUrl;
       } else {
