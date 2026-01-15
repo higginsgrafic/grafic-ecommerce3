@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
@@ -6,6 +6,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 export default function ECPreviewLitePage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const mountedAtRef = useRef(Date.now());
 
   const params = useMemo(() => new URLSearchParams(location.search || ''), [location.search]);
 
@@ -63,6 +64,17 @@ export default function ECPreviewLitePage() {
     if (!shouldAutoRedirect) return;
     if (!redirectUrl) return;
     if (redirectMode !== 'onEnd') return;
+
+    const minViewMs = 5000;
+    const elapsedMs = Date.now() - mountedAtRef.current;
+    const waitMs = Math.max(0, minViewMs - elapsedMs);
+    if (waitMs > 0) {
+      window.setTimeout(() => {
+        doRedirect();
+      }, waitMs);
+      return;
+    }
+
     doRedirect();
   };
 
