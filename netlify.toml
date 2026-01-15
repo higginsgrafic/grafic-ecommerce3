@@ -41,11 +41,25 @@
   from = "/ec-preview-lite"
   to = "/index.html"
   status = 200
+  force = true
+
+[[redirects]]
+  from = "/ec-preview-lite/*"
+  to = "/index.html"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/ec-preview"
   to = "/index.html"
   status = 200
+  force = true
+
+[[redirects]]
+  from = "/ec-preview/*"
+  to = "/index.html"
+  status = 200
+  force = true
 
 [[redirects]]
   from = "/higginsgrafic.com/*"
