@@ -9,6 +9,7 @@ export default function ECPreviewLitePage() {
   const mountedAtRef = useRef(Date.now());
 
   const params = useMemo(() => new URLSearchParams(location.search || ''), [location.search]);
+  const debug = (params.get('debug') || '').trim() === '1';
 
   const redirectUrl = (params.get('redirect') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_REDIRECT_URL || '').trim();
   const backgroundType = (params.get('bg') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_BG || 'video');
@@ -36,6 +37,21 @@ export default function ECPreviewLitePage() {
   }, [backgroundType, videoUrl, imageUrl]);
 
   const shouldAutoRedirect = redirectMode === 'immediate' || redirectMode === 'onEnd';
+
+  useEffect(() => {
+    if (!debug) return;
+    // eslint-disable-next-line no-console
+    console.log('[ec-preview-lite debug]', {
+      backgroundType,
+      effectiveBackgroundType,
+      videoUrl,
+      imageUrl,
+      redirectMode,
+      redirectUrl,
+      showButton,
+      buttonLink,
+    });
+  }, [debug, backgroundType, effectiveBackgroundType, videoUrl, imageUrl, redirectMode, redirectUrl, showButton, buttonLink]);
 
   const doRedirect = () => {
     const target = String(redirectUrl || '').trim();
@@ -101,6 +117,13 @@ export default function ECPreviewLitePage() {
       </Helmet>
 
       <div className="relative w-full h-screen overflow-hidden cursor-pointer" onClick={handleScreenClick} style={{ backgroundColor }}>
+        {debug && (
+          <div className="absolute top-2 left-2 z-20 max-w-[90vw] rounded bg-black/60 px-2 py-1 text-[11px] text-white">
+            <div>bg: {String(backgroundType)} / effective: {String(effectiveBackgroundType)}</div>
+            <div>redirectMode: {String(redirectMode)}</div>
+            <div>videoUrl: {String(videoUrl)}</div>
+          </div>
+        )}
         {effectiveBackgroundType === 'video' && videoUrl && (
           <video
             className="absolute inset-0 w-full h-full object-cover pointer-events-none"
