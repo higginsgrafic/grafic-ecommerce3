@@ -71,7 +71,7 @@ export default function AdminLoginPage() {
               Accés Administrador
             </h1>
             <p className="text-center text-gray-600 mb-6">
-              Inicia sessió per accedir al panell d'administració
+              Inicieu sessió per accedir al panell d'administració
             </p>
 
             <button
@@ -79,7 +79,7 @@ export default function AdminLoginPage() {
               onClick={handleGoogleLogin}
               className="w-full bg-white border border-gray-300 text-gray-900 py-3 rounded-lg font-medium hover:bg-gray-50 transition-colors"
             >
-              Entrar amb Google
+              Entreu amb Google
             </button>
 
             <div className="relative my-6">
@@ -144,7 +144,7 @@ export default function AdminLoginPage() {
                 disabled={loading}
                 className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition-colors"
               >
-                {loading ? 'Entrant...' : 'Entrar'}
+                {loading ? 'Accedint...' : 'Entreu'}
               </button>
             </form>
 
@@ -153,7 +153,7 @@ export default function AdminLoginPage() {
                 onClick={() => navigate('/')}
                 className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
               >
-                Tornar a l'inici
+                Torneu a l'inici
               </button>
             </div>
           </div>

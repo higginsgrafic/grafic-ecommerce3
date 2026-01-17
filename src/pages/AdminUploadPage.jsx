@@ -962,7 +962,7 @@ const AdminUploadPage = () => {
         <div className="max-w-6xl mx-auto">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-2">Upload de Fitxers</h1>
-            <p className="text-gray-600">Puja fitxers, arxius .zip i carpetes al sistema</p>
+            <p className="text-gray-600">Pugeu fitxers, arxius .zip i carpetes al sistema</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
@@ -1125,14 +1125,14 @@ const AdminUploadPage = () => {
                       onClick={open}
                       className="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors"
                     >
-                      Seleccionar fitxers
+                      Seleccioneu fitxers
                     </button>
                     <button
                       type="button"
                       onClick={() => folderInputRef.current?.click()}
                       className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                      Seleccionar carpeta
+                      Seleccioneu carpeta
                     </button>
                   </div>
                 </div>
@@ -1225,7 +1225,7 @@ const AdminUploadPage = () => {
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
               >
                 {uploading && <Loader2 className="w-4 h-4 animate-spin" />}
-                <span>{uploading ? 'Pujant...' : 'Pujar Fitxers'}</span>
+                <span>{uploading ? 'Pujant...' : 'Pugeu fitxers'}</span>
               </button>
             </div>
           )}
@@ -1312,7 +1312,7 @@ const AdminUploadPage = () => {
                 <h3 className="font-medium text-blue-900 mb-1">Informació d'Upload</h3>
                 <ul className="text-sm text-blue-800 space-y-1">
                   <li>• Suporta fitxers individuals de qualsevol tipus</li>
-                  <li>• Pots pujar arxius .zip comprimits</li>
+                  <li>• Podeu pujar arxius .zip comprimits</li>
                   <li>• Les carpetes es processaran mantenint l'estructura</li>
                   <li>• Els fitxers es guardaran al directori de uploads</li>
                 </ul>

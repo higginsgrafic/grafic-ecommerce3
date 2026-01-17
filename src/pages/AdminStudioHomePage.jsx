@@ -1,134 +1,132 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import {
-  FileText,
-  Megaphone,
-  Construction,
-  Image,
-  Package,
-  MessageSquare,
-  Film,
-  Layers,
-  Boxes,
-  Settings,
-  ImageIcon,
-  Database,
-  Upload,
-  ClipboardList
-} from 'lucide-react';
+import { CheckCircle2, Circle, Play, ClipboardList } from 'lucide-react';
 import SEO from '@/components/SEO';
 
-const toolsColumn1 = [
-  {
-    title: 'Editor de Textos',
-    description: 'Edita els textos del lloc web, seccions i contingut estàtic',
-    path: '/admin/studio/index',
-    icon: FileText,
-    color: 'from-blue-500 to-blue-600',
-  },
-  {
-    title: 'Textos de Sistema',
-    description: 'Gestiona missatges del sistema, notificacions i feedback de l\'aplicació',
-    path: '/admin/studio/system-messages',
-    icon: MessageSquare,
-    color: 'from-pink-500 to-pink-600',
-  },
-];
+const STORAGE_KEY = 'hg_unitats_canvi_v1';
 
-const toolsColumn2 = [
-  {
-    title: 'Configuració "En Construcció"',
-    description: 'Gestiona la pàgina de manteniment i missatges temporals',
-    path: '/admin/studio/ec-config',
-    icon: Construction,
-    color: 'from-yellow-500 to-yellow-600',
-  },
-  {
-    title: 'Gestor de Contingut Visual',
-    description: 'Administra imatges, vídeos i altres elements multimèdia',
-    path: '/admin/studio/media',
-    icon: Image,
-    color: 'from-green-500 to-green-600',
-  },
-];
+function statusIcon(status) {
+  if (status === 'done') return CheckCircle2;
+  if (status === 'in_progress') return Play;
+  return Circle;
+}
 
-const toolsColumn3 = [
-  {
-    title: 'Gestió de Productes Gelato',
-    description: 'Sincronitza i gestiona productes amb el servei de fulfillment',
-    path: '/admin/studio/fulfillment',
-    icon: Package,
-    color: 'from-teal-500 to-teal-600',
-  },
-  {
-    title: 'Visualització de Productes',
-    description: 'Veure tots els productes mock de Supabase per col·leccions',
-    path: '/admin/studio/products-overview',
-    icon: Database,
-    color: 'from-emerald-500 to-emerald-600',
-  },
-  {
-    title: 'Plantilles Gelato',
-    description: 'Explora i configura plantilles de productes disponibles',
-    path: '/admin/studio/gelato-templates',
-    icon: Boxes,
-    color: 'from-blue-500 to-blue-600',
-  },
-  {
-    title: 'Configuració de Fulfillment',
-    description: 'Configura l\'API key i el Store ID de Gelato',
-    path: '/admin/studio/fulfillment-settings',
-    icon: Settings,
-    color: 'from-cyan-500 to-cyan-600',
-  },
-];
+function statusLabel(status) {
+  if (status === 'done') return 'Fet';
+  if (status === 'in_progress') return 'En curs';
+  return 'Pendent';
+}
 
-const toolsColumn4 = [
-  {
-    title: 'Gestor de Promocions',
-    description: 'Gestiona el banner de promocions i ofertes destacades',
-    path: '/admin/studio/promotions',
-    icon: Megaphone,
-    color: 'from-orange-500 to-orange-600',
-  },
-  {
-    title: 'Unitats de Canvi',
-    description: 'Organitza la feina per unitats i categories (start/status/finish)',
-    path: '/admin/studio/unitats',
-    icon: ClipboardList,
-    color: 'from-slate-600 to-slate-800',
-  },
-  {
-    title: 'Configuració del Hero',
-    description: 'Gestiona els slides del hero, vídeos i contingut principal',
-    path: '/admin/studio/hero',
-    icon: Film,
-    color: 'from-red-500 to-red-600',
-  },
-  {
-    title: 'Configuració de Col·leccions',
-    description: 'Gestiona l\'ordre, visibilitat i configuració de les col·leccions',
-    path: '/admin/studio/collections',
-    icon: Layers,
-    color: 'from-cyan-500 to-cyan-600',
-  },
-  {
-    title: 'Gestor de Mockups',
-    description: 'Gestiona les imatges de previsualització dels productes per colors i variants',
-    path: '/admin/studio/mockups',
-    icon: ImageIcon,
-    color: 'from-teal-500 to-teal-600',
-  },
-  {
-    title: 'Upload de Fitxers',
-    description: 'Puja fitxers, arxius .zip i carpetes al sistema',
-    path: '/admin/studio/upload',
-    icon: Upload,
-    color: 'from-green-500 to-green-600',
-  },
-];
+function loadUnitats() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function Section({ title, items }) {
+  return (
+    <div className="border-l border-black">
+      <div className="pl-3 pr-[28px] text-xs font-semibold text-gray-900 uppercase tracking-wide">{title}</div>
+      <div className="mt-2">
+        {items.map((it) => (
+          <Link
+            key={it.path}
+            to={it.path}
+            title={it.path}
+            className="flex items-start gap-3 pl-3 pr-[28px] py-2 text-sm font-light text-gray-900 hover:bg-gray-50/60"
+          >
+            <span className="min-w-0 flex-1 whitespace-normal break-words text-left">{it.label}</span>
+            <span className="mt-0.5 text-xs text-gray-400">›</span>
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function Region({ title, subtitle, children }) {
+  return (
+    <section>
+      <div className="pl-0 pr-[28px]">
+        <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{title}</div>
+        {subtitle ? <div className="mt-1 text-xs text-gray-500">{subtitle}</div> : null}
+      </div>
+      <div className="mt-3">{children}</div>
+    </section>
+  );
+}
 
 export default function AdminStudioHomePage() {
+  const [unitatsState, setUnitatsState] = useState({ tasks: [], categories: [] });
+
+  useEffect(() => {
+    const loaded = loadUnitats();
+    if (loaded) setUnitatsState({ tasks: Array.isArray(loaded.tasks) ? loaded.tasks : [], categories: Array.isArray(loaded.categories) ? loaded.categories : [] });
+  }, []);
+
+  const pendingTasks = useMemo(() => {
+    const list = Array.isArray(unitatsState.tasks) ? unitatsState.tasks : [];
+    return list.filter((t) => t && t.status !== 'done');
+  }, [unitatsState.tasks]);
+
+  const tasksByUpdated = useMemo(() => {
+    return [...pendingTasks].sort((a, b) => {
+      const ta = Number(a?.updatedAt || a?.createdAt || 0);
+      const tb = Number(b?.updatedAt || b?.createdAt || 0);
+      return tb - ta;
+    });
+  }, [pendingTasks]);
+
+  const tools = useMemo(() => {
+    return {
+      content: [
+        { label: 'Editor de Textos', path: '/admin/index' },
+        { label: 'Textos de Sistema', path: '/admin/system-messages' },
+      ],
+      storefront: [
+        { label: 'Promocions', path: '/admin/promotions' },
+        { label: 'Hero', path: '/admin/hero' },
+        { label: 'Col·leccions', path: '/admin/collections' },
+      ],
+      assets: [
+        { label: 'Media', path: '/admin/media' },
+        { label: 'Mockups', path: '/admin/mockups' },
+        { label: 'Upload', path: '/admin/upload' },
+      ],
+      commerce: [
+        { label: 'Fulfillment', path: '/admin/fulfillment' },
+        { label: 'Fulfillment Settings', path: '/admin/fulfillment-settings' },
+      ],
+      gelato: [
+        { label: 'Gelato Sync', path: '/admin/gelato-sync' },
+        { label: 'Gelato Blank', path: '/admin/gelato-blank' },
+        { label: 'Gelato Templates', path: '/admin/gelato-templates' },
+        { label: 'Products Overview', path: '/admin/products-overview' },
+      ],
+      utils: [
+        { label: 'Demos', path: '/admin/demos' },
+        { label: <><div>EC Config</div><div className="text-[13px] leading-tight">(En Construcció)</div></>, path: '/admin/ec-config' },
+      ],
+      dev: [
+        { label: 'Dev Links', path: '/dev-links' },
+        { label: 'Adidas Stripe Zoom', path: '/adidas-stripe-zoom-dev' },
+        { label: 'Adidas Demo', path: '/adidas-demo' },
+        { label: 'Nike Hero Demo', path: '/nike-hero-demo' },
+      ],
+      wip: [
+        { label: 'Fulfillment settings', path: '/admin/draft/fulfillment-settings' },
+        { label: 'Mockup settings', path: '/admin/draft/mockup-settings' },
+        { label: 'Ruleta', path: '/admin/draft/ruleta' },
+      ],
+    };
+  }, []);
+
   return (
     <>
       <SEO
@@ -136,53 +134,85 @@ export default function AdminStudioHomePage() {
         description="Panell d'administració i gestió de contingut"
       />
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-        {[toolsColumn1, toolsColumn2, toolsColumn3, toolsColumn4].map((column, colIndex) => (
-          <div key={colIndex} className="flex flex-col gap-4">
-            {column.map((tool) => {
-              const Icon = tool.icon;
-              return (
-                <Link
-                  key={tool.path}
-                  to={tool.path}
-                  className="group relative bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-200 hover:border-gray-300"
-                >
-                  <div className={`absolute inset-0 bg-gradient-to-br ${tool.color} opacity-0 group-hover:opacity-5 transition-opacity duration-300`} />
+      <div className="mx-auto max-w-[2000px] px-4 pt-16 pb-6 overflow-hidden sm:px-6 lg:px-8">
+        <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-8">
+          <div className="lg:col-span-3 bg-gray-50">
+            <Region title="Control de Projecte" subtitle="Unitats de canvi pendents (to-do)">
+              <div className="border-l border-black">
+                <div className="pl-3 pr-[28px]">
+                  <Link
+                    to="/admin/unitats"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 hover:underline"
+                  >
+                    <ClipboardList className="h-4 w-4" />
+                    Obrir Unitats de Canvi
+                  </Link>
+                </div>
 
-                  <div className="relative p-4">
-                    <div className={`inline-flex p-2 rounded-lg bg-gradient-to-br ${tool.color} shadow-lg mb-3 group-hover:scale-110 transition-transform duration-300`}>
-                      <Icon className="w-5 h-5 text-white" />
-                    </div>
-
-                    <h3 className="text-base font-semibold text-gray-900 mb-1 group-hover:text-gray-700 transition-colors">
-                      {tool.title}
-                    </h3>
-
-                    <p className="text-gray-600 text-xs leading-relaxed">
-                      {tool.description}
-                    </p>
-
-                    <div className="mt-2 text-[11px] text-gray-400 font-mono">
-                      {tool.path}
-                    </div>
-
-                    <div className="mt-3 flex items-center text-xs font-medium text-gray-400 group-hover:text-gray-600 transition-colors">
-                      Accedir
-                      <svg
-                        className="w-3 h-3 ml-1 group-hover:translate-x-1 transition-transform"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                      </svg>
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
+                <div className="mt-4">
+                  {tasksByUpdated.length === 0 ? (
+                    <div className="pl-3 pr-[28px] py-3 text-sm text-gray-600">No hi ha cap unitat pendent.</div>
+                  ) : (
+                    tasksByUpdated.slice(0, 12).map((t) => {
+                      const Icon = statusIcon(t.status);
+                      const when = t?.updatedAt || t?.createdAt ? new Date(Number(t.updatedAt || t.createdAt)).toLocaleDateString() : '';
+                      return (
+                        <div key={t.id} className="flex items-start gap-3 pl-3 pr-[28px] py-2">
+                          <div className="mt-0.5 flex h-5 w-5 items-center justify-center">
+                            <Icon className="h-4 w-4 text-gray-700" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium text-gray-900">{t.title}</div>
+                            <div className="mt-0.5 text-[11px] text-gray-500">
+                              {statusLabel(t.status)}{when ? ` · ${when}` : ''}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              </div>
+            </Region>
           </div>
-        ))}
+
+          <div className="lg:col-span-2">
+            <Region title="Operació" subtitle="Fulfillment · Gelato · Integracions">
+              <div className="grid grid-cols-1 gap-8">
+                <Section title="Comandes" items={tools.commerce} />
+                <Section title="Gelato" items={tools.gelato} />
+              </div>
+            </Region>
+          </div>
+
+          <div className="lg:col-span-1">
+            <Region title="Storefront" subtitle="El que veu el client">
+              <Section title="Edició" items={tools.storefront} />
+              <div className="mt-8">
+                <Section title="Contingut" items={tools.content} />
+              </div>
+            </Region>
+          </div>
+
+          <div className="lg:col-span-1">
+            <Region title="Catàleg" subtitle="Assets i estructura">
+              <Section title="Assets" items={tools.assets} />
+            </Region>
+          </div>
+
+          <div className="lg:col-span-1">
+            <Region title="Utilitats" subtitle="Debug i suport">
+              <Section title="Tools" items={tools.utils} />
+              <div className="mt-10">
+                <Section title="DEV" items={tools.dev} />
+              </div>
+
+              <div className="mt-10">
+                <Section title="WIP" items={tools.wip} />
+              </div>
+            </Region>
+          </div>
+        </div>
       </div>
     </>
   );

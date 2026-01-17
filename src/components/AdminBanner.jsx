@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-import { LayoutDashboard, ChevronLeft, ChevronRight, LogOut, Lock, Eye, EyeOff, Copy } from 'lucide-react';
+import { LayoutDashboard, ChevronLeft, ChevronRight, LogOut, Lock, Copy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -88,20 +88,29 @@ export default function AdminBanner() {
       {/* Center: Administració - absolutely centered */}
       <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center gap-3">
         {isAdmin && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleBypassUnderConstruction}
-            className={`h-8 w-8 hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 transition-all ${
-              bypassUnderConstruction ? 'text-white' : 'text-white/50'
-            }`}
-            title={bypassUnderConstruction ? 'Bypass "En Construcció" activat (clica per desactivar)' : 'Bypass "En Construcció" desactivat (clica per activar)'}
-          >
-            {bypassUnderConstruction ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
-          </Button>
+          <div className="flex h-[30px] items-center gap-2 rounded-md px-2 hover:bg-red-700 transition-all">
+            <span className="text-xs font-semibold text-white">EC bypass</span>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={bypassUnderConstruction}
+              onClick={toggleBypassUnderConstruction}
+              className={`relative inline-flex h-4 w-8 items-center rounded-full border transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 focus-visible:ring-offset-red-600 ${
+                bypassUnderConstruction ? 'bg-white/90 border-white/70' : 'bg-white/20 border-white/40'
+              }`}
+              title={bypassUnderConstruction ? 'EC bypass activat (feu clic per desactivar)' : 'EC bypass desactivat (feu clic per activar)'}
+              aria-label={bypassUnderConstruction ? 'Desactiveu l\'EC bypass' : 'Activeu l\'EC bypass'}
+            >
+              <span
+                className={`inline-block h-3.5 w-3.5 transform rounded-full bg-red-600 shadow transition-transform ${
+                  bypassUnderConstruction ? 'translate-x-4' : 'translate-x-0.5'
+                }`}
+              />
+            </button>
+          </div>
         )}
         <Link
-          to="/admin/studio"
+          to="/admin"
           className="inline-flex items-center gap-2 text-sm font-semibold text-white hover:bg-red-700 transition-all px-3 py-1.5 rounded group"
         >
           <LayoutDashboard className="w-4 h-4 group-hover:scale-110 transition-transform" />
@@ -113,8 +122,8 @@ export default function AdminBanner() {
             size="icon"
             onClick={copyRouteToClipboard}
             className="h-7 w-7 hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2"
-            aria-label="Copiar URL"
-            title="Copiar URL"
+            aria-label="Copieu l'URL"
+            title="Copieu l'URL"
           >
             <Copy className="h-4 w-4 text-white" />
           </Button>
@@ -132,10 +141,10 @@ export default function AdminBanner() {
             size="sm"
             onClick={handleLogout}
             className="h-8 text-white hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 gap-1.5"
-            title="Tancar sessió"
+            title="Tanqueu la sessió"
           >
             <LogOut className="w-4 h-4" />
-            <span className="text-xs">Sortir</span>
+            <span className="text-xs">Sortiu</span>
           </Button>
         ) : (
           <Button
@@ -143,7 +152,7 @@ export default function AdminBanner() {
             size="sm"
             onClick={() => navigate('/admin-login')}
             className="h-8 text-white hover:bg-red-700 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 gap-1.5"
-            title="Entrar com a administrador"
+            title="Entreu com a administrador"
           >
             <Lock className="w-4 h-4" />
             <span className="text-xs">Admin</span>

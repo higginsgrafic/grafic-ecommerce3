@@ -16,7 +16,7 @@ export default function UnderConstructionEditor() {
     gradientAngle: 180,
     title: 'Estem treballant en alguna cosa increïble',
     subtitle: 'Tornarem aviat',
-    description: 'El nostre lloc web està en construcció. Estem treballant dur per oferir-te la millor experiència.',
+    description: 'El nostre lloc web està en construcció. Estem treballant dur per oferir-vos la millor experiència.',
     buttonText: 'Tornar a l\'inici',
     buttonLink: '/',
     showButton: true,
@@ -140,7 +140,7 @@ export default function UnderConstructionEditor() {
   };
 
   const handleReset = () => {
-    if (window.confirm('Segur que vols restaurar la configuració per defecte?')) {
+    if (window.confirm('Segur que voleu restaurar la configuració per defecte?')) {
       setConfig({
         backgroundType: 'color',
         videoUrl: '',
@@ -150,7 +150,7 @@ export default function UnderConstructionEditor() {
         gradientAngle: 180,
         title: 'Estem treballant en alguna cosa increïble',
         subtitle: 'Tornarem aviat',
-        description: 'El nostre lloc web està en construcció. Estem treballant dur per oferir-te la millor experiència.',
+        description: 'El nostre lloc web està en construcció. Estem treballant dur per oferir-vos la millor experiència.',
         buttonText: 'Tornar a l\'inici',
         buttonLink: '/',
         showButton: true,
@@ -205,7 +205,7 @@ export default function UnderConstructionEditor() {
         <div>
           <h2 className="text-2xl font-bold">Configuració "En Construcció"</h2>
           <div className="flex items-center gap-2">
-            <p className="text-gray-600 text-sm">Personalitza la pàgina de manteniment del teu lloc web</p>
+            <p className="text-gray-600 text-sm">Personalitzeu la pàgina de manteniment del lloc web</p>
             <span className={`text-xs px-2 py-1 rounded-full ${
               autoSaveStatus === 'saved' ? 'bg-green-100 text-green-700' :
               autoSaveStatus === 'saving' ? 'bg-blue-100 text-blue-700' :
@@ -259,7 +259,7 @@ export default function UnderConstructionEditor() {
                 </p>
                 {config.globalRedirect && (
                   <p className="text-xs text-red-600 font-medium">
-                    Important: El teu web no estarà accessible mentre aquesta opció estigui activada
+                    Important: El web no estarà accessible mentre aquesta opció estigui activada
                   </p>
                 )}
               </div>
@@ -388,11 +388,11 @@ export default function UnderConstructionEditor() {
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap"
                     >
                       <ImageIcon className="w-4 h-4" />
-                      Seleccionar
+                      Seleccioneu
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Selecciona una imatge de la biblioteca o puja una de nova
+                    Seleccioneu una imatge de la biblioteca o pugeu-ne una de nova
                   </p>
                 </div>
               )}
@@ -414,11 +414,11 @@ export default function UnderConstructionEditor() {
                       className="px-3 py-2 bg-blue-600 text-white text-sm rounded hover:bg-blue-700 transition-colors flex items-center gap-2 whitespace-nowrap"
                     >
                       <Video className="w-4 h-4" />
-                      Seleccionar
+                      Seleccioneu
                     </button>
                   </div>
                   <p className="text-xs text-gray-500 mt-1">
-                    Selecciona un vídeo de la biblioteca o puja un de nou
+                    Seleccioneu un vídeo de la biblioteca o pugeu-ne un de nou
                   </p>
                 </div>
               )}

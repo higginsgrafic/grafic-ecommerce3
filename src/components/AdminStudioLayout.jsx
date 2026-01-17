@@ -20,7 +20,7 @@ export default function AdminStudioLayout() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 min-h-screen flex flex-col">
         <div className="mb-6 flex-shrink-0">
           <div className="flex items-center justify-between">
-            <Link to="/admin/studio" className="flex items-center gap-3">
+            <Link to="/admin" className="flex items-center gap-3">
               <div className="p-2 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl shadow-lg">
                 <LayoutDashboard className="w-6 h-6 text-white" />
               </div>

@@ -79,7 +79,7 @@ export default function AdminMediaPage() {
     if (validFiles.length === 0) {
       toast({
         title: "Format no vàlid",
-        description: "Si us plau, selecciona fitxers d'imatge, vídeo, àudio o PDF",
+        description: "Si us plau, seleccioneu fitxers d'imatge, vídeo, àudio o PDF",
         variant: "destructive",
       });
       return;
@@ -134,7 +134,7 @@ export default function AdminMediaPage() {
 
   const handleDelete = async (filePath) => {
     const fileName = filePath.split('/').pop();
-    if (!window.confirm(`Segur que vols esborrar "${fileName}"?`)) {
+    if (!window.confirm(`Segur que voleu esborrar "${fileName}"?`)) {
       return;
     }
 
@@ -217,7 +217,7 @@ export default function AdminMediaPage() {
       <div className="flex-1 overflow-y-auto max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Gestor de Media</h1>
-          <p className="text-gray-600">Puja, gestiona i organitza els fitxers del teu lloc</p>
+          <p className="text-gray-600">Pugeu, gestioneu i organitzeu els fitxers del lloc</p>
         </div>
 
         {/* Navegació de carpetes */}
@@ -298,9 +298,9 @@ export default function AdminMediaPage() {
             <div className="mt-4">
               <label htmlFor="file-upload" className="cursor-pointer">
                 <span className="text-blue-600 hover:text-blue-700 font-medium">
-                  Clica per seleccionar
+                  Feu clic per seleccionar
                 </span>
-                <span className="text-gray-600"> o arrossega fitxers aquí</span>
+                <span className="text-gray-600"> o arrossegueu fitxers aquí</span>
               </label>
               <input
                 ref={fileInputRef}
@@ -340,7 +340,7 @@ export default function AdminMediaPage() {
           <div className="text-center py-12 bg-white rounded-lg border border-gray-200">
             <Folder className="mx-auto h-12 w-12 text-gray-400 mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">Carpeta buida</h3>
-            <p className="text-gray-600">Comença pujant fitxers o creant subcarpetes</p>
+            <p className="text-gray-600">Comenceu pujant fitxers o creant subcarpetes</p>
           </div>
         ) : (
           <>
@@ -402,7 +402,7 @@ export default function AdminMediaPage() {
                           <button
                             onClick={() => handleCopyUrl(file.url)}
                             className="p-2 bg-white rounded-full hover:bg-gray-100 transition-colors"
-                            title="Copiar URL"
+                            title="Copieu l'URL"
                           >
                             {copiedUrl === file.url ? (
                               <Check className="w-5 h-5 text-green-600" />

@@ -65,7 +65,7 @@ export default function MediaPicker({ isOpen, onClose, onSelect, mediaType = 'al
     if (validFiles.length === 0) {
       toast({
         title: 'Format no vàlid',
-        description: `Si us plau, selecciona ${mediaType === 'image' ? 'imatges' : mediaType === 'video' ? 'vídeos' : 'imatges o vídeos'}`,
+        description: `Si us plau, seleccioneu ${mediaType === 'image' ? 'imatges' : mediaType === 'video' ? 'vídeos' : 'imatges o vídeos'}`,
         variant: 'destructive',
       });
       return;
@@ -131,7 +131,7 @@ export default function MediaPicker({ isOpen, onClose, onSelect, mediaType = 'al
       >
         <div className="flex items-center justify-between p-4 border-b">
           <h2 className="text-xl font-bold">
-            Seleccionar {mediaType === 'image' ? 'Imatge' : mediaType === 'video' ? 'Vídeo' : 'Mèdia'}
+            Seleccioneu {mediaType === 'image' ? 'imatge' : mediaType === 'video' ? 'vídeo' : 'mèdia'}
           </h2>
           <button
             onClick={onClose}
@@ -160,7 +160,7 @@ export default function MediaPicker({ isOpen, onClose, onSelect, mediaType = 'al
                 : 'text-gray-600 hover:bg-gray-50'
             }`}
           >
-            Pujar Nou
+            Pugeu-ne un de nou
           </button>
         </div>
 
@@ -268,9 +268,9 @@ export default function MediaPicker({ isOpen, onClose, onSelect, mediaType = 'al
                 <Upload className="mx-auto h-12 w-12 text-gray-400 mb-4" />
                 <label htmlFor="media-upload" className="cursor-pointer">
                   <span className="text-blue-600 hover:text-blue-700 font-medium text-lg">
-                    Clica per seleccionar
+                    Feu clic per seleccionar
                   </span>
-                  <span className="text-gray-600 text-lg"> o arrossega fitxers aquí</span>
+                  <span className="text-gray-600 text-lg"> o arrossegueu fitxers aquí</span>
                 </label>
                 <input
                   ref={fileInputRef}
@@ -331,7 +331,7 @@ export default function MediaPicker({ isOpen, onClose, onSelect, mediaType = 'al
               disabled={!selectedFile}
               className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Seleccionar
+              Seleccioneu
             </button>
           </div>
         </div>
