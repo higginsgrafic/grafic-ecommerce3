@@ -48,12 +48,12 @@ Els productes estan subjectes a disponibilitat. Ens reservem el dret de limitar 
 Per fer una comanda has de:
 1. Seleccionar els productes i afegir-los a la cistella
 2. Revisar la cistella i procedir al checkout
-3. Proporcionar les teves dades personals i d'enviament
+3. Proporcionar les dades personals i d'enviament
 4. Seleccionar el mètode de pagament
 5. Revisar i confirmar la comanda
 
 **4.2 Confirmació**
-Un cop rebut el pagament, t'enviarem un email de confirmació amb:
+Un cop rebut el pagament, us enviarem un correu de confirmació amb:
 • Número de comanda
 • Detalls dels productes
 • Adreça d'enviament
@@ -71,10 +71,10 @@ Acceptem pagaments amb:
 • Altres mètodes habilitats a través de Stripe
 
 **5.2 Seguretat**
-Tots els pagaments es processen de forma segura a través de Stripe, que compleix amb els estàndards PCI DSS. No emmagatzemem les dades de la teva targeta als nostres servidors.
+Tots els pagaments es processen de forma segura a través de Stripe, que compleix amb els estàndards PCI DSS. No emmagatzemem les dades de la targeta als nostres servidors.
 
 **5.3 Facturació**
-Rebràs una factura electrònica per email un cop s'hagi processat el pagament. Si necessites una factura amb dades fiscals específiques, indica-ho abans de finalitzar la comanda.`
+Rebreu una factura electrònica per correu un cop s'hagi processat el pagament. Si necessiteu una factura amb dades fiscals específiques, indiqueu-ho abans de finalitzar la comanda.`
     },
     {
       title: '6. Enviament i Lliurament',
@@ -94,7 +94,7 @@ Els temps de lliurament estimats són:
 • **Enviament Internacional:** 10-15 dies laborables
 
 **6.4 Seguiment**
-Rebràs un número de seguiment per email quan la teva comanda s'enviï.
+Rebreu un número de seguiment per correu quan la comanda s'enviï.
 
 **6.5 Lliuraments Fallits**
 Si no es pot lliurar la comanda per:
@@ -168,11 +168,11 @@ Queda prohibit:
     },
     {
       title: '10. Protecció de Dades',
-      content: `El tractament de les teves dades personals es regeix per la nostra Política de Privacitat, que forma part integrant d'aquestes Condicions Generals.
+      content: `El tractament de les dades personals es regeix per la nostra Política de Privacitat, que forma part integrant d'aquestes Condicions Generals.
 
-En utilitzar aquest Lloc Web i realitzar comandes, acceptes el tractament de les teves dades segons s'especifica a la Política de Privacitat, en compliment amb el RGPD i la LOPDGDD.
+En utilitzar aquest Lloc Web i realitzar comandes, accepteu el tractament de les dades segons s'especifica a la Política de Privacitat, en compliment amb el RGPD i la LOPDGDD.
 
-Per exercir els teus drets (accés, rectificació, supressió, etc.), contacta'ns a higginsgrafic@gmail.com`
+Per exercir els drets (accés, rectificació, supressió, etc.), contacteu-nos a higginsgrafic@gmail.com`
     },
     {
       title: '11. Responsabilitat',
@@ -216,13 +216,13 @@ Totes les comunicacions relacionades amb comandes s'enviaran per email a l'adre�
     },
     {
       title: '14. Contacte',
-      content: `Per qualsevol qüestió relacionada amb aquestes Condicions Generals o amb les teves comandes, pots contactar-nos:
+      content: `Per qualsevol qüestió relacionada amb aquestes Condicions Generals o amb les comandes, podeu contactar-nos:
 
 **Email:** higginsgrafic@gmail.com
 **Telèfon:** [Número de telèfon]
 **Horari d'atenció:** Dilluns a Divendres, 9:00h - 18:00h (CET)
 
-Ens comprometem a respondre les teves consultes en un màxim de 48 hores laborables.`
+Ens comprometem a respondre les consultes en un màxim de 48 hores laborables.`
     }
   ];
 
@@ -265,8 +265,8 @@ Ens comprometem a respondre les teves consultes en un màxim de 48 hores laborab
           >
             <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-12">
               <p className="font-roboto text-[13pt] text-gray-800 leading-relaxed m-0">
-                Si us plau, llegeix atentament aquestes Condicions Generals abans de realitzar una comanda.
-                En utilitzar el nostre lloc web i adquirir els nostres productes, acceptes quedar vinculat
+                Si us plau, llegiu atentament aquestes Condicions Generals abans de realitzar una comanda.
+                En utilitzar el nostre lloc web i adquirir els nostres productes, accepteu quedar vinculat
                 per aquestes condicions. Aquests termes estan dissenyats per protegir tant els teus drets
                 com a consumidor com els nostres com a empresa, en compliment amb la legislació espanyola i europea.
               </p>
@@ -293,8 +293,8 @@ Ens comprometem a respondre les teves consultes en un màxim de 48 hores laborab
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mt-12">
               <p className="font-roboto text-[12pt] text-gray-600 leading-relaxed m-0">
                 <strong>Nota important:</strong> Aquests Termes i Condicions constitueixen un acord legal vinculant
-                entre tu i GRÀFIC. Si tens qualsevol dubte sobre aquestes condicions, si us plau contacta'ns
-                abans de realitzar una comanda. La teva satisfacció i confiança són la nostra prioritat.
+                entre vós i GRÀFIC. Si teniu qualsevol dubte sobre aquestes condicions, si us plau contacteu-nos
+                abans de realitzar una comanda. La satisfacció i confiança són la nostra prioritat.
               </p>
             </div>
           </motion.div>

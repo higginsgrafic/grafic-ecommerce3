@@ -17,12 +17,12 @@ function AboutPage() {
     {
       icon: Globe,
       title: 'Sostenibilitat',
-      description: 'Producció sota demanda per evitar residus. Cada peça es fabrica només quan tu la demanes.'
+      description: 'Producció sota demanda per evitar residus. Cada peça es fabrica només quan es demana.'
     },
     {
       icon: Leaf,
       title: 'Qualitat',
-      description: 'Materials orgànics i processos certificats. La qualitat és el nostre compromís amb tu.'
+      description: 'Materials orgànics i processos certificats. La qualitat és el nostre compromís.'
     },
     {
       icon: Users,
@@ -37,7 +37,7 @@ function AboutPage() {
     {
       icon: Target,
       title: 'Transparència',
-      description: 'Sabràs d\'on ve la teva samarreta, qui la fa i com es produeix. Total transparència.'
+      description: 'Sabreu d\'on ve la samarreta, qui la fa i com es produeix. Total transparència.'
     }
   ];
 
@@ -45,12 +45,12 @@ function AboutPage() {
     {
       name: 'First Contact',
       tagline: 'Only you understand everything this journey entails.',
-      description: 'Una reflexió sobre els viatges interiors que només tu coneixes. Sobre els camins que prens sense que ningú més ho vegi.'
+      description: 'Una reflexió sobre els viatges interiors que només coneixeu. Sobre els camins que es prenen sense que ningú més ho vegi.'
     },
     {
       name: 'The Human Inside',
       tagline: 'In the deepest, darkest corner rests your hero.',
-      description: 'El teu heroi interior viu en els racons més foscos. Allà on pocs s\'atreveixen a mirar és on trobes la teva força.'
+      description: 'L\'heroi interior viu en els racons més foscos. Allà on pocs s\'atreveixen a mirar és on es troba la força.'
     },
     {
       name: 'Austen',
@@ -265,7 +265,7 @@ function AboutPage() {
             </h2>
             <p className="font-roboto text-[14pt] text-gray-700 leading-relaxed mb-8 max-w-2xl mx-auto">
               GRÀFIC és més que roba. És una comunitat de persones que no tenen por de pensar diferent,
-              de qüestionar, de provocar converses. Si això ressona amb tu, benvingut/da a casa.
+              de qüestionar, de provocar converses. Si això ressona, benvingut/da a casa.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <a

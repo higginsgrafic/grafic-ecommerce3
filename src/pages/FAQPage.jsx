@@ -21,15 +21,15 @@ function FAQPage() {
       questions: [
         {
           question: 'Quins mètodes de pagament accepteu?',
-          answer: 'Acceptem targetes de crèdit i dèbit (Visa, Mastercard, American Express) a través de Stripe, una plataforma de pagament segura que compleix amb tots els estàndards de seguretat PCI DSS. No emmagatzemem les dades de la teva targeta als nostres servidors.'
+          answer: 'Acceptem targetes de crèdit i dèbit (Visa, Mastercard, American Express) a través de Stripe, una plataforma de pagament segura que compleix amb tots els estàndards de seguretat PCI DSS. No emmagatzemem les dades de la targeta als nostres servidors.'
         },
         {
           question: 'És segur comprar al vostre web?',
-          answer: 'Sí, absolutament. Utilitzem certificat SSL (https) per encriptar totes les dades sensibles. Els pagaments es processen a través de Stripe, un dels processadors de pagament més segurs del món. Mai tenim accés a les dades completes de la teva targeta.'
+          answer: 'Sí, absolutament. Utilitzem certificat SSL (https) per encriptar totes les dades sensibles. Els pagaments es processen a través de Stripe, un dels processadors de pagament més segurs del món. Mai tenim accés a les dades completes de la targeta.'
         },
         {
           question: 'Puc cancel·lar la meva comanda?',
-          answer: 'Pots cancel·lar la teva comanda sense cost si encara no ha entrat en producció (normalment les primeres 24 hores). Contacta\'ns immediatament a higginsgrafic@gmail.com amb el teu número de comanda. Un cop el producte està en producció, no es pot cancel·lar, però pots fer ús del dret de desistiment de 14 dies una vegada el rebis.'
+          answer: 'Podeu cancel·lar la comanda sense cost si encara no ha entrat en producció (normalment les primeres 24 hores). Contacteu-nos immediatament a higginsgrafic@gmail.com amb el número de comanda. Un cop el producte està en producció, no es pot cancel·lar, però podeu fer ús del dret de desistiment de 14 dies un cop el rebeu.'
         },
         {
           question: 'Rebré una factura?',
@@ -42,7 +42,7 @@ function FAQPage() {
       questions: [
         {
           question: 'Quant triga l\'enviament?',
-          answer: 'Els temps de lliurament es componen de producció + enviament:\n\n• Producció: 2-5 dies laborables (els nostres productes es fabriquen sota demanda)\n• Enviament Espanya: 3-5 dies laborables\n• Enviament UE: 5-10 dies laborables\n• Enviament Internacional: 10-15 dies laborables\n\nRebràs un email amb número de seguiment quan el teu paquet s\'enviï.'
+          answer: 'Els temps de lliurament es componen de producció + enviament:\n\n• Producció: 2-5 dies laborables (els nostres productes es fabriquen sota demanda)\n• Enviament Espanya: 3-5 dies laborables\n• Enviament UE: 5-10 dies laborables\n• Enviament Internacional: 10-15 dies laborables\n\nRebreu un correu amb número de seguiment quan el paquet s\'enviï.'
         },
         {
           question: 'Quant costa l\'enviament?',
@@ -50,11 +50,11 @@ function FAQPage() {
         },
         {
           question: 'Envieu a tot el món?',
-          answer: 'Enviem a la majoria de països del món a través de la nostra xarxa de producció global Gelato. Els costos i temps d\'enviament varien segons el país de destinació. Pots veure el cost exacte introduint la teva adreça durant el checkout.'
+          answer: 'Enviem a la majoria de països del món a través de la nostra xarxa de producció global Gelato. Els costos i temps d\'enviament varien segons el país de destinació. Podeu veure el cost exacte introduint l\'adreça durant el checkout.'
         },
         {
           question: 'Puc fer seguiment de la meva comanda?',
-          answer: 'Sí! Un cop el teu paquet s\'enviï, rebràs un email amb un número de seguiment que et permetrà veure exactament on és el teu paquet en tot moment. També pots contactar-nos a higginsgrafic@gmail.com si tens qualsevol dubte.'
+          answer: 'Sí! Un cop el paquet s\'enviï, rebreu un correu amb un número de seguiment que permetrà veure exactament on és el paquet en tot moment. També podeu contactar-nos a higginsgrafic@gmail.com si teniu qualsevol dubte.'
         }
       ]
     },
@@ -67,7 +67,7 @@ function FAQPage() {
         },
         {
           question: 'Com són les talles?',
-          answer: 'Les nostres samarretes segueixen talles europees estàndard. Pots consultar la nostra guia de talles detallada amb mesures exactes a la pàgina de cada producte o a la secció Size Guide. En general, si tens dubtes entre dues talles, et recomanem la més gran per més comoditat.'
+          answer: 'Les nostres samarretes segueixen talles europees estàndard. Podeu consultar la guia de talles detallada amb mesures exactes a la pàgina de cada producte o a la secció Size Guide. En general, si teniu dubtes entre dues talles, recomanem la més gran per més comoditat.'
         },
         {
           question: 'Els dissenys es despinten amb els rentats?',
@@ -84,15 +84,15 @@ function FAQPage() {
       questions: [
         {
           question: 'Puc tornar un producte si no m\'agrada?',
-          answer: 'Sí, tens 14 dies naturals des de la recepció per tornar qualsevol producte sense necessitat de justificació (dret de desistiment). El producte ha d\'estar en condicions originals: sense usar, amb etiquetes i en el seu embalatge original. Els costos d\'enviament de devolució van a càrrec teu (tret que sigui per defecte del producte).'
+          answer: 'Sí, teniu 14 dies naturals des de la recepció per tornar qualsevol producte sense necessitat de justificació (dret de desistiment). El producte ha d\'estar en condicions originals: sense usar, amb etiquetes i en el seu embalatge original. Els costos d\'enviament de devolució van a càrrec vostre (tret que sigui per defecte del producte).'
         },
         {
           question: 'Com puc fer una devolució?',
-          answer: 'Segueix aquests passos:\n\n1. Envia un email a higginsgrafic@gmail.com amb el teu número de comanda\n2. Indica quin producte vols tornar i el motiu\n3. T\'enviarem les instruccions de devolució\n4. Envia el producte segons les instruccions\n5. Rebràs el reemborsament en 14 dies des que rebem la devolució\n\nEl reemborsament es farà pel mateix mètode de pagament utilitzat a la compra.'
+          answer: 'Seguiu aquests passos:\n\n1. Envieu un correu a higginsgrafic@gmail.com amb el número de comanda\n2. Indiqueu quin producte voleu tornar i el motiu\n3. Us enviarem les instruccions de devolució\n4. Envieu el producte segons les instruccions\n5. Rebreu el reemborsament en 14 dies des que rebem la devolució\n\nEl reemborsament es farà pel mateix mètode de pagament utilitzat a la compra.'
         },
         {
           question: 'Puc canviar un producte per una altra talla?',
-          answer: 'Per temes logístics de producció sota demanda, no fem canvis directes. El procés és:\n\n1. Tornar el producte que no t\'encaixa (dret de desistiment)\n2. Fer una nova comanda amb la talla correcta\n\nPer agilitzar, pots fer la nova comanda abans de tornar la primera. Contacta\'ns i t\'ajudarem amb el procés.'
+          answer: 'Per temes logístics de producció sota demanda, no fem canvis directes. El procés és:\n\n1. Tornar el producte que no encaixa (dret de desistiment)\n2. Fer una nova comanda amb la talla correcta\n\nPer agilitzar, podeu fer la nova comanda abans de tornar la primera. Contacteu-nos i us ajudarem amb el procés.'
         },
         {
           question: 'Què passa si el producte arriba defectuós?',
@@ -118,11 +118,11 @@ function FAQPage() {
       questions: [
         {
           question: 'Necessito crear un compte per comprar?',
-          answer: 'No és obligatori! Pots comprar com a convidat proporcionant només les dades necessàries per a l\'enviament i el pagament. No obstant això, crear un compte et permet:\n\n• Seguir les teves comandes fàcilment\n• Guardar les teves adreces\n• Accedir al teu historial de comandes\n• Rebre ofertes exclusives'
+          answer: 'No és obligatori! Podeu comprar com a convidat proporcionant només les dades necessàries per a l\'enviament i el pagament. No obstant això, crear un compte permet:\n\n• Seguir les comandes fàcilment\n• Guardar les adreces\n• Accedir a l\'historial de comandes\n• Rebre ofertes exclusives'
         },
         {
           question: 'Què feu amb les meves dades personals?',
-          answer: 'Respectem totalment la teva privacitat. Només utilitzem les teves dades per:\n\n• Processar i enviar les teves comandes\n• Comunicar-nos amb tu sobre les teves compres\n• Millorar el nostre servei\n• Enviar-te newsletters (si has donat consentiment)\n\nMAI venem o lloguem les teves dades a tercers. Pots consultar tots els detalls a la nostra Política de Privacitat, que compleix amb el RGPD.'
+          answer: 'Respectem totalment la privacitat. Només utilitzem les dades per:\n\n• Processar i enviar les comandes\n• Comunicar-nos sobre les compres\n• Millorar el servei\n• Enviar newsletters (si s\'ha donat consentiment)\n\nMAI venem o lloguem les dades a tercers. Podeu consultar tots els detalls a la nostra Política de Privacitat, que compleix amb el RGPD.'
         }
       ]
     }

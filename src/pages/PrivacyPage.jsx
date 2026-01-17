@@ -22,41 +22,41 @@ La informació pot incloure: nom, adreça de correu electrònic, adreça postal,
     },
     {
       title: '2. Com Utilitzem la Teva Informació',
-      content: `Utilitzem la teva informació per:
+      content: `Utilitzem la informació per:
 
-• Processar i complir les teves comandes
-• Comunicar-nos amb tu sobre les teves comandes i el nostre servei
-• Personalitzar la teva experiència de compra
+• Processar i complir les comandes
+• Comunicar-nos sobre les comandes i el nostre servei
+• Personalitzar l'experiència de compra
 • Millorar els nostres productes i serveis
-• Enviar-te comunicacions de màrqueting (si has donat el teu consentiment)
+• Enviar comunicacions de màrqueting (si s'ha donat el consentiment)
 • Detectar i prevenir fraus
 • Complir amb les nostres obligacions legals`
     },
     {
       title: '3. Compartició de la Teva Informació',
-      content: `Podem compartir la teva informació amb:
+      content: `Podem compartir la informació amb:
 
 • **Proveïdors de serveis:** Empreses que ens ajuden a operar el nostre negoci (processament de pagaments, enviament, allotjament web)
 • **Gelato:** El nostre soci de producció i enviament per a la fabricació i enviament dels productes
-• **Serveis d'anàlisi:** Google Analytics per entendre com utilitzes el nostre lloc web
+• **Serveis d'anàlisi:** Google Analytics per entendre com s'utilitza el nostre lloc web
 • **Autoritats legals:** Quan sigui requerit per llei o per protegir els nostres drets
 
-No venem ni lloguem la teva informació personal a tercers per a fins de màrqueting.`
+No venem ni lloguem informació personal a tercers per a fins de màrqueting.`
     },
     {
       title: '4. Cookies i Tecnologies Similars',
       content: `Utilitzem cookies i tecnologies similars per:
 
-• Recordar les teves preferències i configuració
-• Entendre com utilitzes el nostre lloc web
+• Recordar les preferències i configuració
+• Entendre com s'utilitza el nostre lloc web
 • Personalitzar el contingut i els anuncis
 • Millorar el rendiment del lloc web
 
-Pots gestionar les teves preferències de cookies a través de la configuració del teu navegador. Tingues en compte que deshabilitar certes cookies pot afectar la funcionalitat del lloc web.`
+Podeu gestionar les preferències de cookies a través de la configuració del navegador. Tingueu en compte que deshabilitar certes cookies pot afectar la funcionalitat del lloc web.`
     },
     {
       title: '5. Seguretat de les Dades',
-      content: `Prenem seriosament la seguretat de les teves dades i implementem mesures tècniques i organitzatives adequades per protegir la teva informació personal contra:
+      content: `Prenem seriosament la seguretat de les dades i implementem mesures tècniques i organitzatives adequades per protegir la informació personal contra:
 
 • Accés no autoritzat
 • Alteració
@@ -67,21 +67,21 @@ Utilitzem xifratge SSL per protegir la informació sensible durant la transmissi
     },
     {
       title: '6. Els Teus Drets (RGPD)',
-      content: `Segons el Reglament General de Protecció de Dades (RGPD), tens dret a:
+      content: `Segons el Reglament General de Protecció de Dades (RGPD), teniu dret a:
 
-• **Accés:** Demanar una còpia de les teves dades personals
+• **Accés:** Demanar una còpia de les dades personals
 • **Rectificació:** Corregir dades inexactes o incompletes
-• **Supressió:** Sol·licitar l'eliminació de les teves dades ("dret a l'oblit")
-• **Restricció:** Limitar el tractament de les teves dades
-• **Portabilitat:** Rebre les teves dades en un format estructurat
-• **Oposició:** Oposar-te al tractament de les teves dades
+• **Supressió:** Sol·licitar l'eliminació de les dades ("dret a l'oblit")
+• **Restricció:** Limitar el tractament de les dades
+• **Portabilitat:** Rebre les dades en un format estructurat
+• **Oposició:** Oposar-vos al tractament de les dades
 • **No ser objecte de decisions automatitzades**
 
-Per exercir aquests drets, contacta'ns a higginsgrafic@gmail.com`
+Per exercir aquests drets, contacteu-nos a higginsgrafic@gmail.com`
     },
     {
       title: '7. Retenció de Dades',
-      content: `Conservem la teva informació personal durant el temps necessari per complir amb els fins descrits en aquesta política, tret que la llei requereixi o permeti un període de retenció més llarg.
+      content: `Conservem la informació personal durant el temps necessari per complir amb els fins descrits en aquesta política, tret que la llei requereixi o permeti un període de retenció més llarg.
 
 Criteris de retenció:
 • Dades de comandes: 10 anys (obligació fiscal)
@@ -91,35 +91,35 @@ Criteris de retenció:
     },
     {
       title: '8. Transferències Internacionals',
-      content: `Les teves dades poden ser transferides i processades fora de l'Espai Econòmic Europeu (EEE), incloent:
+      content: `Les dades poden ser transferides i processades fora de l'Espai Econòmic Europeu (EEE), incloent:
 
 • Servidors de Netlify (Estats Units)
 • Sistemes de Gelato (global)
 • Stripe per processament de pagaments
 
-En aquests casos, ens assegurem que es prenguin mesures adequades per protegir les teves dades d'acord amb el RGPD, com ara clàusules contractuals estàndard aprovades per la Comissió Europea.`
+En aquests casos, ens assegurem que es prenguin mesures adequades per protegir les dades d'acord amb el RGPD, com ara clàusules contractuals estàndard aprovades per la Comissió Europea.`
     },
     {
       title: '9. Menors d\'Edat',
-      content: `Els nostres serveis no estan dirigits a menors de 16 anys. No recopilem conscientment informació personal de menors de 16 anys. Si ets pare/mare o tutor i creus que el teu fill/a ens ha proporcionat informació personal, contacta'ns immediatament.`
+      content: `Els nostres serveis no estan dirigits a menors de 16 anys. No recopilem conscientment informació personal de menors de 16 anys. Si sou pare/mare o tutor i creieu que el vostre fill/a ens ha proporcionat informació personal, contacteu-nos immediatament.`
     },
     {
       title: '10. Canvis a Aquesta Política',
       content: `Podem actualitzar aquesta Política de Privacitat ocasionalment per reflectir canvis en les nostres pràctiques o per raons legals, operatives o reguladores.
 
-T'informarem de qualsevol canvi significatiu publicant la nova política en aquesta pàgina i actualitzant la data de "Última actualització" a la part superior.
+Informarem de qualsevol canvi significatiu publicant la nova política en aquesta pàgina i actualitzant la data de "Última actualització" a la part superior.
 
-Et recomanem que revisis aquesta política periòdicament per estar informat sobre com protegim la teva informació.`
+Recomanem revisar aquesta política periòdicament per estar informat sobre com protegim la informació.`
     },
     {
       title: '11. Contacte',
-      content: `Si tens preguntes o preocupacions sobre aquesta Política de Privacitat o sobre com gestionem les teves dades personals, pots contactar-nos:
+      content: `Si teniu preguntes o preocupacions sobre aquesta Política de Privacitat o sobre com gestionem les dades personals, podeu contactar-nos:
 
 **Email:** higginsgrafic@gmail.com
 **Correu postal:** GRÀFIC, [Adreça completa]
 **Telèfon:** [Número de telèfon]
 
-També tens dret a presentar una reclamació davant l'Agència Espanyola de Protecció de Dades (AEPD) si consideres que el tractament de les teves dades personals vulnera la normativa aplicable.
+També teniu dret a presentar una reclamació davant l'Agència Espanyola de Protecció de Dades (AEPD) si considereu que el tractament de les dades personals vulnera la normativa aplicable.
 
 **AEPD:** www.aepd.es`
     }
@@ -129,7 +129,7 @@ També tens dret a presentar una reclamació davant l'Agència Espanyola de Prot
     <>
       <SEO
         title="Política de Privacitat | GRÀFIC"
-        description="Política de privacitat de GRÀFIC. Informació sobre com recopilem, utilitzem i protegim les teves dades personals segons el RGPD i LOPDGDD."
+        description="Política de privacitat de GRÀFIC. Informació sobre com recopilem, utilitzem i protegim les dades personals segons el RGPD i LOPDGDD."
         keywords="política privacitat gràfic, rgpd, protecció dades, privacitat"
         type="website"
         url="/privacy"
@@ -164,9 +164,9 @@ També tens dret a presentar una reclamació davant l'Agència Espanyola de Prot
           >
             <div className="bg-blue-50 border-l-4 border-blue-600 p-6 mb-12">
               <p className="font-roboto text-[13pt] text-gray-800 leading-relaxed m-0">
-                A GRÀFIC, ens comprometem a protegir la teva privacitat i les teves dades personals.
+                A GRÀFIC, ens comprometem a protegir la privacitat i les dades personals.
                 Aquesta Política de Privacitat explica com recopilem, utilitzem, compartim i protegim
-                la teva informació quan utilitzes el nostre lloc web i serveis, en compliment amb el
+                la informació quan utilitzeu el nostre lloc web i serveis, en compliment amb el
                 Reglament General de Protecció de Dades (RGPD) de la Unió Europea i la Llei Orgànica
                 de Protecció de Dades Personals i garantia dels drets digitals (LOPDGDD) d'Espanya.
               </p>
@@ -193,8 +193,8 @@ També tens dret a presentar una reclamació davant l'Agència Espanyola de Prot
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 mt-12">
               <p className="font-roboto text-[12pt] text-gray-600 leading-relaxed m-0">
                 <strong>Nota important:</strong> Aquesta Política de Privacitat està subjecta a la legislació espanyola i europea.
-                En utilitzar els nostres serveis, acceptes els termes descrits en aquesta política.
-                Si no estàs d'acord amb qualsevol part d'aquesta política, si us plau, no utilitzis el nostre lloc web.
+                En utilitzar els nostres serveis, accepteu els termes descrits en aquesta política.
+                Si no esteu d'acord amb qualsevol part d'aquesta política, si us plau, no utilitzeu el nostre lloc web.
               </p>
             </div>
           </motion.div>

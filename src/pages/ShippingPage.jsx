@@ -89,7 +89,7 @@ function ShippingPage() {
                   </h3>
                   <p className="font-roboto text-[13pt] text-green-800 leading-relaxed">
                     Gaudeix d'enviament gratuït en totes les comandes superiors a <strong>50€</strong> a
-                    Espanya i la Unió Europea. És la nostra manera de recompensar la teva confiança!
+                    Espanya i la Unió Europea. És la nostra manera de recompensar la confiança!
                   </p>
                 </div>
               </div>
@@ -105,7 +105,7 @@ function ShippingPage() {
                   </h3>
                   <p className="font-roboto text-[13pt] text-blue-800 leading-relaxed">
                     Els nostres productes es fabriquen <strong>sota demanda</strong> per evitar malbaratament.
-                    Això significa que cada peça es crea específicament per a tu després de fer la comanda.
+                    Això significa que cada peça es crea específicament després de fer la comanda.
                     El temps de producció és de <strong>2-5 dies laborables</strong>.
                   </p>
                 </div>
@@ -154,8 +154,8 @@ function ShippingPage() {
                     Seguiment de Comanda
                   </h3>
                   <p className="font-roboto text-[13pt] text-gray-700 leading-relaxed mb-3">
-                    Rebràs un email amb el número de seguiment tan aviat com el teu paquet s'enviï.
-                    Podràs veure l'estat de la teva comanda en temps real a través del link proporcionat.
+                    Rebreu un correu amb el número de seguiment tan aviat com el paquet s'enviï.
+                    Podreu veure l'estat de la comanda en temps real a través de l'enllaç proporcionat.
                   </p>
                   <p className="font-roboto text-[12pt] text-gray-600 italic">
                     Nota: El número de seguiment pot trigar 24-48h en activar-se al sistema del transportista.
@@ -200,7 +200,7 @@ function ShippingPage() {
                 {
                   step: 1,
                   title: 'Contacta\'ns',
-                  description: 'Envia un email a higginsgrafic@gmail.com amb el teu número de comanda i el motiu de la devolució (opcional).'
+                  description: 'Envieu un correu a higginsgrafic@gmail.com amb el número de comanda i el motiu de la devolució (opcional).'
                 },
                 {
                   step: 2,
@@ -210,7 +210,7 @@ function ShippingPage() {
                 {
                   step: 3,
                   title: 'Envia el Producte',
-                  description: 'T\'enviarem les instruccions d\'enviament. Els costos de devolució van a càrrec teu (tret de defecte del producte).'
+                  description: 'Us enviarem les instruccions d\'enviament. Els costos de devolució van a càrrec vostre (tret de defecte del producte).'
                 },
                 {
                   step: 4,
@@ -260,16 +260,16 @@ function ShippingPage() {
                 Productes Defectuosos o Danys
               </h3>
               <p className="font-roboto text-[13pt] text-red-800 leading-relaxed mb-3">
-                Si el teu producte arriba amb defectes de fabricació o danys durant el transport:
+                Si el producte arriba amb defectes de fabricació o danys durant el transport:
               </p>
               <ul className="font-roboto text-[13pt] text-red-800 leading-relaxed space-y-2 ml-6 mb-3">
                 <li>• Contacta'ns en un <strong>màxim de 7 dies</strong> a higginsgrafic@gmail.com</li>
                 <li>• Envia'ns fotos clares del defecte o dany</li>
-                <li>• T'enviarem un <strong>reemplaçament gratuït</strong></li>
-                <li>• NO cal que tornis el producte defectuós</li>
+                <li>• Us enviarem un <strong>reemplaçament gratuït</strong></li>
+                <li>• NO cal que torneu el producte defectuós</li>
               </ul>
               <p className="font-roboto text-[13pt] text-red-800 leading-relaxed">
-                Els costos d'enviament del reemplaçament van totalment a càrrec nostre. La teva satisfacció és la nostra prioritat.
+                Els costos d'enviament del reemplaçament van totalment a càrrec nostre. La satisfacció és la nostra prioritat.
               </p>
             </div>
           </motion.div>
@@ -299,7 +299,7 @@ function ShippingPage() {
                 href="/faq"
                 className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-lg font-roboto text-[14pt] font-medium hover:bg-white hover:text-gray-900 transition-colors"
               >
-                Veure FAQ
+                Vegeu les FAQ
               </a>
             </div>
           </motion.div>
