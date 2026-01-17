@@ -431,6 +431,8 @@ export default function AdidasInspiredHeader({
   onUserClick,
   forceStripeDebugHit = false,
   ignoreStripeDebugFromUrl = false,
+  stripeItemLeftOffsetPxByIndex,
+  redistributeStripeBetweenFirstAndLast = false,
 }) {
   const [active, setActive] = useState(() => {
     try {
@@ -903,6 +905,8 @@ export default function AdidasInspiredHeader({
                   onSelect={setSelectedColorSlug}
                   colorLabelBySlug={colorLabelBySlug}
                   colorButtonSrcBySlug={colorButtonSrcBySlug}
+                  itemLeftOffsetPxByIndex={stripeItemLeftOffsetPxByIndex}
+                  redistributeBetweenFirstAndLast={redistributeStripeBetweenFirstAndLast}
                   firstOffsetPx={-20}
                   lastOffsetPx={63}
                   cropFirstRightPx={20}

@@ -21,35 +21,6 @@ const demos = [
   },
 ];
 
-const routes = [
-  {
-    group: 'Demos',
-    items: demos,
-  },
-  {
-    group: 'Admin Studio',
-    items: [
-      { title: 'Admin Studio', description: 'Home (eines)', path: '/admin/studio' },
-      { title: 'Unitats de Canvi', description: 'Gestió d\'unitats (work units)', path: '/admin/studio/unitats' },
-      { title: 'Promotions', description: 'Gestor de promocions', path: '/admin/studio/promotions' },
-      { title: 'EC Config', description: 'Configuració e-commerce', path: '/admin/studio/ec-config' },
-      { title: 'System Messages', description: 'Missatges del sistema', path: '/admin/studio/system-messages' },
-      { title: 'Media', description: 'Gestor de media', path: '/admin/studio/media' },
-      { title: 'Visual Optimizer', description: 'Optimització visual', path: '/admin/studio/visual-optimizer' },
-      { title: 'Hero', description: 'Configuració del hero', path: '/admin/studio/hero' },
-      { title: 'Collections', description: 'Configuració de col·leccions', path: '/admin/studio/collections' },
-      { title: 'Mockups', description: 'Gestor de mockups', path: '/admin/studio/mockups' },
-      { title: 'Upload', description: 'Pujada de fitxers', path: '/admin/studio/upload' },
-      { title: 'Fulfillment', description: 'Gestió de productes Gelato', path: '/admin/studio/fulfillment' },
-      { title: 'Fulfillment Settings', description: 'Configuració API/Store Gelato', path: '/admin/studio/fulfillment-settings' },
-      { title: 'Gelato Sync', description: 'Sincronització Gelato', path: '/admin/studio/gelato-sync' },
-      { title: 'Gelato Blank', description: 'Productes blanc Gelato', path: '/admin/studio/gelato-blank' },
-      { title: 'Gelato Templates', description: 'Plantilles Gelato', path: '/admin/studio/gelato-templates' },
-      { title: 'Products Overview', description: 'Visió general productes', path: '/admin/studio/products-overview' },
-    ],
-  },
-];
-
 export default function AdminDemosPage() {
   const copyUrl = async (path) => {
     const fullUrl = `${window.location.origin}${path}`;
@@ -100,69 +71,39 @@ export default function AdminDemosPage() {
 
       <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-md">
         <div className="text-sm font-semibold text-gray-900">Demos disponibles</div>
-        <div className="mt-1 text-xs text-gray-600">Accés ràpid a totes les pàgines demo.</div>
+        <div className="mt-1 text-xs text-gray-600">Accés ràpid + URL copiables.</div>
 
-        <div className="mt-4 divide-y divide-gray-100">
+        <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {demos.map((demo) => (
-            <div key={demo.path} className="flex items-center justify-between gap-4 py-3">
+            <div key={demo.path} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
               <div className="min-w-0">
                 <div className="text-sm font-semibold text-gray-900 truncate">{demo.title}</div>
                 <div className="mt-0.5 text-xs text-gray-600">{demo.description}</div>
-                <div className="mt-1 text-[11px] text-gray-400 font-mono">{demo.path}</div>
+                <div className="mt-2 text-[11px] text-gray-400 font-mono">{demo.path}</div>
               </div>
 
-              <Link
-                to={demo.path}
-                className="shrink-0 inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-xs font-medium text-white hover:bg-black/90"
-              >
-                Obrir
-                <ExternalLink className="h-3.5 w-3.5" />
-              </Link>
+              <div className="mt-3 flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => copyUrl(demo.path)}
+                  className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-3 py-2 text-xs font-medium text-black/80 hover:bg-black/5"
+                  aria-label={`Copiar ${demo.path}`}
+                  title="Copiar URL"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  Copiar
+                </button>
+                <Link
+                  to={demo.path}
+                  className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-xs font-medium text-white hover:bg-black/90"
+                >
+                  Obrir
+                  <ExternalLink className="h-3.5 w-3.5" />
+                </Link>
+              </div>
             </div>
           ))}
         </div>
-      </div>
-
-      <div className="mt-6 rounded-2xl border border-gray-200 bg-white p-5 shadow-md">
-        <div className="text-sm font-semibold text-gray-900">Rutes</div>
-        <div className="mt-1 text-xs text-gray-600">Rutes copiables per obrir-les o compartir-les.</div>
-
-        {routes.map((section) => (
-          <div key={section.group} className="mt-5">
-            <div className="text-xs font-semibold tracking-[0.16em] text-black/50">{section.group}</div>
-            <div className="mt-2 divide-y divide-gray-100">
-              {section.items.map((r) => (
-                <div key={`${section.group}-${r.path}`} className="flex items-center justify-between gap-4 py-3">
-                  <div className="min-w-0">
-                    <div className="text-sm font-semibold text-gray-900 truncate">{r.title}</div>
-                    <div className="mt-0.5 text-xs text-gray-600">{r.description}</div>
-                    <div className="mt-1 text-[11px] text-gray-400 font-mono">{r.path}</div>
-                  </div>
-
-                  <div className="shrink-0 flex items-center gap-2">
-                    <button
-                      type="button"
-                      onClick={() => copyUrl(r.path)}
-                      className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-3 py-2 text-xs font-medium text-black/80 hover:bg-black/5"
-                      aria-label={`Copiar ${r.path}`}
-                      title="Copiar URL"
-                    >
-                      <Copy className="h-3.5 w-3.5" />
-                      Copiar
-                    </button>
-                    <Link
-                      to={r.path}
-                      className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-xs font-medium text-white hover:bg-black/90"
-                    >
-                      Obrir
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
       </div>
     </>
   );

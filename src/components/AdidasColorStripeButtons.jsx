@@ -7,6 +7,8 @@ export default function AdidasColorStripeButtons({
   onSelect,
   colorLabelBySlug,
   colorButtonSrcBySlug,
+  itemLeftOffsetPxByIndex,
+  redistributeBetweenFirstAndLast = false,
   firstOffsetPx = -20,
   lastOffsetPx = 50,
   cropFirstRightPx = 20,
@@ -85,7 +87,18 @@ export default function AdidasColorStripeButtons({
     >
       {items.map((slug, idx) => {
         const src = colorButtonSrcBySlug?.[slug];
-        const left = firstOffsetPx + idx * stepEq;
+        const lastIdx = Math.max(0, items.length - 1);
+        const offsetThis = Number.isFinite(itemLeftOffsetPxByIndex?.[idx]) ? itemLeftOffsetPxByIndex[idx] : 0;
+        const offsetFirst = Number.isFinite(itemLeftOffsetPxByIndex?.[0]) ? itemLeftOffsetPxByIndex[0] : 0;
+        const offsetLast = Number.isFinite(itemLeftOffsetPxByIndex?.[lastIdx]) ? itemLeftOffsetPxByIndex[lastIdx] : 0;
+
+        const baseLeft = firstOffsetPx + idx * stepEq;
+        const left0 = firstOffsetPx + offsetFirst;
+        const leftLast = firstOffsetPx + lastIdx * stepEq + offsetLast;
+
+        const left = redistributeBetweenFirstAndLast && lastIdx > 0 && idx !== 0 && idx !== lastIdx
+          ? left0 + (idx / lastIdx) * (leftLast - left0)
+          : baseLeft + offsetThis;
         const firstClip = `inset(0 0 0 ${cropRightPx}px)`;
         const shouldClip = idx === 0 && cropRightPx > 0;
         const isSelected = selectedColorSlug === slug;

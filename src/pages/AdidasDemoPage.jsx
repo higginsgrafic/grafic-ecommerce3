@@ -34,9 +34,18 @@ function PlaceholderMedia({ label }) {
 export default function AdidasDemoPage() {
   const [stripeDebugHit, setStripeDebugHit] = useState(false);
 
+  const stripeItemLeftOffsetPxByIndex = {
+    13: -12,
+  };
+
   return (
     <div className="min-h-screen bg-white">
-      <AdidasInspiredHeader forceStripeDebugHit={stripeDebugHit} ignoreStripeDebugFromUrl />
+      <AdidasInspiredHeader
+        forceStripeDebugHit={stripeDebugHit}
+        ignoreStripeDebugFromUrl
+        stripeItemLeftOffsetPxByIndex={stripeItemLeftOffsetPxByIndex}
+        redistributeStripeBetweenFirstAndLast
+      />
 
       <div className="fixed bottom-4 right-4 z-[9999]">
         <button

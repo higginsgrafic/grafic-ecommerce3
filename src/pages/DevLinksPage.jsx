@@ -49,6 +49,21 @@ export default function DevLinksPage() {
     LEGACY: 'border-black/20 bg-black/5 text-black/70',
   };
 
+  const pickPrimaryTag = (tags) => {
+    const order = ['ADMIN', 'DEMO', 'DEV', 'UTIL', 'WIP', 'TMP', 'LEGACY'];
+    const set = new Set(Array.isArray(tags) ? tags : []);
+    for (const t of order) {
+      if (set.has(t)) return t;
+    }
+    return Array.isArray(tags) && tags.length ? tags[0] : '';
+  };
+
+  const getTagTextClass = (tag) => {
+    const raw = badgeClassByTag[tag] || '';
+    const cls = raw.split(' ').find((c) => c.startsWith('text-'));
+    return cls || 'text-black/60';
+  };
+
   const groups = useMemo(
     () => [
       {
@@ -141,40 +156,36 @@ export default function DevLinksPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="h-screen overflow-y-auto bg-white">
       <SEO title="Dev links" description="Índex d'enllaços ràpids" />
 
-      <div className="mx-auto w-full max-w-5xl px-4 py-8">
-        <div className="text-xs font-semibold tracking-[0.18em] text-black/50">DEV</div>
-        <h1 className="mt-2 text-2xl font-semibold text-black">Índex</h1>
-        <div className="mt-1 text-sm text-black/55">Links ràpids a pàgines útils del projecte.</div>
-
-        <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-black/10 bg-white p-4 shadow-sm">
-          <div className="text-sm text-black/70">
-            Seleccionats: <span className="font-semibold text-black">{selectedPaths.length}</span> / {allPaths.length}
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2">
+      <div className="mx-auto w-full px-4 pt-[25px] pb-3">
+        <div className="flex items-center justify-center">
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <div className="text-xs text-black/65">
+              <span className="font-semibold text-black">{selectedPaths.length}</span>/{allPaths.length}
+              <span className="ml-1">seleccionats</span>
+            </div>
             <button
               type="button"
-              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-black/80 hover:bg-black/5"
+              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-black/80 hover:border-black/40"
               onClick={() => setAllSelected(true)}
             >
-              Seleccionar tot
+              Seleccioneu-ho tot
             </button>
             <button
               type="button"
-              className="rounded-full border border-black/10 bg-white px-4 py-2 text-xs font-semibold text-black/80 hover:bg-black/5"
+              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-black/80 hover:border-black/40"
               onClick={() => setAllSelected(false)}
             >
-              Netejar
+              Netegeu
             </button>
             <button
               type="button"
-              className="rounded-full border border-black/10 bg-black px-4 py-2 text-xs font-semibold text-white hover:bg-black/90"
+              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-black hover:border-black/40"
               onClick={copySelected}
             >
-              Copiar seleccionats
+              Copieu ítems
             </button>
 
             {copyStatus !== 'idle' && (
@@ -187,70 +198,66 @@ export default function DevLinksPage() {
           </div>
         </div>
 
-        <div className="mt-6 grid grid-cols-1 gap-6 md:grid-cols-2">
+        <div className="mt-[25px] grid grid-cols-1 gap-6 md:grid-cols-3">
           {groups.map((group) => (
-            <div key={group.title} className="rounded-2xl border border-black/10 bg-white p-5 shadow-sm">
-              <div className="text-sm font-semibold text-black/80">{group.title}</div>
+            <div key={group.title}>
+              <div className="text-center">
+                <div className="text-sm font-semibold text-black">
+                  {group.title}
+                  <span className="mx-2 text-black/25">·</span>
+                  <span className="text-[11px] font-semibold text-black/45">{group.items.length}</span>
+                </div>
+              </div>
 
-              <div className="mt-3 flex flex-col gap-2">
+              <div className="mt-2 flex flex-col gap-1">
                 {group.items.map((item) => {
                   const active = location.pathname === item.path;
                   const tags = getTagsForPath(item.path, group.title, item.tags);
                   const selected = !!selectedByPath[item.path];
+                  const primaryTag = pickPrimaryTag(tags);
                   return (
                     <div
                       key={item.path}
-                      className={`rounded-lg border px-3 py-2 text-sm transition-colors ${
-                        active
-                          ? 'border-[#337AC6]/40 bg-[#337AC6]/10 text-[#0f172a]'
-                          : 'border-black/10 bg-white text-black/75 hover:bg-black/5'
+                      className={`grid items-center gap-x-3 gap-y-1 py-1 ${
+                        active ? 'text-black' : 'text-black/75 hover:text-black'
                       }`}
+                      style={{ gridTemplateColumns: 'minmax(160px,1fr) 56px 28px minmax(200px,1.2fr)' }}
                     >
-                      <div className="flex items-center justify-between gap-3">
-                        <div className="flex min-w-0 items-center gap-2">
-                          <label
-                            className="flex h-7 w-7 cursor-pointer items-center justify-center rounded-md border border-black/10 bg-white text-black/70 hover:bg-black/5"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            aria-label={selected ? 'Desseleccionar' : 'Seleccionar'}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={selected}
-                              onChange={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                                toggleSelected(item.path);
-                              }}
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                              className="h-4 w-4"
-                            />
-                          </label>
-
-                          <Link to={item.path} className="min-w-0">
-                            <div className="min-w-0 truncate font-medium">{item.label}</div>
-                          </Link>
-
-                          <div className="flex flex-wrap items-center gap-1">
-                            {tags.map((t) => (
-                              <span
-                                key={t}
-                                className={`inline-flex items-center rounded-full border px-2 py-[2px] text-[10px] font-semibold leading-none ${
-                                  badgeClassByTag[t] || 'border-black/10 bg-black/5 text-black/70'
-                                }`}
-                              >
-                                {t}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                        <div className="text-[11px] text-black/40">{item.path}</div>
+                      <div className="min-w-0 text-right font-mono text-[11px] text-black/45 truncate" title={item.path}>
+                        {item.path}
                       </div>
+
+                      <div className={`justify-self-center text-center text-[10px] font-semibold ${getTagTextClass(primaryTag)}`}>
+                        {primaryTag || ''}
+                      </div>
+
+                      <label
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center text-black/70"
+                        onClick={(e) => {
+                          e.preventDefault();
+                          e.stopPropagation();
+                        }}
+                        aria-label={selected ? 'Desmarqueu' : 'Marqueu'}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selected}
+                          onChange={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            toggleSelected(item.path);
+                          }}
+                          onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                          }}
+                          className="h-4 w-4"
+                        />
+                      </label>
+
+                      <Link to={item.path} className="min-w-0">
+                        <div className="min-w-0 truncate text-sm font-medium">{item.label}</div>
+                      </Link>
                     </div>
                   );
                 })}
