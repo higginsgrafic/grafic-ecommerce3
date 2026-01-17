@@ -56,7 +56,7 @@ export const systemMessages = {
     deleteError: 'No s\'ha pogut esborrar el fitxer',
     loadError: 'No s\'han pogut carregar els fitxers',
     formatInvalid: 'Format no vàlid',
-    formatInvalidDescription: 'Si us plau, selecciona fitxers d\'imatge, vídeo, àudio o PDF',
+    formatInvalidDescription: 'Si us plau, seleccioneu fitxers d\'imatge, vídeo, àudio o PDF',
     someIgnored: 'Alguns fitxers s\'han ignorat',
     someIgnoredDescription: '{count} fitxer(s) no tenen un format vàlid',
     urlCopied: 'URL copiada',
@@ -72,7 +72,7 @@ export const systemMessages = {
     addedToCartDescription: '{productName} s\'ha afegit al cistell',
     removedFromCart: 'Eliminat del cistell',
     outOfStock: 'No disponible',
-    selectSize: 'Selecciona una talla',
+    selectSize: 'Seleccioneu una talla',
   },
 
   cart: {
@@ -85,7 +85,7 @@ export const systemMessages = {
   checkout: {
     processing: 'Processant la comanda...',
     success: 'Comanda realitzada amb èxit',
-    error: 'Hi ha hagut un problema a l\'hora de processar la teva comanda. Si et plau, torna-ho a provar.',
+    error: 'Hi ha hagut un problema a l\'hora de processar la comanda. Si us plau, torneu-ho a provar.',
     invalidEmail: 'Correu electrònic no vàlid',
     invalidCard: 'Targeta no vàlida',
     fieldRequired: 'Aquest camp és obligatori',
@@ -120,9 +120,9 @@ export const systemMessages = {
 
   confirmation: {
     deleteTitle: 'Confirmar eliminació',
-    deleteMessage: 'Estàs segur que vols eliminar aquest element?',
-    unsavedChanges: 'Tens canvis sense desar',
-    unsavedChangesMessage: 'Si surts ara, perdràs els canvis no desats.',
+    deleteMessage: 'Segur que voleu eliminar aquest element?',
+    unsavedChanges: 'Hi ha canvis sense desar',
+    unsavedChangesMessage: 'Si sortiu ara, es perdran els canvis no desats.',
     confirm: 'Confirmar',
     cancel: 'Cancel·lar',
   },

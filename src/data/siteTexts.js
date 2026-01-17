@@ -3,7 +3,7 @@ export const siteTexts = {
   offersHeader: {
     freeShipping: "Enviament gratuït",
     wpThemeReady: "🎉 Tema WordPress llest!",
-    downloadTheme: "📥 Descarrega Tema (343 KB)",
+    downloadTheme: "📥 Descarregueu el tema (343 KB)",
     moreInfo: "Més informació"
   },
 
@@ -20,7 +20,7 @@ export const siteTexts = {
       altFull: "Cistell amb productes",
       altEmpty: "Cistell buit",
       srOnly: "Cistell",
-      openMenu: "Obre el menú"
+      openMenu: "Obriu el menú"
     }
   },
 
@@ -29,11 +29,11 @@ export const siteTexts = {
     slides: {
       firstContact: {
         title: "FIRST CONTACT",
-        subtitle: "Només tu ets conscient de què comporta aquest viatge."
+        subtitle: "Només sou conscients de què comporta aquest viatge."
       },
       theHumanInside: {
         title: "THE HUMAN INSIDE",
-        subtitle: "En el racó més profund del teu ésser hi ha un heroi."
+        subtitle: "En el racó més profund del vostre ésser hi ha un heroi."
       },
       austen: {
         title: "AUSTEN",
@@ -57,8 +57,8 @@ export const siteTexts = {
       description: "Xafardegeu la nostra col·lecció exclusiva de samarretes amb il·lustracions úniques i d'autor. Qualitat prèmium, dissenys minimalistes, samarretes ajustades i còmodes."
     },
     sections: {
-      firstContactDesc: "Només tu ets conscient de què comporta aquest viatge.",
-      theHumanInsideDesc: "En el racó més profund del teu ésser hi ha un heroi.",
+      firstContactDesc: "Només sou conscients de què comporta aquest viatge.",
+      theHumanInsideDesc: "En el racó més profund del vostre ésser hi ha un heroi.",
       austenDesc: "Les coses que s'han de dir, dites amb elegància, sonen més bé.",
       cubeDesc: "En el fons, tots som una mica estranys als nostres ulls.",
       outcastedDesc: "Més val sol que mal acompanyat."
@@ -68,8 +68,8 @@ export const siteTexts = {
   // PRODUCT CARD
   productCard: {
     productName: "MASCHINENMENSCH",
-    addToCart: "Afegeix-ho al cistell",
-    addToCartAlt: "Afegeix-ho al cistell",
+    addToCart: "Afegiu-ho al cistell",
+    addToCartAlt: "Afegiu-ho al cistell",
     sizes: {
       s: "S",
       m: "M",
@@ -80,7 +80,7 @@ export const siteTexts = {
 
   // CART SIDEBAR
   cart: {
-    title: "El teu cistell",
+    title: "El vostre cistell",
     sorting: {
       none: "Sense ordenar",
       design: "Ordena-ho pel disseny",
@@ -92,8 +92,8 @@ export const siteTexts = {
     empty: {
       altImage: "Cistell buit",
       title: "El cistell és buit",
-      message: "Afegeix-hi un producte",
-      continueShopping: "Continua la comanda"
+      message: "Afegiu-hi un producte",
+      continueShopping: "Continueu la compra"
     },
     actions: {
       remove: "Elimina-ho",
@@ -101,24 +101,24 @@ export const siteTexts = {
       increase: "Augmenta la quantitat"
     },
     total: "Tot plegat fa",
-    goToCart: "Ves al cistell"
+    goToCart: "Aneu al cistell"
   },
 
   // CART PAGE
   cartPage: {
     seo: {
       title: "Cistell | GRÀFC",
-      description: "Revisa els teus productes"
+      description: "Reviseu els productes"
     },
-    title: "El teu Cistell",
-    subtitle: "Revisa els teus productes abans de continuar",
+    title: "El vostre cistell",
+    subtitle: "Reviseu els productes abans de continuar",
     empty: {
       altImage: "Cistell buit",
       title: "El cistell és buit",
-      message: "Encara no has afegit res al teu cistell.",
+      message: "Encara no heu afegit res al cistell.",
       backToStore: "Tornar a la Botiga"
     },
-    cartTitle: "El teu Cistell",
+    cartTitle: "El vostre cistell",
     size: "Talla:",
     remove: "Elimina-ho",
     decreaseQty: "Redueix la quantitat",
@@ -127,9 +127,9 @@ export const siteTexts = {
     shipping: "Enviament",
     free: "Gratuït",
     total: "Tot plegat fa",
-    addMoreForFreeShipping: "Afegeix-hi {amount} € més per tenir l'enviament gratuït",
-    continueToCheckout: "Continua amb el pagament",
-    continueShopping: "Continua comprant!",
+    addMoreForFreeShipping: "Afegiu-hi {amount} € més per tenir l'enviament gratuït",
+    continueToCheckout: "Continueu amb el pagament",
+    continueShopping: "Continueu comprant!",
     itemsInCart: "{count} producte",
     itemsInCartPlural: "{count} productes",
     orderSummary: "L'estat de la comanda"
@@ -143,7 +143,7 @@ export const siteTexts = {
       email: "Correu electrònic"
     },
     shipping: {
-      title: "On t'ho enviem?",
+      title: "On l'enviem?",
       firstName: "Nom",
       lastName: "Cognoms",
       address: "Adreça",
@@ -165,9 +165,9 @@ export const siteTexts = {
     },
     actions: {
       processing: "Processant...",
-      pay: "Tot plegat fa {amount}€"
+      pay: "Pagueu {amount}€"
     },
-    error: "Hi ha hagut un problema a l'hora de processar la teva comanda. Si et plau, torna-ho a provar."
+    error: "Hi ha hagut un problema a l'hora de processar la comanda. Si us plau, torneu-ho a provar."
   },
 
   // COLLECTION PAGES
@@ -186,7 +186,7 @@ export const siteTexts = {
         description: "Dibuixos inspirats en les icones més rellevants del segle XX"
       },
       title: "The Human Inside",
-      description: "Tots duem una màscara, quina és la teva?"
+      description: "Tots duem una màscara, quina és la vostra?"
     },
     austen: {
       seo: {
@@ -202,7 +202,7 @@ export const siteTexts = {
         description: "Dibuixos inspirats en les icones més rellevants del segle XX"
       },
       title: "Cube",
-      description: "Quan fa massa temps que els teus herois són a la capsa..."
+      description: "Quan fa massa temps que els vostres herois són a la capsa..."
     },
     outcasted: {
       seo: {
@@ -258,11 +258,11 @@ export const siteTexts = {
   notFound: {
     seo: {
       title: "404 - Pel que sembla, aquesta pàgina és fugissera i no es deixa trobar | GRÀFIC",
-      description: "La pàgina que busques no existeix."
+      description: "La pàgina que cerqueu no existeix."
     },
     number: "404",
     title: "El sistema no ha trobat la pàgina.",
-    message: "Ens sap greu, però la pàgina que busques o bé no existeix o ha estat moguda.",
+    message: "Ens sap greu, però la pàgina que cerqueu o bé no existeix o ha estat moguda.",
     backHome: "Torna a l'inici",
     viewCollections: "Col·leccions"
   },
@@ -270,7 +270,7 @@ export const siteTexts = {
   // ERROR BOUNDARY
   errorBoundary: {
     title: "Ui...! Què passa ara?",
-    message: "Ens sap greu, però s'ha produït un error d'aquells en què el sistema no sap què fer. Si et plau, torna a l'inici o refresca la pàgina.",
+    message: "Ens sap greu, però s'ha produït un error d'aquells en què el sistema no sap què fer. Si us plau, torneu a l'inici o refresqueu la pàgina.",
     detailsTitle: "Detalls de l'error (només pel desenvolupador)",
     backHome: "Torna a l'inici",
     refresh: "Refresca la pàgina"

@@ -27,7 +27,7 @@ export const ca = {
   offersHeader: {
     freeShipping: 'Enviament gratuït en comandes superiors a 50€',
     wpThemeReady: '🎉 Tema WordPress de GRÀFIC disponible!',
-    downloadTheme: 'Descarregar Tema',
+    downloadTheme: 'Descarregueu el tema',
     moreInfo: 'Més informació',
   },
 
@@ -36,7 +36,7 @@ export const ca = {
     cart: {
       altEmpty: 'Cistell buit',
       altFull: 'Cistell amb productes',
-      srOnly: 'Veure cistell',
+      srOnly: 'Vegeu el cistell',
       openMenu: 'Obrir menú',
     },
     menu: 'Menú',
@@ -57,7 +57,7 @@ export const ca = {
   },
 
   product: {
-    addToCart: 'Afegir al cistell',
+    addToCart: 'Afegiu al cistell',
     size: 'Talla',
     price: 'Preu',
     description: 'Descripció',
@@ -65,21 +65,21 @@ export const ca = {
   },
 
   cart: {
-    title: 'El teu cistell',
+    title: 'El vostre cistell',
     empty: 'El cistell està buit',
     subtotal: 'Subtotal',
     shipping: 'Enviament',
     total: 'Total',
     freeShipping: 'Enviament gratuït',
-    checkout: 'Finalitzar compra',
-    continueShopping: 'Continuar comprant',
+    checkout: 'Finalitzeu la compra',
+    continueShopping: 'Continueu comprant',
     remove: 'Eliminar',
     quantity: 'Quantitat',
   },
 
   checkout: {
-    title: 'Checkout Segur',
-    subtitle: 'Completa la teva comanda de manera segura',
+    title: 'Pagament segur',
+    subtitle: 'Completeu la vostra comanda de manera segura',
     contact: 'Contacte',
     email: 'Correu electrònic',
     shipping: 'Adreça d\'Enviament',
@@ -93,9 +93,9 @@ export const ca = {
     cardNumber: 'Número de Targeta',
     expiryDate: 'MM/AA',
     cvv: 'CVV',
-    payNow: 'Pagar {amount} €',
+    payNow: 'Pagueu {amount} €',
     processing: 'Processant...',
-    securePayment: 'Les teves dades estan protegides amb encriptació SSL',
+    securePayment: 'Les vostres dades estan protegides amb encriptació SSL',
     orderSummary: 'Resum de la Comanda',
   },
 
@@ -150,18 +150,18 @@ export const ca = {
   collections: {
     firstContact: {
       title: 'FIRST CONTACT',
-      description: 'Només tu entens tot el que comporta aquest viatge.',
+      description: 'Només enteneu tot el que comporta aquest viatge.',
       seo: {
         title: 'First Contact - GRÀFIC',
-        description: 'Només tu entens tot el que comporta aquest viatge.',
+        description: 'Només enteneu tot el que comporta aquest viatge.',
       },
     },
     theHumanInside: {
       title: 'THE HUMAN INSIDE',
-      description: 'En el racó més profund i fosc hi reposa el teu heroi.',
+      description: 'En el racó més profund i fosc hi reposa el vostre heroi.',
       seo: {
         title: 'The Human Inside - GRÀFIC',
-        description: 'En el racó més profund i fosc hi reposa el teu heroi.',
+        description: 'En el racó més profund i fosc hi reposa el vostre heroi.',
       },
     },
     austen: {
@@ -196,8 +196,8 @@ export const ca = {
       description: 'Descobreix les nostres col·leccions exclusives de roba amb dissenys únics i originals.',
     },
     sections: {
-      firstContactDesc: 'Només tu entens tot el que comporta aquest viatge.',
-      theHumanInsideDesc: 'En el racó més profund i fosc hi reposa el teu heroi.',
+      firstContactDesc: 'Només enteneu tot el que comporta aquest viatge.',
+      theHumanInsideDesc: 'En el racó més profund i fosc hi reposa el vostre heroi.',
       austenDesc: 'Detesto sentir-vos parlar de les dones com si fossin unes pàmfiles irracionals que volen estar en aigües tranquil·les tota la vida.',
       cubeDesc: 'En el fons tots som uns estranys a ulls nostres.',
       outcastedDesc: 'Ja se sap, més val sol que mal acompanyat.',
@@ -208,11 +208,11 @@ export const ca = {
     slides: {
       firstContact: {
         title: 'FIRST CONTACT',
-        subtitle: 'Només tu entens tot el que comporta aquest viatge.',
+        subtitle: 'Només enteneu tot el que comporta aquest viatge.',
       },
       theHumanInside: {
         title: 'THE HUMAN INSIDE',
-        subtitle: 'En el racó més profund i fosc hi reposa el teu heroi.',
+        subtitle: 'En el racó més profund i fosc hi reposa el vostre heroi.',
       },
       austen: {
         title: 'AUSTEN',
