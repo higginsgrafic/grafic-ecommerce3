@@ -15,12 +15,12 @@ import OffersHeader from '@/components/OffersHeader';
 import AdminBanner from '@/components/AdminBanner';
 import Header from '@/components/Header';
 import NikeInspiredHeader from '@/components/NikeInspiredHeader';
+import DevHeader from '@/components/DevHeader';
 import ScrollToTop from '@/components/ScrollToTop';
 import Footer from '@/components/Footer';
 import Cart from '@/components/Cart';
 import UserSidebar from '@/components/UserSidebar';
 import Checkout from '@/components/Checkout';
-import AdminStudioLayout from '@/components/AdminStudioLayout';
 import SupabaseCollectionRoute from '@/pages/SupabaseCollectionRoute.jsx';
 import DevGuidesOverlay from '@/components/DevGuidesOverlay.jsx';
 
@@ -75,6 +75,7 @@ const ProductsOverviewPage = lazy(() => import('@/pages/ProductsOverviewPage'));
 const GelatoBlankProductsPage = lazy(() => import('@/pages/GelatoBlankProductsPage'));
 const AdminUploadPage = lazy(() => import('@/pages/AdminUploadPage'));
 const UnitatsCanviPage = lazy(() => import('@/pages/UnitatsCanviPage'));
+const RuletaDemoPage = lazy(() => import('@/pages/RuletaDemoPage'));
 
 const NikeTambePage = lazy(() => import('@/pages/NikeTambePage.jsx'));
 const AdidasDemoPage = lazy(() => import('@/pages/AdidasDemoPage'));
@@ -624,17 +625,20 @@ function App() {
   };
 
   const isFullScreenRoute = location.pathname === '/ec-preview' || location.pathname === '/ec-preview-lite';
-  const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
+  const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings', '/admin/draft/ruleta'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
   const isHeroSettingsDevRoute = location.pathname === '/hero-settings';
+  const isDevLinksRoute = location.pathname === '/dev-links';
+  const isDevToolsRoute = isDevLinksRoute || location.pathname === '/adidas-stripe-zoom-dev';
   // DEV layout routes: hide offers/footer, show AdminBanner, etc.
-  const isDevLayoutRoute = isHeroSettingsDevRoute || isDevDemoRoute;
+  const isDevLayoutRoute = isHeroSettingsDevRoute || isDevDemoRoute || isDevToolsRoute;
   // DEV header routes: inject the global white DEV header with links.
   // EXCEPTIONS: header-demo pages keep their own headers, so don't override them.
   const isDevHeaderRoute =
     isHeroSettingsDevRoute ||
+    isDevToolsRoute ||
     (isDevDemoRoute && !isAdidasDemoRoute && !isNikeHeroDemoRoute);
 
-  const isAdminStudioRoute = location.pathname.startsWith('/admin/studio');
+  const isAdminStudioRoute = location.pathname.startsWith('/admin');
   const devHeaderVisible = !isFullScreenRoute && (isDevHeaderRoute || isAdminStudioRoute);
 
   const offersHeaderVisible = !isAdminRoute && !isFullScreenRoute && !isDevLayoutRoute && offersEnabled && !offersLoading;
@@ -662,15 +666,12 @@ function App() {
       )}
 
       {devHeaderVisible && (
-        <div className="fixed left-0 right-0 z-[20000] bg-white border-b border-gray-200" style={{ top: `${adminBannerHeight}px` }}>
-        <div className="max-w-[1400px] mx-auto px-6 md:px-12 h-16 lg:h-20 flex items-center gap-2 text-xs text-gray-700">
-          <button type="button" onClick={() => navigate('/nike-tambe')} className="hover:text-black">Nike També</button>
-          <span className="text-gray-300">/</span>
-          <button type="button" onClick={() => navigate('/adidas-demo')} className="hover:text-black">Adidas</button>
-          <span className="text-gray-300">/</span>
-          <button type="button" onClick={() => navigate('/hero-settings')} className="hover:text-black">Hero Settings</button>
-        </div>
-      </div>
+        <DevHeader
+          adminBannerHeight={adminBannerHeight}
+          cartItemCount={getTotalItems()}
+          onCartClick={() => setIsCartOpen(true)}
+          onUserClick={() => setIsUserSidebarOpen(true)}
+        />
       )}
 
       {/* Main Header - NO mostrar a pàgines full-screen ni admin ni a dev tools */}
@@ -899,6 +900,8 @@ function App() {
                 <Route path="/status" element={<OrderStatusPage />} />
                 <Route path="/track" element={<OrderTrackingPage />} />
 
+                <Route path="/ruleta-demo" element={<Navigate to="/admin/draft/ruleta" replace />} />
+
                 {/* Full Screen Media Page */}
                 <Route path="/ec-preview" element={<Navigate to="/ec-preview-lite" replace />} />
 
@@ -918,43 +921,40 @@ function App() {
                 {/* Admin Login - Login d'administrador */}
                 <Route path="/admin-login" element={<AdminLoginPage />} />
 
-                {/* Admin Studio - Multi-page under /admin/... */}
-                <Route path="/admin" element={<AdminDemosPage />} />
+                {/* Admin - Single entry point under /admin */}
+                <Route path="/admin" element={<AdminStudioHomePage />} />
+                <Route path="/admin/draft" element={<Navigate to="/admin/draft/ruleta" replace />} />
+                <Route path="/admin/demos" element={<AdminDemosPage />} />
+                <Route path="/admin/index" element={<IndexPage />} />
+                <Route path="/admin/promotions" element={<PromotionsManagerPage />} />
+                <Route path="/admin/ec-config" element={<ECConfigPage />} />
+                <Route path="/admin/system-messages" element={<SystemMessagesPage />} />
+                <Route path="/admin/media" element={<AdminMediaPage />} />
+                <Route path="/admin/hero" element={<HeroSettingsPage />} />
+                <Route path="/admin/collections" element={<ColleccioSettingsPage {...pageProps} />} />
+                <Route path="/admin/mockups" element={<MockupsManagerPage />} />
+                <Route path="/admin/upload" element={<AdminUploadPage />} />
+                <Route path="/admin/fulfillment" element={<FulfillmentPage />} />
+                <Route path="/admin/fulfillment-settings" element={<FulfillmentSettingsPage />} />
+                <Route path="/admin/gelato-sync" element={<GelatoProductsManagerPage />} />
+                <Route path="/admin/gelato-blank" element={<GelatoBlankProductsPage />} />
+                <Route path="/admin/gelato-templates" element={<GelatoTemplatesPage />} />
+                <Route path="/admin/products-overview" element={<ProductsOverviewPage />} />
+                <Route path="/admin/unitats" element={<UnitatsCanviPage />} />
+                <Route path="/admin/draft/ruleta" element={<RuletaDemoPage />} />
 
-                <Route path="/admin/studio" element={<AdminStudioLayout />}>
-                  <Route index element={<AdminStudioHomePage />} />
-                  <Route path="demos" element={<AdminDemosPage />} />
-                  <Route path="index" element={<IndexPage />} />
-                  <Route path="promotions" element={<PromotionsManagerPage />} />
-                  <Route path="ec-config" element={<ECConfigPage />} />
-                  <Route path="system-messages" element={<SystemMessagesPage />} />
-                  <Route path="media" element={<AdminMediaPage />} />
-                  <Route path="hero" element={<HeroSettingsPage />} />
-                  <Route path="collections" element={<ColleccioSettingsPage {...pageProps} />} />
-                  <Route path="mockups" element={<MockupsManagerPage />} />
-                  <Route path="upload" element={<AdminUploadPage />} />
-                  <Route path="fulfillment" element={<FulfillmentPage />} />
-                  <Route path="fulfillment-settings" element={<FulfillmentSettingsPage />} />
-                  <Route path="gelato-sync" element={<GelatoProductsManagerPage />} />
-                  <Route path="gelato-blank" element={<GelatoBlankProductsPage />} />
-                  <Route path="gelato-templates" element={<GelatoTemplatesPage />} />
-                  <Route path="products-overview" element={<ProductsOverviewPage />} />
-                  <Route path="unitats" element={<UnitatsCanviPage />} />
-                  <Route path="draft" element={<Navigate to="/admin/studio" replace />} />
-                  <Route path="draft/fulfillment-settings" element={<FulfillmentSettingsPage />} />
-                  <Route path="draft/mockup-settings" element={<Navigate to="/admin/studio" replace />} />
-                </Route>
-
-                {/* Legacy admin routes -> redirects to Admin Studio */}
-                <Route path="/index" element={<Navigate to="/admin/studio/index" replace />} />
-                <Route path="/promotions" element={<Navigate to="/admin/studio/promotions" replace />} />
-                <Route path="/ec-config" element={<Navigate to="/admin/studio/ec-config" replace />} />
-                <Route path="/system-messages" element={<Navigate to="/admin/studio/system-messages" replace />} />
-                <Route path="/hero-settings" element={<HeroSettingsPage />} />
-                <Route path="/colleccio-settings" element={<Navigate to="/admin/studio/collections" replace />} />
-                <Route path="/mockups" element={<Navigate to="/admin/studio/mockups" replace />} />
-                <Route path="/fulfillment" element={<Navigate to="/admin/studio/fulfillment" replace />} />
-                <Route path="/fulfillment-settings" element={<Navigate to="/admin/studio/fulfillment-settings" replace />} />
+                {/* Legacy admin routes -> redirects to /admin */}
+                <Route path="/admin/studio" element={<AdminStudioHomePage />} />
+                <Route path="/admin/studio/*" element={<Navigate to="/admin/studio" replace />} />
+                <Route path="/index" element={<Navigate to="/admin/index" replace />} />
+                <Route path="/promotions" element={<Navigate to="/admin/promotions" replace />} />
+                <Route path="/ec-config" element={<Navigate to="/admin/ec-config" replace />} />
+                <Route path="/system-messages" element={<Navigate to="/admin/system-messages" replace />} />
+                <Route path="/hero-settings" element={<Navigate to="/admin/hero" replace />} />
+                <Route path="/colleccio-settings" element={<Navigate to="/admin/collections" replace />} />
+                <Route path="/mockups" element={<Navigate to="/admin/mockups" replace />} />
+                <Route path="/fulfillment" element={<Navigate to="/admin/fulfillment" replace />} />
+                <Route path="/fulfillment-settings" element={<Navigate to="/admin/fulfillment-settings" replace />} />
 
                 <Route path="/fulfillment/:id" element={
                   <motion.div

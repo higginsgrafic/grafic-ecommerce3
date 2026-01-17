@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
-import ProductCard from '@/components/ProductCard';
 import ProductGallery from '@/components/ProductGallery';
 import ProductInfo from '@/components/ProductInfo';
 import ProductMockups from '@/components/ProductMockups';
@@ -13,6 +12,7 @@ import { trackProductView, trackAddToCart, trackAddToWishlist, trackShare } from
 import { useProductContext } from '@/contexts/ProductContext';
 import { useToast } from '@/contexts/ToastContext';
 import useProductEpisodes from '@/hooks/useProductEpisodes';
+import { useRelatedProducts } from '@/hooks/useProducts';
 import { useAdmin } from '@/contexts/AdminContext';
 
 const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, language = 'ca' }) => {
@@ -23,6 +23,8 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
   const { isAdmin } = useAdmin();
 
   const product = getProductById(id);
+
+  const tepaProducts = useRelatedProducts(product?.id, 3);
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -1024,21 +1026,66 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
     }
   };
 
-  const relatedCollections = Array.from(
-    new Set(
-      products
-        .map((p) => p.collection)
-        .filter((c) => c && c !== product.collection)
-    )
-  ).slice(0, 4);
+  const normalizeText = (s) => (s || '').toString().replace(/<[^>]*>/g, '').trim();
 
-  const isTepaEnabled = false;
+  const getNikeStatus = (p) => {
+    const variants = Array.isArray(p?.variants) ? p.variants : [];
+    if (variants.length === 0) return null;
+    const available = variants.some((v) => v && v.isAvailable !== false);
+    return available ? null : 'Producte esgotat';
+  };
 
-  useEffect(() => {
-    if (!isTepaEnabled) {
-      console.warn('[TEPA] "També et podria agradar" està desactivat temporalment. Cal definir comportament i reactivar-ho abans de tancar el projecte.');
+  const getNikeSubtitle = (p) => {
+    const parts = [];
+    const base = (p?.category || '').toString().trim();
+    if (base) parts.push(base);
+    const collection = (p?.collection || '').toString().trim();
+    if (collection) parts.push(humanizeLabel(collection));
+    return parts.join(' · ');
+  };
+
+  const getUniqueColors = (p) => {
+    const variants = Array.isArray(p?.variants) ? p.variants : [];
+    const out = [];
+    const seen = new Set();
+    for (const v of variants) {
+      const c = (v?.color || '').toString().trim();
+      if (!c) continue;
+      const key = c.toLowerCase();
+      if (seen.has(key)) continue;
+      seen.add(key);
+      out.push(c);
     }
-  }, []);
+    return out;
+  };
+
+  const colorDotStyle = (colorName) => {
+    const key = (colorName || '').toString().trim().toLowerCase();
+    const map = {
+      blanc: '#ffffff',
+      white: '#ffffff',
+      negre: '#111111',
+      black: '#111111',
+      navy: '#1f2a44',
+      blau: '#1f6feb',
+      blue: '#1f6feb',
+      royal: '#2d6cff',
+      vermell: '#d11a2a',
+      red: '#d11a2a',
+      green: '#1f6f3a',
+      verd: '#1f6f3a',
+      purple: '#6b21a8',
+      lila: '#a78bfa',
+      pink: '#ec4899',
+      rosa: '#ec4899',
+      gold: '#caa24d',
+      groc: '#facc15',
+      yellow: '#facc15'
+    };
+    const bg = map[key] || '#9ca3af';
+    const border = bg === '#ffffff' ? '1px solid rgba(0,0,0,0.25)' : '1px solid rgba(0,0,0,0)';
+    return { background: bg, border };
+  };
 
   return (
     <>
@@ -1310,6 +1357,87 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
                   </div>
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {tepaProducts.length > 0 && (
+        <div className="max-w-7xl mx-auto px-4 lg:px-8">
+          <div className="border-t border-gray-200 pt-12 pb-12">
+            <h2 className="font-roboto text-[15px] font-normal mb-6" style={{ color: '#141414' }}>
+              també et pot agradar
+            </h2>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
+              {tepaProducts.slice(0, 3).map((p) => {
+                const productId = p?.id;
+                const productSlugOrId = p?.slug || productId;
+                const productUrl = productSlugOrId ? `/product/${productSlugOrId}` : '/';
+                const name = p?.name || '';
+                const subtitle = getNikeSubtitle(p);
+                const img = p?.image || p?.images?.[0] || p?.variants?.find((v) => v?.image)?.image || '/placeholder-product.svg';
+                const status = getNikeStatus(p);
+                const colors = getUniqueColors(p);
+                const colorCount = colors.length;
+                const dots = colors.slice(0, 3);
+
+                return (
+                  <Link key={productId || productSlugOrId} to={productUrl} className="block">
+                    <div className="w-full">
+                      <div className="w-full aspect-square bg-[#f5f5f5] overflow-hidden p-10">
+                        <img
+                          src={img}
+                          alt={name}
+                          className="h-full w-full object-contain"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      </div>
+
+                      <div className="mt-3">
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1">
+                            {dots.map((c) => (
+                              <span
+                                key={c}
+                                className="inline-block h-2 w-2 rounded-full"
+                                style={colorDotStyle(c)}
+                              />
+                            ))}
+                            {colorCount > 3 ? (
+                              <span className="inline-block h-2 w-2 rounded-full" style={{ background: '#6b7280' }} />
+                            ) : null}
+                          </div>
+
+                          {status ? (
+                            <div className="text-[13px] font-roboto" style={{ color: '#d11a2a' }}>
+                              {status}
+                            </div>
+                          ) : null}
+                        </div>
+
+                        <div className="mt-2">
+                          <div className="font-roboto text-[15px] font-semibold" style={{ color: '#111111' }}>
+                            {name}
+                          </div>
+                          {subtitle ? (
+                            <div className="font-roboto text-[13px]" style={{ color: '#6b7280' }}>
+                              {subtitle}
+                            </div>
+                          ) : null}
+                          <div className="mt-1 font-roboto text-[13px]" style={{ color: '#6b7280' }}>
+                            {colorCount > 0 ? `${colorCount} colors` : null}
+                          </div>
+                          <div className="mt-2 font-roboto text-[15px] font-semibold" style={{ color: '#111111' }}>
+                            {typeof p?.price === 'number' ? `${p.price.toFixed(2).replace('.', ',')} €` : null}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
           </div>
         </div>
