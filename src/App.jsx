@@ -32,12 +32,9 @@ const ProductPage = lazy(() => import('@/pages/ProductPage'));
 // Lazy loading de pàgines per millorar performance (code splitting)
 const Home = lazy(() => import('@/pages/Home'));
 const NewPage = lazy(() => import('@/pages/NewPage'));
-const OrderStatusPage = lazy(() => import('@/pages/OrderStatusPage'));
 const OrderTrackingPage = lazy(() => import('@/pages/OrderTrackingPage'));
 const CartPage = lazy(() => import('@/pages/CartPage'));
 const CheckoutPage = lazy(() => import('@/pages/CheckoutPage'));
-const WishlistPage = lazy(() => import('@/pages/WishlistPage'));
-const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const NotFoundPage = lazy(() => import('@/pages/NotFoundPage'));
 const OffersPage = lazy(() => import('@/pages/OffersPage'));
 const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
@@ -79,8 +76,13 @@ const RuletaDemoPage = lazy(() => import('@/pages/RuletaDemoPage'));
 
 const NikeTambePage = lazy(() => import('@/pages/NikeTambePage.jsx'));
 const AdidasDemoPage = lazy(() => import('@/pages/AdidasDemoPage'));
+const AdidasPdpPage = lazy(() => import('@/pages/AdidasPdpPage.jsx'));
 const AdidasStripeZoomDevPage = lazy(() => import('@/pages/AdidasStripeZoomDevPage'));
 const DevLinksPage = lazy(() => import('@/pages/DevLinksPage'));
+const TheHumanInsidePage = lazy(() => import('@/pages/TheHumanInsidePage'));
+const LabDemosPage = lazy(() => import('@/pages/LabDemosPage.jsx'));
+const LabWipPage = lazy(() => import('@/pages/LabWipPage.jsx'));
+const LabHomePage = lazy(() => import('@/pages/LabHomePage.jsx'));
 
 // Pàgines administratives
 const AppsPage = lazy(() => import('@/pages/AppsPage'));
@@ -98,6 +100,7 @@ function App() {
   const [layoutInspectorEnabled, setLayoutInspectorEnabled] = useState(false);
   const [debugCaptureClicks, setDebugCaptureClicks] = useState(false);
   const [guidesEnabled, setGuidesEnabled] = useState(false);
+  const [nikeTambeBgOn, setNikeTambeBgOn] = useState(true);
   const debugButtonsWrapRef = useRef(null);
   const [debugButtonsRect, setDebugButtonsRect] = useState({ left: 16, top: 0, width: 150, height: 60 });
   const selectedElementNodeRef = useRef(null);
@@ -246,11 +249,29 @@ function App() {
     }
   }, [shouldRedirect, redirectUrl, redirectLoading, location.pathname, navigate, bypassUnderConstruction]);
 
-  const isNikeDemoRoute = location.pathname === '/nike-tambe';
+  const isNikeDemoRoute = location.pathname === '/nike-tambe' || location.pathname.startsWith('/proves/demo-nike-tambe');
   const isNikeHeroDemoRoute = false;
-  const isAdidasDemoRoute = location.pathname === '/adidas-demo' || location.pathname.startsWith('/adidas-demo/');
+  const isAdidasDemoRoute =
+    location.pathname === '/adidas-demo' ||
+    location.pathname.startsWith('/adidas-demo/') ||
+    location.pathname === '/adidas-pdp' ||
+    location.pathname.startsWith('/adidas-pdp/') ||
+    location.pathname.startsWith('/proves/demo-adidas');
   const isDevDemoRoute = isNikeDemoRoute || isAdidasDemoRoute;
   const layoutInspectorActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && layoutInspectorEnabled;
+
+  useEffect(() => {
+    try {
+      const raw = window.localStorage.getItem('NIKE_TAMBE_BG_ON');
+      if (raw === null) {
+        setNikeTambeBgOn(true);
+        return;
+      }
+      setNikeTambeBgOn(raw === '1');
+    } catch {
+      setNikeTambeBgOn(true);
+    }
+  }, []);
 
   const [nikeDemoManualEnabled, setNikeDemoManualEnabled] = useState(false);
   const [nikeDemoPhaseOverride, setNikeDemoPhaseOverride] = useState(null);
@@ -521,7 +542,62 @@ function App() {
     const tagNameRaw = (el.tagName || '').toLowerCase();
     const idRaw = (el.getAttribute('id') || '').trim();
     const classRaw = (el.getAttribute('class') || '').replace(/\bdebug-selected\b/g, '').trim();
-    const firstClass = classRaw ? String(classRaw).split(/\s+/).filter(Boolean)[0] : '';
+    const classes = classRaw ? String(classRaw).split(/\s+/).filter(Boolean) : [];
+
+    const isTailwindUtilityClass = (cls) => {
+      if (!cls) return true;
+      if (cls === 'debug-exempt' || cls === 'debug-selected') return true;
+      if (cls.includes(':')) return true;
+      if (/^(group|peer)$/.test(cls)) return true;
+      if (/^(container)$/.test(cls)) return true;
+      if (/^(sr-only|not-sr-only)$/.test(cls)) return true;
+      if (/^(prose|dark|light)$/.test(cls)) return true;
+      return /^(mx|my|mt|mr|mb|ml|m|px|py|pt|pr|pb|pl|p|w|min-w|max-w|h|min-h|max-h|text|font|leading|tracking|uppercase|lowercase|capitalize|bg|from|via|to|border|rounded|ring|shadow|opacity|flex|inline-flex|grid|block|inline-block|hidden|items|justify|content|self|place|gap|space|order|grow|shrink|basis|overflow|relative|absolute|fixed|sticky|top|left|right|bottom|inset|z|cursor|pointer-events|select|transition|duration|ease|delay|animate|transform|origin|scale|rotate|translate|skew|blur|drop-shadow|backdrop|object|aspect|whitespace|break|truncate|antialiased|subpixel-antialiased)(-|$)/.test(cls);
+    };
+
+    const pickHumanClass = () => {
+      const candidate = classes.find((c) => !isTailwindUtilityClass(c));
+      return candidate || '';
+    };
+
+    const hintClass = pickHumanClass();
+
+    const getDataHint = (node) => {
+      if (!node || !(node instanceof Element)) return '';
+      const page = (node.getAttribute('data-page') || '').trim();
+      if (page) return `[data-page=${page}]`;
+      const section = (node.getAttribute('data-section') || '').trim();
+      if (section) return `[data-section=${section}]`;
+      const component = (node.getAttribute('data-component') || '').trim();
+      if (component) return `[data-component=${component}]`;
+      const container = (node.getAttribute('data-container') || '').trim();
+      if (container) return `[data-container=${container}]`;
+      return '';
+    };
+
+    const getAriaHint = (node) => {
+      if (!node || !(node instanceof Element)) return '';
+      const aria = (node.getAttribute('aria-label') || '').trim();
+      if (aria) return `[aria-label="${aria}"]`;
+      const role = (node.getAttribute('role') || '').trim();
+      if (role && role !== 'presentation') return `[role=${role}]`;
+      return '';
+    };
+
+    const getNodeLabel = (node) => {
+      if (!node || !(node instanceof Element)) return '';
+      const id = (node.getAttribute('id') || '').trim();
+      if (id) return `#${id}`;
+      const dataHint = getDataHint(node);
+      if (dataHint) return dataHint;
+      const ariaHint = getAriaHint(node);
+      if (ariaHint) return ariaHint;
+      const clsRaw = (node.getAttribute('class') || '').replace(/\bdebug-selected\b/g, '').trim();
+      const cls = clsRaw ? String(clsRaw).split(/\s+/).filter(Boolean) : [];
+      const humanCls = cls.find((c) => !isTailwindUtilityClass(c));
+      if (humanCls) return `.${humanCls}`;
+      return '';
+    };
 
     const buildPath = () => {
       const parts = [];
@@ -530,8 +606,13 @@ function App() {
         const tag = (cur.tagName || '').toLowerCase();
         const parent = cur.parentElement;
         const idx = parent ? Math.max(0, Array.from(parent.children).indexOf(cur)) : 0;
-        parts.unshift(`${tag}[${idx}]`);
+        const label = getNodeLabel(cur);
+        parts.unshift(label ? `${tag}${label}` : `${tag}[${idx}]`);
         if (cur.getAttribute('id')) break;
+        if (cur.getAttribute('data-page')) break;
+        if (cur.getAttribute('data-section')) break;
+        if (cur.getAttribute('data-component')) break;
+        if (cur.getAttribute('data-container')) break;
         cur = parent;
       }
       return parts.join('>');
@@ -539,8 +620,10 @@ function App() {
 
     const hint = idRaw
       ? `#${idRaw}`
-      : firstClass
-        ? `.${firstClass}`
+      : getDataHint(el)
+        ? getDataHint(el)
+      : hintClass
+        ? `.${hintClass}`
         : '';
 
     return `${buildPath()}${hint ? ` ${tagNameRaw}${hint}` : ''}`.trim();
@@ -627,8 +710,11 @@ function App() {
   const isFullScreenRoute = location.pathname === '/ec-preview' || location.pathname === '/ec-preview-lite';
   const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings', '/admin/draft/ruleta'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
   const isHeroSettingsDevRoute = location.pathname === '/hero-settings';
-  const isDevLinksRoute = location.pathname === '/dev-links';
-  const isDevToolsRoute = isDevLinksRoute || location.pathname === '/adidas-stripe-zoom-dev';
+  const isDevLinksRoute = location.pathname === '/dev-links' || location.pathname.startsWith('/proves/dev-links');
+  const isDevToolsRoute =
+    isDevLinksRoute ||
+    location.pathname === '/adidas-stripe-zoom-dev' ||
+    location.pathname.startsWith('/proves/dev-adidas-stripe-zoom');
   // DEV layout routes: hide offers/footer, show AdminBanner, etc.
   const isDevLayoutRoute = isHeroSettingsDevRoute || isDevDemoRoute || isDevToolsRoute;
   // DEV header routes: inject the global white DEV header with links.
@@ -697,7 +783,7 @@ function App() {
 
         <main
           id="main-content"
-          className={`flex-grow ${isAdminRoute ? 'overflow-y-auto' : ''} ${!isFullScreenRoute ? 'transition-[padding-top] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]' : ''} ${(layoutInspectorActive && layoutInspectorPickEnabled) ? 'debug-containers' : ''}`}
+          className={`flex-grow ${isAdminRoute ? 'overflow-y-auto' : ''} ${!isFullScreenRoute ? 'transition-[padding-top] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]' : ''} ${layoutInspectorActive ? 'debug-containers' : ''}`}
           style={!isFullScreenRoute ? (
             isAdminRoute
               ? { paddingTop: adminRouteOffset, '--appHeaderOffset': adminRouteOffset }
@@ -721,6 +807,10 @@ function App() {
                     <Home {...pageProps} />
                   </motion.div>
                 } />
+
+                <Route path="/lab" element={<LabHomePage />} />
+                <Route path="/lab/demos" element={<LabDemosPage />} />
+                <Route path="/lab/wip" element={<LabWipPage />} />
                 <Route path="/first-contact" element={
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -729,6 +819,19 @@ function App() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
                     <SupabaseCollectionRoute collectionKey="first-contact" {...pageProps} />
+                  </motion.div>
+                } />
+
+                <Route path="/the-human-inside" element={<Navigate to="/thin" replace />} />
+
+                <Route path="/thin" element={
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                  >
+                    <TheHumanInsidePage {...pageProps} />
                   </motion.div>
                 } />
 
@@ -743,7 +846,7 @@ function App() {
                   </motion.div>
                 } />
 
-                <Route path="/proves" element={
+                <Route path="/lab/proves" element={
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -753,6 +856,14 @@ function App() {
                     <SupabaseCollectionRoute collectionKey="proves" {...pageProps} />
                   </motion.div>
                 } />
+
+                <Route path="/proves" element={<Navigate to="/lab/proves" replace />} />
+
+                <Route path="/proves/demo-adidas" element={<AdidasDemoPage />} />
+                <Route path="/proves/demo-adidas-pdp" element={<AdidasPdpPage />} />
+                <Route path="/proves/demo-nike-tambe" element={<NikeTambePage />} />
+                <Route path="/proves/dev-links" element={<DevLinksPage />} />
+                <Route path="/proves/dev-adidas-stripe-zoom" element={<AdidasStripeZoomDevPage />} />
 
                 <Route
                   path="/proves/product/:id"
@@ -825,35 +936,8 @@ function App() {
                   }
                 />
 
-                {/* Wishlist/Favorits Page */}
-                <Route
-                  path="/wishlist"
-                  element={
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <WishlistPage {...pageProps} />
-                    </motion.div>
-                  }
-                />
-
-                {/* Profile Page */}
-                <Route
-                  path="/profile"
-                  element={
-                    <motion.div
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.3, ease: "easeInOut" }}
-                    >
-                      <ProfilePage />
-                    </motion.div>
-                  }
-                />
+                <Route path="/wishlist" element={<Navigate to="/" replace />} />
+                <Route path="/profile" element={<Navigate to="/" replace />} />
 
                 {/* Checkout Page */}
                 <Route
@@ -893,11 +977,12 @@ function App() {
                 <Route path="/offers" element={<OffersPage />} />
 
                 <Route path="/new" element={<NewPage />} />
-                <Route path="/adidas-demo" element={<AdidasDemoPage />} />
-                <Route path="/adidas-stripe-zoom-dev" element={<AdidasStripeZoomDevPage />} />
-                <Route path="/dev-links" element={<DevLinksPage />} />
-                <Route path="/nike-tambe" element={<NikeTambePage />} />
-                <Route path="/status" element={<OrderStatusPage />} />
+                <Route path="/adidas-demo" element={<Navigate to="/proves/demo-adidas" replace />} />
+                <Route path="/adidas-pdp" element={<Navigate to="/proves/demo-adidas-pdp" replace />} />
+                <Route path="/adidas-stripe-zoom-dev" element={<Navigate to="/proves/dev-adidas-stripe-zoom" replace />} />
+                <Route path="/dev-links" element={<Navigate to="/proves/dev-links" replace />} />
+                <Route path="/nike-tambe" element={<Navigate to="/proves/demo-nike-tambe" replace />} />
+                <Route path="/status" element={<Navigate to="/track" replace />} />
                 <Route path="/track" element={<OrderTrackingPage />} />
 
                 <Route path="/ruleta-demo" element={<Navigate to="/admin/draft/ruleta" replace />} />
@@ -1062,6 +1147,35 @@ function App() {
               >
                 Guides
               </button>
+
+              {isNikeDemoRoute && (
+                <button
+                  type="button"
+                  className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
+                    nikeTambeBgOn
+                      ? 'border-black/15 bg-white text-black/80 hover:bg-black/5'
+                      : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
+                  }`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const next = !nikeTambeBgOn;
+                    try {
+                      window.localStorage.setItem('NIKE_TAMBE_BG_ON', next ? '1' : '0');
+                    } catch {
+                      // ignore
+                    }
+                    setNikeTambeBgOn(next);
+                    try {
+                      window.dispatchEvent(new Event('nike-tambe-bg-toggle-changed'));
+                    } catch {
+                      // ignore
+                    }
+                  }}
+                >
+                  BG {nikeTambeBgOn ? 'ON' : 'OFF'}
+                </button>
+              )}
 
               <button
                 type="button"

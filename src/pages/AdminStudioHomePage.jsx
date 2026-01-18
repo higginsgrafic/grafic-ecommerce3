@@ -204,7 +204,7 @@ export default function AdminStudioHomePage() {
             <Region title="Utilitats" subtitle="Debug i suport">
               <Section title="Tools" items={tools.utils} />
               <div className="mt-10">
-                <Section title="DEV" items={tools.dev} />
+                <Section title="Demos" items={tools.dev} />
               </div>
 
               <div className="mt-10">
