@@ -8,6 +8,8 @@ import ProductMockups from '@/components/ProductMockups';
 import EpisodeControls from '@/components/EpisodeControls';
 import EpisodeDisplay from '@/components/EpisodeDisplay';
 import SEOProductSchema from '@/components/SEOProductSchema';
+import ProductTeaserCard from '@/components/ProductTeaserCard';
+import TEPASection from '@/components/TEPASection';
 import { trackProductView, trackAddToCart, trackAddToWishlist, trackShare } from '@/utils/analytics';
 import { useProductContext } from '@/contexts/ProductContext';
 import { useToast } from '@/contexts/ToastContext';
@@ -24,7 +26,10 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
 
   const product = getProductById(id);
 
-  const tepaProducts = useRelatedProducts(product?.id, 3);
+  const TEPAProducts = useRelatedProducts(product?.id, 3);
+
+  const relatedCollections = [];
+  const isTEPAEnabled = false;
 
   useEffect(() => {
     if (!import.meta.env.DEV) return;
@@ -1328,11 +1333,11 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
         </div>
       )}
 
-      {isTepaEnabled && relatedCollections.length > 0 && (
+      {isTEPAEnabled && relatedCollections.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
           <div className="border-t border-gray-200 pt-12">
             <h2 className="font-roboto text-2xl sm:text-3xl font-normal uppercase mb-8" style={{ color: '#141414' }}>
-              També et podria agradar
+              Col·leccions
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-center">
               {relatedCollections.map((collection) => (
@@ -1362,85 +1367,33 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
         </div>
       )}
 
-      {tepaProducts.length > 0 && (
-        <div className="max-w-7xl mx-auto px-4 lg:px-8">
-          <div className="border-t border-gray-200 pt-12 pb-12">
-            <h2 className="font-roboto text-[15px] font-normal mb-6" style={{ color: '#141414' }}>
-              també et pot agradar
-            </h2>
+      {TEPAProducts.length > 0 && (
+        <TEPASection title="també et pot agradar">
+          {TEPAProducts.slice(0, 3).map((p) => {
+            const productId = p?.id;
+            const productSlugOrId = p?.slug || productId;
+            const productUrl = productSlugOrId ? `/product/${productSlugOrId}` : '/';
+            const name = p?.name || '';
+            const subtitle = getNikeSubtitle(p);
+            const img = p?.image || p?.images?.[0] || p?.variants?.find((v) => v?.image)?.image || '/placeholder-product.svg';
+            const status = getNikeStatus(p);
+            const colors = getUniqueColors(p);
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
-              {tepaProducts.slice(0, 3).map((p) => {
-                const productId = p?.id;
-                const productSlugOrId = p?.slug || productId;
-                const productUrl = productSlugOrId ? `/product/${productSlugOrId}` : '/';
-                const name = p?.name || '';
-                const subtitle = getNikeSubtitle(p);
-                const img = p?.image || p?.images?.[0] || p?.variants?.find((v) => v?.image)?.image || '/placeholder-product.svg';
-                const status = getNikeStatus(p);
-                const colors = getUniqueColors(p);
-                const colorCount = colors.length;
-                const dots = colors.slice(0, 3);
-
-                return (
-                  <Link key={productId || productSlugOrId} to={productUrl} className="block">
-                    <div className="w-full">
-                      <div className="w-full aspect-square bg-[#f5f5f5] overflow-hidden p-10">
-                        <img
-                          src={img}
-                          alt={name}
-                          className="h-full w-full object-contain"
-                          loading="lazy"
-                          decoding="async"
-                        />
-                      </div>
-
-                      <div className="mt-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1">
-                            {dots.map((c) => (
-                              <span
-                                key={c}
-                                className="inline-block h-2 w-2 rounded-full"
-                                style={colorDotStyle(c)}
-                              />
-                            ))}
-                            {colorCount > 3 ? (
-                              <span className="inline-block h-2 w-2 rounded-full" style={{ background: '#6b7280' }} />
-                            ) : null}
-                          </div>
-
-                          {status ? (
-                            <div className="text-[13px] font-roboto" style={{ color: '#d11a2a' }}>
-                              {status}
-                            </div>
-                          ) : null}
-                        </div>
-
-                        <div className="mt-2">
-                          <div className="font-roboto text-[15px] font-semibold" style={{ color: '#111111' }}>
-                            {name}
-                          </div>
-                          {subtitle ? (
-                            <div className="font-roboto text-[13px]" style={{ color: '#6b7280' }}>
-                              {subtitle}
-                            </div>
-                          ) : null}
-                          <div className="mt-1 font-roboto text-[13px]" style={{ color: '#6b7280' }}>
-                            {colorCount > 0 ? `${colorCount} colors` : null}
-                          </div>
-                          <div className="mt-2 font-roboto text-[15px] font-semibold" style={{ color: '#111111' }}>
-                            {typeof p?.price === 'number' ? `${p.price.toFixed(2).replace('.', ',')} €` : null}
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-        </div>
+            return (
+              <ProductTeaserCard
+                key={productId || productSlugOrId}
+                to={productUrl}
+                imgSrc={img}
+                name={name}
+                subtitle={subtitle}
+                status={status}
+                colors={colors}
+                price={p?.price}
+                colorDotStyle={colorDotStyle}
+              />
+            );
+          })}
+        </TEPASection>
       )}
     </div>
 </>
