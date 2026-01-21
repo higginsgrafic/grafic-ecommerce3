@@ -34,10 +34,10 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
 
         {/* Capçalera */}
         <div className="mb-6 sm:mb-8">
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-oswald uppercase" style={{ color: '#141414' }}>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-oswald uppercase text-foreground">
             El teu Cistell
           </h1>
-          <p className="mt-1 sm:mt-2 text-xs sm:text-sm" style={{ color: '#141414', opacity: 0.6 }}>
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground">
             Revisa els teus productes abans de continuar
           </p>
         </div>
@@ -49,16 +49,27 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
             className="text-center py-16 bg-white rounded-lg shadow-sm"
           >
             <div className="mb-6">
-              <img
-                src="/custom_logos/icons/basket-empty.svg"
-                alt="Cistell buit"
+              <span
+                aria-hidden="true"
                 className="h-24 w-24 mx-auto opacity-20"
+                style={{
+                  display: 'block',
+                  backgroundColor: 'hsl(var(--foreground))',
+                  WebkitMaskImage: "url(/custom_logos/icons/basket-empty.svg)",
+                  maskImage: "url(/custom_logos/icons/basket-empty.svg)",
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain'
+                }}
               />
             </div>
-            <h2 className="text-2xl font-medium mb-4" style={{ color: '#141414' }}>El cistell està buit</h2>
-            <p className="text-gray-500 mb-8">Sembla que encara no has afegit res al teu cistell.</p>
+            <h2 className="text-2xl font-medium mb-4 text-foreground">El cistell està buit</h2>
+            <p className="text-muted-foreground mb-8">Sembla que encara no has afegit res al teu cistell.</p>
             <Link to="/">
-              <Button className="rounded-sm" style={{ backgroundColor: '#141414', color: '#FFFFFF' }}>
+              <Button className="rounded-sm" style={{ backgroundColor: 'hsl(var(--foreground))', color: '#FFFFFF' }}>
                 Tornar a la Botiga
               </Button>
             </Link>
@@ -68,7 +79,7 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
             {/* Columna Esquerra: Productes del Cistell */}
             <div className="lg:col-span-2 mb-6 lg:mb-0">
               <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
-                <h2 className="text-base sm:text-lg font-bold font-oswald uppercase mb-3 sm:mb-4" style={{ color: '#141414' }}>
+                <h2 className="text-base sm:text-lg font-bold font-oswald uppercase mb-3 sm:mb-4 text-foreground">
                   El teu Cistell ({cartItems.length})
                 </h2>
 
@@ -88,17 +99,17 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1 sm:mb-2">
                           <div className="flex-1 pr-2 min-w-0">
-                            <h3 className="font-oswald uppercase text-xs sm:text-sm font-bold line-clamp-2 sm:line-clamp-1" style={{ color: '#141414' }}>
+                            <h3 className="font-oswald uppercase text-xs sm:text-sm font-bold line-clamp-2 sm:line-clamp-1 text-foreground">
                               {item.name}
                             </h3>
-                            <p className="text-[10px] sm:text-xs mt-0.5 sm:mt-1" style={{ color: '#141414', opacity: 0.6 }}>
+                            <p className="text-[10px] sm:text-xs mt-0.5 sm:mt-1 text-muted-foreground">
                               Talla: {item.size}
                             </p>
                           </div>
                           <button
                             onClick={() => onRemove(item.id, item.size)}
                             className="hover:text-red-500 transition-colors flex-shrink-0"
-                            style={{ color: '#141414', opacity: 0.4 }}
+                            style={{ color: 'hsl(var(--foreground))', opacity: 0.4 }}
                             aria-label="Eliminar"
                           >
                             <Trash2 className="h-3.5 w-3.5 sm:h-4 sm:w-4" />
@@ -107,7 +118,7 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
 
                         {/* Preu i controls */}
                         <div className="flex justify-between items-center mt-2">
-                          <div className="font-oswald text-base sm:text-lg font-normal" style={{ color: '#141414' }}>
+                          <div className="font-oswald text-base sm:text-lg font-normal text-foreground">
                             {(item.price * item.quantity).toFixed(2).replace('.', ',')} €
                           </div>
 
@@ -116,16 +127,16 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
                             <button
                               onClick={() => onUpdateQuantity(item.id, item.size, Math.max(0, item.quantity - 1))}
                               className="px-2 sm:px-3 hover:bg-gray-100 h-full"
-                              style={{ color: '#141414' }}
+                              style={{ color: 'hsl(var(--foreground))' }}
                               aria-label="Reduir quantitat"
                             >
                               <Minus className="h-3 w-3" />
                             </button>
-                            <span className="w-6 sm:w-8 text-center text-xs sm:text-sm font-medium" style={{ color: '#141414' }}>{item.quantity}</span>
+                            <span className="w-6 sm:w-8 text-center text-xs sm:text-sm font-medium text-foreground">{item.quantity}</span>
                             <button
                               onClick={() => onUpdateQuantity(item.id, item.size, item.quantity + 1)}
                               className="px-2 sm:px-3 hover:bg-gray-100 h-full"
-                              style={{ color: '#141414' }}
+                              style={{ color: 'hsl(var(--foreground))' }}
                               aria-label="Augmentar quantitat"
                             >
                               <Plus className="h-3 w-3" />
@@ -142,16 +153,16 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
               <div className="lg:hidden bg-white rounded-lg shadow-sm p-3 sm:p-4 mb-4 sm:mb-6">
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span style={{ color: '#141414', opacity: 0.6 }}>Subtotal</span>
-                    <span style={{ color: '#141414' }}>{subtotal.toFixed(2).replace('.', ',')} €</span>
+                    <span className="text-muted-foreground">Subtotal</span>
+                    <span className="text-foreground">{subtotal.toFixed(2).replace('.', ',')} €</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
-                    <span style={{ color: '#141414', opacity: 0.6 }}>Enviament</span>
-                    <span style={{ color: '#141414' }}>{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
+                    <span className="text-muted-foreground">Enviament</span>
+                    <span className="text-foreground">{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t">
-                    <span className="font-oswald text-lg sm:text-xl font-normal" style={{ color: '#141414' }}>Total</span>
-                    <span className="font-oswald text-lg sm:text-xl font-normal" style={{ color: '#141414' }}>{total.toFixed(2).replace('.', ',')} €</span>
+                    <span className="font-oswald text-lg sm:text-xl font-normal text-foreground">Total</span>
+                    <span className="font-oswald text-lg sm:text-xl font-normal text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
                   </div>
                 </div>
               </div>
@@ -161,34 +172,34 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
             <div className="lg:col-span-1">
               <div className="lg:sticky lg:top-8">
                 <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                  <h2 className="text-lg font-bold font-oswald uppercase mb-6" style={{ color: '#141414' }}>
+                  <h2 className="text-lg font-bold font-oswald uppercase mb-6 text-foreground">
                     Resum de la Comanda
                   </h2>
 
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
-                      <span style={{ color: '#141414', opacity: 0.6 }}>Subtotal</span>
-                      <span style={{ color: '#141414' }}>{subtotal.toFixed(2).replace('.', ',')} €</span>
+                      <span className="text-muted-foreground">Subtotal</span>
+                      <span className="text-foreground">{subtotal.toFixed(2).replace('.', ',')} €</span>
                     </div>
                     <div className="flex justify-between text-sm">
-                      <span style={{ color: '#141414', opacity: 0.6 }}>Enviament</span>
-                      <span style={{ color: '#141414' }}>{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
+                      <span className="text-muted-foreground">Enviament</span>
+                      <span className="text-foreground">{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
                     </div>
                     {shipping === 0 ? null : (
-                      <p className="text-xs" style={{ color: '#141414', opacity: 0.5 }}>
+                      <p className="text-xs text-muted-foreground" style={{ opacity: 0.85 }}>
                         Afegeix {(50 - subtotal).toFixed(2).replace('.', ',')} € més per enviament gratuït
                       </p>
                     )}
                     <div className="flex justify-between pt-3 border-t">
-                      <span className="font-oswald text-xl font-normal" style={{ color: '#141414' }}>Total</span>
-                      <span className="font-oswald text-xl font-normal" style={{ color: '#141414' }}>{total.toFixed(2).replace('.', ',')} €</span>
+                      <span className="font-oswald text-xl font-normal text-foreground">Total</span>
+                      <span className="font-oswald text-xl font-normal text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
                     </div>
                   </div>
 
                   <Button
                     onClick={handleProceedToCheckout}
                     className="w-full h-12 text-sm font-oswald uppercase tracking-wider rounded-sm"
-                    style={{ backgroundColor: '#141414', color: '#FFFFFF' }}
+                    style={{ backgroundColor: 'hsl(var(--foreground))', color: '#FFFFFF' }}
                   >
                     Continuar al Checkout
                   </Button>
@@ -197,14 +208,14 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
                     <Button
                       variant="ghost"
                       className="w-full mt-3 h-10 text-sm font-oswald uppercase tracking-wider rounded-sm"
-                      style={{ color: '#141414' }}
+                      style={{ color: 'hsl(var(--foreground))' }}
                     >
                       Continua comprant
                     </Button>
                   </Link>
 
                   <div className="mt-6 pt-6 border-t">
-                    <div className="flex items-center gap-2 text-sm" style={{ color: '#141414', opacity: 0.6 }}>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <ShoppingBag className="h-4 w-4" />
                       <span>{cartItems.length} {cartItems.length === 1 ? 'producte' : 'productes'} al cistell</span>
                     </div>

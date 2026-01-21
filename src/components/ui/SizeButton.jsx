@@ -6,7 +6,7 @@ function SizeButton({ size, selected = false, onClick, className = '' }) {
       onClick={onClick}
       className={`transition-all duration-200 overflow-hidden relative group font-oswald font-medium
         flex items-center justify-center mx-auto
-        ${selected ? 'bg-black text-white shadow-lg hover:scale-110' : 'bg-transparent text-gray-900 hover:text-gray-700'}
+        ${selected ? 'bg-foreground text-whiteStrong shadow-lg hover:scale-110' : 'bg-transparent text-foreground hover:text-muted-foreground'}
         active:scale-95
         ${className}`}
       style={{

@@ -119,7 +119,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
   // Si el cistell està buit, redirigir
   if (cartItems.length === 0) {
     return (
-      <div className="min-h-[80vh] bg-gray-50 py-12 flex items-center justify-center">
+      <div className="min-h-[80vh] bg-muted py-12 flex items-center justify-center">
         <Helmet>
           <title>Checkout | GRAFC</title>
         </Helmet>
@@ -135,10 +135,10 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
               className="h-24 w-24 mx-auto opacity-20"
             />
           </div>
-          <h2 className="text-2xl font-medium mb-4" style={{ color: '#141414' }}>El cistell està buit</h2>
-          <p className="text-gray-500 mb-8">Afegeix productes abans de continuar al checkout.</p>
+          <h2 className="text-2xl font-medium mb-4 text-foreground">El cistell està buit</h2>
+          <p className="text-muted-foreground mb-8">Afegeix productes abans de continuar al checkout.</p>
           <Link to="/">
-            <Button className="rounded-sm" style={{ backgroundColor: '#141414', color: '#FFFFFF' }}>
+            <Button className="rounded-sm">
               Tornar a la Botiga
             </Button>
           </Link>
@@ -148,7 +148,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 pt-[129px] lg:pt-[145px] pb-8 md:pb-12">
+    <div className="min-h-screen bg-muted pt-[129px] lg:pt-[145px] pb-8 md:pb-12">
       <Helmet>
         <title>Checkout | GRAFC</title>
         <meta name="description" content="Completa la teva comanda de manera segura." />
@@ -165,14 +165,14 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
 
         {/* Capçalera amb botó tornar */}
         <div className="mb-6 sm:mb-8">
-          <Link to="/cart" className="inline-flex items-center text-xs sm:text-sm mb-3 sm:mb-4 hover:underline" style={{ color: '#141414', opacity: 0.6 }}>
+          <Link to="/cart" className="inline-flex items-center text-xs sm:text-sm mb-3 sm:mb-4 hover:underline text-muted-foreground opacity-60">
             <ChevronLeft className="h-4 w-4 mr-1" />
             Tornar al cistell
           </Link>
-          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-oswald uppercase" style={{ color: '#141414' }}>
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-oswald uppercase text-foreground">
             Checkout Segur
           </h1>
-          <p className="mt-1 sm:mt-2 text-xs sm:text-sm" style={{ color: '#141414', opacity: 0.6 }}>
+          <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground opacity-60">
             Completa la teva comanda de manera segura
           </p>
         </div>
@@ -183,7 +183,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
             <div className="bg-white rounded-lg shadow-sm p-3 sm:p-4 md:p-6">
               <div className="flex items-center gap-2 mb-4 sm:mb-6">
                 <Lock className="h-4 w-4 sm:h-5 sm:w-5 text-green-600" />
-                <h2 className="text-base sm:text-lg font-bold font-oswald uppercase" style={{ color: '#141414' }}>
+                <h2 className="text-base sm:text-lg font-bold font-oswald uppercase text-foreground">
                   Informació de Compra
                 </h2>
               </div>
@@ -191,7 +191,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Contacte */}
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3" style={{ color: '#141414' }}>Contacte</h3>
+                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 text-foreground">Contacte</h3>
                   <input
                     type="email"
                     name="email"
@@ -199,14 +199,13 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                     value={formData.email}
                     onChange={handleChange}
                     required
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                    style={{ color: '#141414' }}
+                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                 </div>
 
                 {/* Enviament */}
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3" style={{ color: '#141414' }}>Adreça d'Enviament</h3>
+                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 text-foreground">Adreça d'Enviament</h3>
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
                     <input
                       type="text"
@@ -215,8 +214,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       value={formData.firstName}
                       onChange={handleChange}
                       required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      style={{ color: '#141414' }}
+                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
                       type="text"
@@ -225,8 +223,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       value={formData.lastName}
                       onChange={handleChange}
                       required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      style={{ color: '#141414' }}
+                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
                       type="text"
@@ -235,8 +232,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       value={formData.address}
                       onChange={handleChange}
                       required
-                      className="col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      style={{ color: '#141414' }}
+                      className="col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
                       type="text"
@@ -245,8 +241,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       value={formData.city}
                       onChange={handleChange}
                       required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      style={{ color: '#141414' }}
+                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
                       type="text"
@@ -255,8 +250,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       value={formData.postalCode}
                       onChange={handleChange}
                       required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      style={{ color: '#141414' }}
+                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                     <input
                       type="text"
@@ -265,15 +259,14 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       value={formData.country}
                       onChange={handleChange}
                       required
-                      className="col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-gray-900"
-                      style={{ color: '#141414' }}
+                      className="col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
                     />
                   </div>
                 </div>
 
                 {/* Pagament */}
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 flex items-center gap-2" style={{ color: '#141414' }}>
+                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 flex items-center gap-2 text-foreground">
                     <CreditCard className="h-3.5 w-3.5 sm:h-4 sm:w-4" /> Informació de Pagament
                   </h3>
 
@@ -341,7 +334,6 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       type="submit"
                       disabled={isProcessing}
                       className="w-full h-12 text-sm font-oswald uppercase tracking-wider rounded-sm"
-                      style={{ backgroundColor: '#141414', color: '#FFFFFF' }}
                     >
                       {isProcessing ? (
                         <span className="flex items-center gap-2">
@@ -352,7 +344,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                         `Pagar ${total.toFixed(2).replace('.', ',')} €`
                       )}
                     </Button>
-                    <p className="text-xs text-center mt-3" style={{ color: '#141414', opacity: 0.5 }}>
+                    <p className="text-xs text-center mt-3 text-muted-foreground opacity-50">
                       Les teves dades estan protegides amb encriptació SSL
                     </p>
                   </div>
@@ -365,15 +357,15 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
           <div className="lg:col-span-1">
             <div className="lg:sticky lg:top-8">
               <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
-                <h2 className="text-lg font-bold font-oswald uppercase mb-6" style={{ color: '#141414' }}>
+                <h2 className="text-lg font-bold font-oswald uppercase mb-6 text-foreground">
                   Resum de la Comanda
                 </h2>
 
                 {/* Productes */}
                 <div className="space-y-3 mb-6 max-h-[300px] overflow-y-auto">
                   {cartItems.map((item) => (
-                    <div key={`${item.id}-${item.size}`} className="flex gap-3 pb-3 border-b border-gray-100 last:border-0">
-                      <div className="w-16 h-16 bg-gray-100 rounded-md overflow-hidden flex-shrink-0">
+                    <div key={`${item.id}-${item.size}`} className="flex gap-3 pb-3 border-b border-border last:border-0">
+                      <div className="w-16 h-16 bg-muted rounded-md overflow-hidden flex-shrink-0">
                         <img
                           src={item.image}
                           alt={item.name}
@@ -381,11 +373,11 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                         />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="text-sm font-medium truncate" style={{ color: '#141414' }}>{item.name}</h4>
-                        <p className="text-xs mt-1" style={{ color: '#141414', opacity: 0.6 }}>
+                        <h4 className="text-sm font-medium truncate text-foreground">{item.name}</h4>
+                        <p className="text-xs mt-1 text-muted-foreground opacity-60">
                           Talla: {item.size} · Qty: {item.quantity}
                         </p>
-                        <p className="text-sm font-medium mt-1" style={{ color: '#141414' }}>
+                        <p className="text-sm font-medium mt-1 text-foreground">
                           {(item.price * item.quantity).toFixed(2).replace('.', ',')} €
                         </p>
                       </div>
@@ -396,16 +388,16 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                 {/* Totals */}
                 <div className="space-y-2 mb-6 pb-6 border-b">
                   <div className="flex justify-between text-sm">
-                    <span style={{ color: '#141414', opacity: 0.6 }}>Subtotal</span>
-                    <span style={{ color: '#141414' }}>{subtotal.toFixed(2).replace('.', ',')} €</span>
+                    <span className="text-muted-foreground opacity-60">Subtotal</span>
+                    <span className="text-foreground">{subtotal.toFixed(2).replace('.', ',')} €</span>
                   </div>
                   <div className="flex justify-between text-sm">
-                    <span style={{ color: '#141414', opacity: 0.6 }}>Enviament</span>
-                    <span style={{ color: '#141414' }}>{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
+                    <span className="text-muted-foreground opacity-60">Enviament</span>
+                    <span className="text-foreground">{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t">
-                    <span className="font-oswald text-xl font-normal" style={{ color: '#141414' }}>Total</span>
-                    <span className="font-oswald text-xl font-normal" style={{ color: '#141414' }}>{total.toFixed(2).replace('.', ',')} €</span>
+                    <span className="font-oswald text-xl font-normal text-foreground">Total</span>
+                    <span className="font-oswald text-xl font-normal text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
                   </div>
                 </div>
 
@@ -417,7 +409,6 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                       onClick={handleSubmit}
                       disabled={isProcessing}
                       className="w-full h-12 text-sm font-oswald uppercase tracking-wider rounded-sm"
-                      style={{ backgroundColor: '#141414', color: '#FFFFFF' }}
                     >
                       {isProcessing ? (
                         <span className="flex items-center gap-2">
@@ -428,7 +419,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                         `Pagar ${total.toFixed(2).replace('.', ',')} €`
                       )}
                     </Button>
-                    <p className="text-xs text-center mt-3" style={{ color: '#141414', opacity: 0.5 }}>
+                    <p className="text-xs text-center mt-3 text-muted-foreground opacity-50">
                       Les teves dades estan protegides amb encriptació SSL
                     </p>
                   </div>

@@ -228,7 +228,7 @@ const ProductInfo = ({
           <button
             onClick={onAddToCart}
             data-cart-button="1"
-            className="bg-transparent rounded-md flex items-end justify-center"
+            className="bg-transparent rounded-md flex items-end justify-center text-foreground"
             style={{ width: '70px', height: '35px', position: 'relative', top: '0px', left: '-4px', zIndex: 10, display: 'flex', alignItems: 'flex-end', justifyContent: 'center', lineHeight: '0' }}
             aria-label="Afegeix al cistell"
           >
@@ -240,7 +240,8 @@ const ProductInfo = ({
                   left: '50%',
                   transform: 'translate(-50%, calc(-35% - 2.5px))',
                   backgroundColor: 'transparent',
-                  color: '#141414',
+                  color: 'hsl(var(--foreground))',
+                  textShadow: '0 0 1px hsl(var(--background))',
                   fontSize: '20px',
                   fontWeight: 500,
                   lineHeight: '20px',
@@ -251,10 +252,24 @@ const ProductInfo = ({
                 {cartItems.length}
               </span>
             ) : null}
-            <img
-              src={cartItems.length > 0 ? "/custom_logos/icons/basket-full-1.svg" : "/custom_logos/icons/basket-empty.svg"}
-              alt={cartItems.length > 0 ? "Cistell amb productes" : "Cistell buit"}
-              style={{ height: '35px', width: '70px', display: 'block', objectFit: 'contain', objectPosition: 'center bottom', transform: 'scale(1.27)', transformOrigin: 'center bottom' }}
+            <span
+              aria-hidden="true"
+              style={{
+                height: '35px',
+                width: '70px',
+                display: 'block',
+                transform: 'scale(1.27)',
+                transformOrigin: 'center bottom',
+                backgroundColor: 'currentColor',
+                WebkitMaskImage: `url(${cartItems.length > 0 ? '/custom_logos/icons/basket-full-1.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                maskImage: `url(${cartItems.length > 0 ? '/custom_logos/icons/basket-full-1.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                WebkitMaskRepeat: 'no-repeat',
+                maskRepeat: 'no-repeat',
+                WebkitMaskPosition: 'center bottom',
+                maskPosition: 'center bottom',
+                WebkitMaskSize: 'contain',
+                maskSize: 'contain'
+              }}
             />
           </button>
         </div>

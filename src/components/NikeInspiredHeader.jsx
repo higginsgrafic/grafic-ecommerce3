@@ -748,8 +748,8 @@ function NikeInspiredHeader({
         closeCollections();
       }}
     >
-      <div className="hidden lg:block bg-white border-b border-gray-100">
-        <div className="max-w-[1696px] mx-auto px-6 md:px-12 h-10 flex items-center gap-6 text-xs text-gray-700">
+      <div className="hidden lg:block bg-white border-b border-border">
+        <div className="max-w-[1696px] mx-auto px-6 md:px-12 h-10 flex items-center gap-6 text-xs text-muted-foreground">
           {isNikeDemoRoute && (
             <div className="flex items-center gap-2">
               <Button
@@ -780,15 +780,15 @@ function NikeInspiredHeader({
               </Button>
             </div>
           )}
-          <Link to="/adidas-demo" className="hover:text-black transition-colors">Adidas</Link>
-          <Link to="/nike-hero-demo" className="hover:text-black transition-colors">Nike Hero</Link>
-          <Link to="/proves" className="hover:text-black transition-colors">Proves</Link>
-          <Link to="/help" className="hover:text-black transition-colors">Ajuda</Link>
-          <Link to="/contact" className="hover:text-black transition-colors">Contacte</Link>
+          <Link to="/adidas-demo" className="hover:text-foreground transition-colors">Adidas</Link>
+          <Link to="/nike-hero-demo" className="hover:text-foreground transition-colors">Nike Hero</Link>
+          <Link to="/proves" className="hover:text-foreground transition-colors">Proves</Link>
+          <Link to="/help" className="hover:text-foreground transition-colors">Ajuda</Link>
+          <Link to="/contact" className="hover:text-foreground transition-colors">Contacte</Link>
           <button
             type="button"
             onClick={() => onUserClick?.()}
-            className="hover:text-black transition-colors"
+            className="hover:text-foreground transition-colors"
           >
             Compte
           </button>
@@ -797,7 +797,7 @@ function NikeInspiredHeader({
 
       <div
         ref={headerBarRef}
-        className={`relative bg-white ${activeMenu === 'collections' ? '' : 'border-b border-gray-200'}`}
+        className={`relative bg-white ${activeMenu === 'collections' ? '' : 'border-b border-border'}`}
       >
         {collectionsVisible && expansionPhase === 'expanded' && navHoverBridgeTopPx != null && (
           <div
@@ -821,20 +821,32 @@ function NikeInspiredHeader({
                 {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
               </Button>
 
-              <Link to="/" className="block transition-transform hover:scale-105 active:scale-95" title="GRÀFIC - Inici">
-                <img
-                  src="/custom_logos/brand/marca-grafic-logo.svg"
-                  alt="GRÀFIC"
-                  className="h-8 lg:h-10 w-auto"
+              <Link to="/" className="relative z-10 pointer-events-auto block transition-transform hover:scale-105 active:scale-95" title="GRÀFIC - Inici">
+                <span
+                  aria-hidden="true"
+                  data-brand-logo="1"
+                  className="h-8 lg:h-10 w-[140px] text-foreground"
+                  style={{
+                    display: 'block',
+                    backgroundColor: 'currentColor',
+                    WebkitMaskImage: 'url(/custom_logos/brand/marca-grafic-logo.svg)',
+                    maskImage: 'url(/custom_logos/brand/marca-grafic-logo.svg)',
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'left center',
+                    maskPosition: 'left center',
+                    WebkitMaskSize: 'contain',
+                    maskSize: 'contain'
+                  }}
                 />
               </Link>
             </div>
 
-            <div className="hidden lg:block absolute left-[-48px] right-[-48px]">
+            <div className="hidden lg:flex absolute inset-y-0 left-[-48px] right-[-48px] items-center">
               <motion.nav
                 data-nike-nav="true"
                 ref={navRef}
-                className="w-full grid grid-flow-col justify-items-stretch"
+                className="w-full h-full grid grid-flow-col justify-items-stretch items-center"
                 onMouseEnter={(e) => maybeOpenCollectionsFromNavPointer(e.clientX)}
                 onMouseMove={(e) => maybeOpenCollectionsFromNavPointer(e.clientX)}
                 style={
@@ -872,7 +884,7 @@ function NikeInspiredHeader({
                   <motion.div
                     key={link.href}
                     layout={false}
-                    className="justify-self-stretch"
+                    className="justify-self-stretch flex items-center"
                   >
                     <Link
                       to={link.href}
@@ -885,7 +897,7 @@ function NikeInspiredHeader({
                       }}
                       className="font-roboto text-sm font-normal text-gray-900 transition-all block w-full m-0 p-0 leading-none"
                       onMouseEnter={(e) => {
-                        const color = document.documentElement.classList.contains('dark') ? '#ffffff' : '#141414';
+                        const color = document.documentElement.classList.contains('dark') ? '#ffffff' : 'hsl(var(--foreground))';
                         e.currentTarget.style.textShadow = `0 0 0.55px ${color}, 0 0 0.55px ${color}`;
                         openCollections();
                       }}
@@ -906,7 +918,7 @@ function NikeInspiredHeader({
                 variant="ghost"
                 size="icon"
                 onClick={() => setIsSearchDialogOpen(true)}
-                className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+                className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Obrir cerca"
               >
                 <Search className="h-5 w-5 lg:h-6 lg:w-6" strokeWidth={1.5} />
@@ -916,13 +928,24 @@ function NikeInspiredHeader({
                 variant="ghost"
                 size="icon"
                 onClick={onCartClick}
-                className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+                className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-foreground"
                 aria-label={cartItemCount > 0 ? 'Carro (amb productes)' : 'Carro'}
               >
-                <img
-                  src={cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'}
-                  alt="Carro"
+                <span
+                  aria-hidden="true"
                   className="h-[27px] w-[27px] lg:h-[31px] lg:w-[31px] transition-all duration-200"
+                  style={{
+                    display: 'block',
+                    backgroundColor: 'currentColor',
+                    WebkitMaskImage: `url(${cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                    maskImage: `url(${cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'center',
+                    maskPosition: 'center',
+                    WebkitMaskSize: 'contain',
+                    maskSize: 'contain'
+                  }}
                 />
                 {cartItemCount > 0 && (
                   <span
@@ -938,7 +961,7 @@ function NikeInspiredHeader({
                 variant="ghost"
                 size="icon"
                 onClick={onUserClick}
-                className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+                className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 aria-label="Obrir compte"
               >
                 <UserRound className="h-5 w-5 lg:h-6 lg:w-6" strokeWidth={1.5} />
@@ -1010,7 +1033,7 @@ function NikeInspiredHeader({
                     height: { delay: 0, duration: MOTION_DURATION, ease: MOTION_EASE },
                   },
                 }}
-                className="relative z-[9991] hidden lg:block bg-white border-b border-gray-200 overflow-hidden"
+                className="relative z-[9991] hidden lg:block bg-white border-b border-border overflow-hidden"
                 onMouseEnter={openCollections}
                 onMouseLeave={() => {
                   closeCollections();
@@ -1020,7 +1043,7 @@ function NikeInspiredHeader({
                 <button
                   type="button"
                   aria-label="Tancar"
-                  className="absolute right-3 top-2 z-10 text-gray-700 hover:text-black focus:outline-none"
+                  className="absolute right-3 top-2 z-10 text-muted-foreground hover:text-foreground focus:outline-none"
                   onClick={() => {
                     closeCollections();
                   }}
@@ -1149,7 +1172,7 @@ function NikeInspiredHeader({
                                           <Link
                                             key={p.key}
                                             to={p.href}
-                                            className="font-roboto text-[inherit] font-light text-gray-700 transition-all block w-full"
+                                            className="font-roboto text-[inherit] font-light text-muted-foreground transition-all block w-full"
                                             onMouseEnter={(e) => {
                                               const color = document.documentElement.classList.contains('dark') ? '#ffffff' : '#141414';
                                               e.currentTarget.style.textShadow = `0 0 0.55px ${color}, 0 0 0.55px ${color}`;
@@ -1188,14 +1211,14 @@ function NikeInspiredHeader({
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
               transition={{ duration: MOTION_DURATION, ease: MOTION_EASE }}
-              className="lg:hidden border-t border-gray-200 bg-white"
+              className="lg:hidden border-t border-border bg-white"
             >
               <div className="px-4 py-4 grid gap-3">
                 {navLinks.map((i) => (
                   <Link
                     key={i.name}
                     to={i.href}
-                    className="py-2 text-sm text-gray-900"
+                    className="py-2 text-sm text-foreground"
                     onClick={closeAll}
                   >
                     {i.name}

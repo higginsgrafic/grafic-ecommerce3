@@ -158,18 +158,18 @@ function ProductGrid({
       style={isSectionEnabled('layout') ? getDebugStyle('layout', 'main') : {}}
     >
       {/* Fons blanc que inclou títol, descripció i productes */}
-      <div className="bg-white w-full">
+      <div className="bg-background w-full">
         {/* Títol i descripció dins del fons gris - padding 75% del desktop */}
         <div className="max-w-7xl mx-auto px-3 lg:px-8 pt-16 lg:pt-20">
           <div className="text-center mb-9 lg:mb-12 px-1 lg:px-4">
             {collectionPath ? (
               <Link to={collectionPath} className="inline-block group">
-                <h2 className={`${getTypographyClasses(typography.productGrid.title)} mb-2 sm:mb-2 md:mb-2 lg:mb-4 uppercase group-hover:opacity-80 transition-opacity text-gray-900`} style={{ fontSize: gridTitleFontSize }}>
+                <h2 className={`${getTypographyClasses(typography.productGrid.title)} mb-2 sm:mb-2 md:mb-2 lg:mb-4 uppercase group-hover:opacity-80 transition-opacity text-foreground`} style={{ fontSize: gridTitleFontSize }}>
                   {title}
                 </h2>
               </Link>
             ) : (
-              <h2 className={`${getTypographyClasses(typography.productGrid.title)} mb-2 sm:mb-2 md:mb-2 lg:mb-4 uppercase text-gray-900`} style={{ fontSize: gridTitleFontSize }}>
+              <h2 className={`${getTypographyClasses(typography.productGrid.title)} mb-2 sm:mb-2 md:mb-2 lg:mb-4 uppercase text-foreground`} style={{ fontSize: gridTitleFontSize }}>
                 {title}
               </h2>
             )}
@@ -180,7 +180,7 @@ function ProductGrid({
                3. Centered
             */}
             <div className="w-full px-4">
-              <p className={`${getTypographyClasses(typography.productGrid.description)} text-center overflow-hidden text-gray-900`} style={{
+              <p className={`${getTypographyClasses(typography.productGrid.description)} text-center overflow-hidden text-muted-foreground`} style={{
                 opacity: 0.7,
                 whiteSpace: 'nowrap',
                 textOverflow: 'ellipsis',

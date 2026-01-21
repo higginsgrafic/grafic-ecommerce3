@@ -3,31 +3,41 @@ import { CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/contexts/ToastContext';
 
-const CARD_ELEMENT_OPTIONS = {
-  style: {
-    base: {
-      color: '#141414',
-      fontFamily: 'Roboto, sans-serif',
-      fontSmoothing: 'antialiased',
-      fontSize: '14px',
-      '::placeholder': {
-        color: '#9ca3af',
-      },
-    },
-    invalid: {
-      color: '#ef4444',
-      iconColor: '#ef4444',
-    },
-  },
-  hidePostalCode: true,
-};
-
 const PaymentForm = ({ amount, onSuccess, billingDetails }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { error: showError } = useToast();
   const [isProcessing, setIsProcessing] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
+
+  const readCssVar = (name) => {
+    try {
+      const raw = window.getComputedStyle(document.documentElement).getPropertyValue(name);
+      const value = (raw || '').toString().trim();
+      return value || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const CARD_ELEMENT_OPTIONS = {
+    style: {
+      base: {
+        color: `hsl(${readCssVar('--foreground') || '0 0% 0%'})`,
+        fontFamily: 'Roboto, sans-serif',
+        fontSmoothing: 'antialiased',
+        fontSize: '14px',
+        '::placeholder': {
+          color: `hsl(${readCssVar('--muted-foreground') || '0 0% 50%'})`,
+        },
+      },
+      invalid: {
+        color: '#ef4444',
+        iconColor: '#ef4444',
+      },
+    },
+    hidePostalCode: true,
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -117,7 +127,7 @@ const PaymentForm = ({ amount, onSuccess, billingDetails }) => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="p-4 border border-gray-300 rounded-md">
+      <div className="p-4 border border-border rounded-md">
         <CardElement options={CARD_ELEMENT_OPTIONS} />
       </div>
 
@@ -131,7 +141,6 @@ const PaymentForm = ({ amount, onSuccess, billingDetails }) => {
         type="submit"
         disabled={!stripe || isProcessing}
         className="w-full h-12 text-sm font-oswald uppercase tracking-wider rounded-sm"
-        style={{ backgroundColor: '#141414', color: '#FFFFFF' }}
       >
         {isProcessing ? (
           <span className="flex items-center gap-2">
@@ -143,7 +152,7 @@ const PaymentForm = ({ amount, onSuccess, billingDetails }) => {
         )}
       </Button>
 
-      <p className="text-xs text-center" style={{ color: '#141414', opacity: 0.5 }}>
+      <p className="text-xs text-center text-muted-foreground opacity-50">
         Les teves dades estan protegides amb encriptació SSL
       </p>
     </form>

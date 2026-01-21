@@ -11,23 +11,33 @@ function CartIcon({
   return (
     <button
       onClick={onClick}
-      className={`relative hover:bg-gray-50 rounded-md transition-colors ${className}`}
+      className={`relative hover:bg-muted rounded-md transition-colors text-foreground ${className}`}
       aria-label="Afegir al cistell"
       style={{ padding: 'clamp(0.1rem, 0.35vw, 0.2rem)' }}
     >
-      <img
-        src={count > 0 ? "/custom_logos/icons/basket-full-1.svg" : "/custom_logos/icons/basket-empty.svg"}
-        alt={count > 0 ? "Cistell amb productes" : "Cistell"}
-        width="28"
-        height="28"
+      <span
+        aria-hidden="true"
         className="transition-all duration-200"
-        style={{ width: iconSize, height: iconSize }}
+        style={{
+          display: 'block',
+          width: iconSize,
+          height: iconSize,
+          backgroundColor: 'currentColor',
+          WebkitMaskImage: `url(${count > 0 ? '/custom_logos/icons/basket-full-1.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+          maskImage: `url(${count > 0 ? '/custom_logos/icons/basket-full-1.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+          WebkitMaskRepeat: 'no-repeat',
+          maskRepeat: 'no-repeat',
+          WebkitMaskPosition: 'center',
+          maskPosition: 'center',
+          WebkitMaskSize: 'contain',
+          maskSize: 'contain'
+        }}
       />
       {count > 0 && (
         <>
           {/* Comptador intern (dins el cistell) */}
           <span
-            className="absolute pointer-events-none font-bold font-oswald text-white"
+            className="absolute pointer-events-none font-bold font-oswald text-whiteStrong"
             style={{
               top: 'calc(60% - 0.25px)',
               left: '50%',
@@ -41,7 +51,7 @@ function CartIcon({
 
           {/* Badge comptador circular a 45 graus (cantonada superior dreta) */}
           <span
-            className="absolute pointer-events-none flex items-center justify-center rounded-full bg-red-600 text-white font-bold font-oswald shadow-md"
+            className="absolute pointer-events-none flex items-center justify-center rounded-full bg-foreground text-whiteStrong font-bold font-oswald shadow-md"
             style={{
               top: '-11px',
               right: '-12px',

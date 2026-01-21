@@ -31,7 +31,8 @@ function Header({
 
   return (
     <motion.header
-      className="fixed left-0 right-0 z-[10000] bg-white border-b border-gray-200"
+      data-main-header="true"
+      className="fixed left-0 right-0 z-[10000] bg-background border-b border-border"
       initial={false}
       animate={{
         top: adminBannerVisible && offersHeaderVisible ? '80px' : adminBannerVisible ? '40px' : offersHeaderVisible ? '40px' : '0px'
@@ -56,13 +57,24 @@ function Header({
           >
             <Link
               to="/"
-              className="block transition-transform hover:scale-105 active:scale-95 lg:active:scale-100"
+              className="relative z-10 pointer-events-auto block transition-transform hover:scale-105 active:scale-95 lg:active:scale-100"
               title="GRÀFIC - Inici"
             >
-              <img
-                src="/custom_logos/brand/marca-grafic-logo.svg"
-                alt="GRAFC"
-                className="h-8 lg:h-10 w-auto"
+              <span
+                aria-hidden="true"
+                data-brand-logo="1"
+                className="h-8 w-[140px] block text-foreground"
+                style={{
+                  backgroundColor: 'currentColor',
+                  WebkitMaskImage: 'url(/custom_logos/brand/marca-grafic-logo.svg)',
+                  maskImage: 'url(/custom_logos/brand/marca-grafic-logo.svg)',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'left center',
+                  maskPosition: 'left center',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain'
+                }}
               />
             </Link>
           </motion.div>
@@ -72,17 +84,17 @@ function Header({
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
-            className="flex justify-center flex-1"
+            className="flex items-center justify-center flex-1"
           >
             {/* Mobile: Search Button */}
             <Button
               variant="ghost"
               size="icon"
               onClick={() => setIsSearchDialogOpen(true)}
-              className="h-9 w-9 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2 lg:hidden"
+              className="h-9 w-9 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:hidden"
               aria-label="Obrir cerca"
             >
-              <svg className="h-5 w-5 text-gray-900 relative top-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <span className="sr-only">Cerca</span>
@@ -94,9 +106,9 @@ function Header({
                 <Link
                   key={link.name}
                   to={link.href}
-                  className="font-roboto text-sm font-normal text-gray-900 transition-all inline-block whitespace-nowrap"
+                  className="font-roboto text-sm font-normal text-foreground transition-all inline-block whitespace-nowrap"
                   onMouseEnter={(e) => {
-                    const color = document.documentElement.classList.contains('dark') ? '#ffffff' : '#141414';
+                    const color = document.documentElement.classList.contains('dark') ? '#ffffff' : 'hsl(var(--foreground))';
                     e.target.style.textShadow = `0 0 0.55px ${color}, 0 0 0.55px ${color}`;
                   }}
                   onMouseLeave={(e) => e.target.style.textShadow = 'none'}
@@ -119,24 +131,35 @@ function Header({
               variant="ghost"
               size="icon"
               onClick={() => setIsSearchDialogOpen(true)}
-              className="hidden lg:flex h-10 w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+              className="hidden lg:flex h-10 w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label="Obrir cerca"
             >
-              <svg className="h-6 w-6 text-gray-900 relative top-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-6 w-6 translate-y-[3px] text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <span className="sr-only">Cerca</span>
             </Button>
 
             {/* Cart */}
-            <Button variant="ghost" size="icon" onClick={onCartClick} className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2">
-               <img
-                src={cartItemCount > 0 ? "/custom_logos/icons/basket-full-2.svg" : "/custom_logos/icons/basket-empty.svg"}
-                alt={cartItemCount > 0 ? texts.header.cart.altFull : texts.header.cart.altEmpty}
+            <Button variant="ghost" size="icon" onClick={onCartClick} className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-foreground">
+              <span
+                aria-hidden="true"
                 className="h-[27px] w-[27px] lg:h-[31px] lg:w-[31px] transition-all duration-200"
+                style={{
+                  display: 'block',
+                  backgroundColor: 'currentColor',
+                  WebkitMaskImage: `url(${cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                  maskImage: `url(${cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'center',
+                  maskPosition: 'center',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain'
+                }}
               />
               {cartItemCount > 0 && (
-                <span className="absolute left-1/2 -translate-x-1/2 text-white text-[13.75px] lg:text-[16.25px] font-bold" style={{ top: 'calc(60% - 1px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}>
+                <span className="absolute left-1/2 -translate-x-1/2 text-whiteStrong text-[13.75px] lg:text-[16.25px] font-bold" style={{ top: 'calc(60% - 1px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}>
                   {cartItemCount}
                 </span>
               )}
@@ -148,9 +171,9 @@ function Header({
               variant="ghost"
               size="icon"
               onClick={onUserClick}
-              className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2"
+              className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <UserRound className="h-5 w-5 lg:h-6 lg:w-6 text-gray-900 relative top-1" />
+              <UserRound className="h-5 w-5 lg:h-6 lg:w-6 translate-y-[3px] text-foreground" />
               <span className="sr-only">Obrir menú d'usuari</span>
             </Button>
           </motion.div>

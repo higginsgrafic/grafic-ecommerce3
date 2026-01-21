@@ -1027,7 +1027,7 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
       case 'outcasted':
         return '/custom_logos/collections/collection-outcasted-logo.svg';
       default:
-        return '/custom_logos/collections/collection-thin-logo.png';
+        return '/custom_logos/collections/collection-thin-logo.svg';
     }
   };
 
@@ -1336,7 +1336,7 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
       {isTEPAEnabled && relatedCollections.length > 0 && (
         <div className="max-w-7xl mx-auto px-4 lg:px-8">
           <div className="border-t border-gray-200 pt-12">
-            <h2 className="font-roboto text-2xl sm:text-3xl font-normal uppercase mb-8" style={{ color: '#141414' }}>
+            <h2 className="font-roboto text-2xl sm:text-3xl font-normal uppercase mb-8 text-foreground">
               Col·leccions
             </h2>
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 items-center">
@@ -1349,15 +1349,20 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
                     <img
                       src={getCollectionLogoSrc(collection)}
                       alt={humanizeLabel(collection)}
+                      className="block object-contain"
                       style={{
+                        height: '70px',
+                        width: 'auto',
                         maxWidth: '220px',
-                        maxHeight: '70px',
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        filter: 'grayscale(100%)',
-                        opacity: 0.35
+                        transform: (collection === 'the-human-inside' || collection === 'thin')
+                          ? 'scale(1.18)'
+                          : undefined,
+                        transformOrigin: (collection === 'the-human-inside' || collection === 'thin')
+                          ? 'center'
+                          : undefined
                       }}
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
                 </div>

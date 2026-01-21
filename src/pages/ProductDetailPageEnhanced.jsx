@@ -471,14 +471,14 @@ export default function ProductDetailPageEnhanced() {
             <div className="space-y-6">
               <div>
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-oswald uppercase text-gray-600">
+                  <span className="inline-block px-3 py-1 bg-gray-100 rounded-full text-xs font-oswald uppercase text-muted-foreground">
                     {product.collection}
                   </span>
                   <span className="inline-block px-3 py-1 bg-green-100 rounded-full text-xs font-oswald uppercase text-green-600">
                     BEST SELLER
                   </span>
                 </div>
-                <h1 className="font-oswald text-4xl lg:text-5xl font-bold uppercase mb-3" style={{ color: '#141414' }}>
+                <h1 className="font-oswald text-4xl lg:text-5xl font-bold uppercase mb-3 text-foreground">
                   {product.name}
                 </h1>
 
@@ -488,11 +488,11 @@ export default function ProductDetailPageEnhanced() {
                       <Star key={star} className="w-5 h-5 fill-yellow-400 text-yellow-400" />
                     ))}
                   </div>
-                  <span className="text-sm font-roboto text-gray-600">4.8 (127 valoracions)</span>
+                  <span className="text-sm font-roboto text-muted-foreground">4.8 (127 valoracions)</span>
                 </div>
 
                 <div className="flex items-baseline gap-3 mb-6">
-                  <p className="font-oswald text-4xl font-normal" style={{ color: '#141414' }}>
+                  <p className="font-oswald text-4xl font-normal text-foreground">
                     {currentPrice.toFixed(2).replace('.', ',')} €
                   </p>
                   {selectedVariant && selectedVariant.price !== product.price && (
@@ -535,11 +535,11 @@ export default function ProductDetailPageEnhanced() {
               {availableSizes.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-oswald font-semibold text-lg uppercase" style={{ color: '#141414' }}>
+                    <h3 className="font-oswald font-semibold text-lg uppercase text-foreground">
                       Capacitat
                     </h3>
                     {selectedSize && (
-                      <span className="text-sm font-roboto text-gray-600">
+                      <span className="text-sm font-roboto text-muted-foreground">
                         {productSpecs.capacity} ({selectedSize})
                       </span>
                     )}
@@ -553,12 +553,12 @@ export default function ProductDetailPageEnhanced() {
                           onClick={() => handleSizeChange(size)}
                           className={`flex-1 min-w-[140px] px-4 py-4 border-2 rounded-lg transition-all ${
                             selectedSize === size
-                              ? 'border-gray-900 bg-gray-900 text-white'
-                              : 'border-gray-300 hover:border-gray-900'
+                              ? 'border-foreground bg-foreground text-white'
+                              : 'border-gray-300 hover:border-foreground'
                           }`}
                         >
                           <div className="font-oswald font-bold text-lg">{size}</div>
-                          <div className={`text-xs ${selectedSize === size ? 'text-gray-300' : 'text-gray-600'}`}>
+                          <div className={`text-xs ${selectedSize === size ? 'text-gray-300' : 'text-muted-foreground'}`}>
                             {size === '11oz' ? '325ml' : '444ml'} • {sizePrice.toFixed(2)}€
                           </div>
                         </button>
@@ -571,11 +571,11 @@ export default function ProductDetailPageEnhanced() {
               {availableColors.length > 0 && (
                 <div>
                   <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-oswald font-semibold text-lg uppercase" style={{ color: '#141414' }}>
+                    <h3 className="font-oswald font-semibold text-lg uppercase text-foreground">
                       Color
                     </h3>
                     {selectedColor && (
-                      <span className="text-sm font-roboto text-gray-600">
+                      <span className="text-sm font-roboto text-muted-foreground">
                         {selectedColor}
                       </span>
                     )}
@@ -732,8 +732,8 @@ export default function ProductDetailPageEnhanced() {
                     onClick={() => setActiveTab(tab)}
                     className={`pb-4 font-oswald font-semibold uppercase tracking-wider transition-colors ${
                       activeTab === tab
-                        ? 'border-b-2 border-gray-900 text-gray-900'
-                        : 'text-gray-500 hover:text-gray-900'
+                        ? 'border-b-2 border-foreground text-foreground'
+                        : 'text-gray-500 hover:text-foreground'
                     }`}
                   >
                     {tab === 'description' && 'Descripció'}

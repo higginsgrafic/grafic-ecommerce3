@@ -39,12 +39,12 @@ const OffersHeader = ({ adminBannerVisible = false }) => {
       style={{
         fontFamily: font || 'Roboto',
         fontSize: fontSize || '14px',
-        color: textColor || '#ffffff',
+        color: 'hsl(var(--primary-foreground))',
         cursor: isClickable ? 'pointer' : 'default'
       }}
       onClick={handleClick}
     >
-      <Truck className="h-5 w-5 mr-1 scale-x-[-1] flex-shrink-0 mt-[0.1em]" style={{ color: textColor || '#ffffff' }} />
+      <Truck className="h-5 w-5 mr-1 scale-x-[-1] flex-shrink-0 mt-[0.1em]" style={{ color: 'hsl(var(--primary-foreground))' }} />
       <span>
         {text || texts.offersHeader.freeShipping}
       </span>
@@ -103,6 +103,7 @@ const OffersHeader = ({ adminBannerVisible = false }) => {
       {/* Banner animat d'ofertes */}
       <motion.div
         className={`fixed top-0 left-0 right-0 z-50 text-white text-sm flex items-center px-4 sm:px-6 lg:px-8 overflow-hidden ${isClickable ? 'pointer-events-auto' : 'pointer-events-none'}`}
+        data-offers-header="true"
         initial={false}
         animate={{
           height: shouldShow ? '40px' : '0px',
@@ -114,7 +115,7 @@ const OffersHeader = ({ adminBannerVisible = false }) => {
         }}
         style={{
           top: adminBannerVisible ? '40px' : '0px',
-          backgroundColor: bgColor || '#111827',
+          backgroundColor: 'hsl(var(--foreground))',
           ...(isSectionEnabled('header') ? getDebugStyle('header', 'row2') : {})
         }}
       >

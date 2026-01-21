@@ -15,44 +15,57 @@ const UserSidebar = ({ isOpen, onClose }) => {
 
   useEffect(() => {
     if (isOpen) {
-      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
-      document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
-      document.body.style.paddingRight = `${scrollbarWidth}px`;
+      let needsComp = false;
+      try {
+        needsComp = !(window.CSS && typeof window.CSS.supports === 'function' && window.CSS.supports('scrollbar-gutter: stable'));
+      } catch {
+        needsComp = true;
+      }
+
+      if (needsComp) {
+        const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth;
+        document.documentElement.style.setProperty('--scrollbar-width', `${scrollbarWidth}px`);
+        document.documentElement.classList.add('scrollbar-compensate');
+        document.body.style.paddingRight = `${scrollbarWidth}px`;
+      }
+
       document.body.classList.add('cart-open');
 
-      const header = document.querySelector('header');
+      const header = document.querySelector('[data-main-header="true"]');
       if (header) {
         header.classList.add('cart-open');
       }
 
-      const offersHeaders = document.querySelectorAll('.fixed.top-0');
-      offersHeaders.forEach(el => el.classList.add('offers-header-cart-open'));
+      const offersHeaders = document.querySelectorAll('[data-offers-header="true"]');
+      offersHeaders.forEach((el) => el.classList.add('offers-header-cart-open'));
     } else {
       document.documentElement.style.removeProperty('--scrollbar-width');
+      document.documentElement.classList.remove('scrollbar-compensate');
       document.body.style.paddingRight = '';
       document.body.classList.remove('cart-open');
 
-      const header = document.querySelector('header');
+      const header = document.querySelector('[data-main-header="true"]');
       if (header) {
         header.classList.remove('cart-open');
       }
 
-      const offersHeaders = document.querySelectorAll('.fixed.top-0');
-      offersHeaders.forEach(el => el.classList.remove('offers-header-cart-open'));
+      const offersHeaders = document.querySelectorAll('[data-offers-header="true"]');
+      offersHeaders.forEach((el) => el.classList.remove('offers-header-cart-open'));
     }
 
     return () => {
       document.documentElement.style.removeProperty('--scrollbar-width');
+      document.documentElement.classList.remove('scrollbar-compensate');
       document.body.style.paddingRight = '';
       document.body.classList.remove('cart-open');
 
-      const header = document.querySelector('header');
+      const header = document.querySelector('[data-main-header="true"]');
       if (header) {
         header.classList.remove('cart-open');
       }
 
-      const offersHeaders = document.querySelectorAll('.fixed.top-0');
-      offersHeaders.forEach(el => el.classList.remove('offers-header-cart-open'));
+      const offersHeaders = document.querySelectorAll('[data-offers-header="true"]');
+      offersHeaders.forEach((el) => el.classList.remove('offers-header-cart-open'));
     };
   }, [isOpen]);
 

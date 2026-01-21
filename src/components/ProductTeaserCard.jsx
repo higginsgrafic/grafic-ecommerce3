@@ -22,15 +22,15 @@ function ProductTeaserCard({
   })();
 
   return (
-    <Link to={to} className="block">
-      <div className="w-full">
-        <div className="w-full aspect-square bg-[#f5f5f5] overflow-hidden p-10">
+    <Link to={to} className="block" data-component="product-teaser-link">
+      <div className="w-full" data-component="product-teaser">
+        <div className="w-full aspect-square bg-[#f5f5f5] overflow-hidden p-10" data-component="product-teaser-media">
           <img src={imgSrc} alt={name} className="h-full w-full object-contain" loading="lazy" decoding="async" />
         </div>
 
-        <div className="mt-3">
-          <div className="flex items-center gap-2">
-            <div className="flex items-center gap-1">
+        <div className="mt-3" data-component="product-teaser-body">
+          <div className="flex items-center gap-2" data-component="product-teaser-meta">
+            <div className="flex items-center gap-1" data-component="product-teaser-colors">
               {dots.map((c) => (
                 <span key={c} className="inline-block h-2 w-2 rounded-full" style={colorDotStyle ? colorDotStyle(c) : undefined} />
               ))}
@@ -46,19 +46,19 @@ function ProductTeaserCard({
             ) : null}
           </div>
 
-          <div className="mt-2">
-            <div className="font-roboto text-[15px] font-semibold" style={{ color: '#111111' }}>
+          <div className="mt-2" data-component="product-teaser-text">
+            <div className="font-roboto text-[15px] font-semibold" style={{ color: '#111111' }} data-component="product-teaser-name">
               {name}
             </div>
             {subtitle ? (
-              <div className="font-roboto text-[13px]" style={{ color: '#6b7280' }}>
+              <div className="font-roboto text-[13px]" style={{ color: '#6b7280' }} data-component="product-teaser-subtitle">
                 {subtitle}
               </div>
             ) : null}
-            <div className="mt-1 font-roboto text-[13px]" style={{ color: '#6b7280' }}>
+            <div className="mt-1 font-roboto text-[13px]" style={{ color: '#6b7280' }} data-component="product-teaser-color-count">
               {colorCount > 0 ? `${colorCount} colors` : null}
             </div>
-            <div className="mt-2 font-roboto text-[15px] font-semibold" style={{ color: '#111111' }}>
+            <div className="mt-2 font-roboto text-[15px] font-semibold" style={{ color: '#111111' }} data-component="product-teaser-price">
               {priceText}
             </div>
           </div>
