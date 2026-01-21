@@ -79,7 +79,7 @@ const EpisodeDisplay = ({
               fontSize: '16pt',
               lineHeight: '24pt',
               height: 'calc(24pt * 6)',
-              color: '#141414',
+              color: 'hsl(var(--foreground))',
               overflow: 'hidden',
               letterSpacing: '0em',
               wordSpacing: '0em'

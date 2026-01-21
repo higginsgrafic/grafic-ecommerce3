@@ -367,8 +367,8 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-gray-600">Carregant...</div>
+      <div className="min-h-screen bg-muted flex items-center justify-center">
+        <div className="text-muted-foreground">Carregant...</div>
       </div>
     );
   }
@@ -391,7 +391,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
 
       <FullBleedUnderHeader
         as="section"
-        className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-white bg-black"
+        className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-whiteStrong bg-foreground"
       >
         {!editMode && (
           <motion.div
@@ -432,7 +432,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
               </div>
             )}
             <div
-              className="absolute inset-0 bg-black"
+              className="absolute inset-0 bg-foreground"
               style={{ opacity: slides[currentSlide]?.bg_opacity ?? 0.5 }}
             />
           </motion.div>
@@ -444,13 +444,13 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
         >
           <div className="relative h-8 px-6">
             {isAdmin && (
-              <div className="absolute left-6 top-0 h-8 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-white/80 select-none">
-                <span className="px-2 py-0.5 rounded bg-white/10 border border-white/15">DEV</span>
-                <button type="button" onClick={() => navigate('/nike-hero-demo')} className="text-white/70 hover:text-white transition-colors">Nike Hero</button>
-                <span className="text-white/30">/</span>
-                <button type="button" onClick={() => navigate('/nike-tambe')} className="text-white/70 hover:text-white transition-colors">Nike També</button>
-                <span className="text-white/30">/</span>
-                <button type="button" onClick={() => navigate('/adidas-demo')} className="text-white/70 hover:text-white transition-colors">Adidas</button>
+              <div className="absolute left-6 top-0 h-8 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-whiteSoft/80 select-none">
+                <span className="px-2 py-0.5 rounded bg-whiteSoft/10 border border-whiteSoft/15">DEV</span>
+                <button type="button" onClick={() => navigate('/nike-hero-demo')} className="text-whiteSoft/70 hover:text-whiteStrong transition-colors">Nike Hero</button>
+                <span className="text-whiteSoft/30">/</span>
+                <button type="button" onClick={() => navigate('/nike-tambe')} className="text-whiteSoft/70 hover:text-whiteStrong transition-colors">Nike També</button>
+                <span className="text-whiteSoft/30">/</span>
+                <button type="button" onClick={() => navigate('/adidas-demo')} className="text-whiteSoft/70 hover:text-whiteStrong transition-colors">Adidas</button>
               </div>
             )}
 
@@ -460,8 +460,8 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                   onClick={() => setActiveTab('text')}
                   className={`transition-colors ${
                     activeTab === 'text'
-                      ? 'text-white'
-                      : 'text-white/50 hover:text-white/80'
+                      ? 'text-whiteStrong'
+                      : 'text-whiteSoft/50 hover:text-whiteSoft/80'
                   }`}
                 >
                   Text
@@ -471,8 +471,8 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                   onClick={() => setActiveTab('background')}
                   className={`transition-colors ${
                     activeTab === 'background'
-                      ? 'text-white'
-                      : 'text-white/50 hover:text-white/80'
+                      ? 'text-whiteStrong'
+                      : 'text-whiteSoft/50 hover:text-whiteSoft/80'
                   }`}
                 >
                   Background
@@ -480,7 +480,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 <div className="w-px h-4 bg-white/30" />
                 <button
                   onClick={addSlide}
-                  className="flex items-center gap-1 transition-colors text-white/50 hover:text-white"
+                  className="flex items-center gap-1 transition-colors text-whiteSoft/50 hover:text-whiteStrong"
                   title="Afegir slide"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -490,7 +490,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 <div className="w-px h-4 bg-white/30" />
                 <button
                   onClick={() => setDeleteConfirmDialog(true)}
-                  className="flex items-center gap-1 transition-colors text-white/50 hover:text-red-400"
+                  className="flex items-center gap-1 transition-colors text-whiteSoft/50 hover:text-red-400"
                 >
                   <Trash2 className="w-4 h-4" />
                 </button>
@@ -498,7 +498,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
             )}
 
             {isAdmin && editMode && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-0 h-8 flex items-center gap-2 text-white/90 font-mono text-sm">
+              <div className="absolute left-1/2 -translate-x-1/2 top-0 h-8 flex items-center gap-2 text-whiteSoft/90 font-mono text-sm">
                 {editingInterval ? (
                   <>
                     <input
@@ -508,7 +508,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                       onBlur={handleIntervalBlur}
                       onKeyDown={handleIntervalKeyDown}
                       onWheel={(e) => e.stopPropagation()}
-                      className="w-12 h-6 px-1 py-0.5 bg-white/20 text-white text-center rounded border border-white/30 focus:border-white/60 focus:outline-none"
+                      className="w-12 h-6 px-1 py-0.5 bg-whiteSoft/20 text-whiteStrong text-center rounded border border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none"
                       min="0"
                       autoFocus
                     />
@@ -520,20 +520,20 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                       onBlur={handleIntervalBlur}
                       onKeyDown={handleIntervalKeyDown}
                       onWheel={(e) => e.stopPropagation()}
-                      className="w-16 h-6 px-1 py-0.5 bg-white/20 text-white text-center rounded border border-white/30 focus:border-white/60 focus:outline-none"
+                      className="w-16 h-6 px-1 py-0.5 bg-whiteSoft/20 text-whiteStrong text-center rounded border border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none"
                       min="0"
                       max="999"
                     />
-                    <span className="text-white/50">ms</span>
+                    <span className="text-whiteSoft/50">ms</span>
                   </>
                 ) : (
                   <button
                     onClick={handleIntervalClick}
                     className="flex items-center gap-2 hover:bg-white/10 px-2 h-6 rounded transition-colors cursor-pointer"
                   >
-                    <span className="text-white/50">⏱</span>
+                    <span className="text-whiteSoft/50">⏱</span>
                     <span>{tempInterval.seconds}s</span>
-                    <span className="text-white/50">{String(tempInterval.milliseconds).padStart(3, '0')}ms</span>
+                    <span className="text-whiteSoft/50">{String(tempInterval.milliseconds).padStart(3, '0')}ms</span>
                   </button>
                 )}
               </div>
@@ -550,7 +550,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}
-                        className="flex items-center gap-3 text-xs font-medium text-white/90"
+                        className="flex items-center gap-3 text-xs font-medium text-whiteSoft/90"
                       >
                         <label className="flex items-center gap-2">
                           <span>Opacitat fons:</span>
@@ -561,7 +561,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                             step="0.05"
                             value={currentSlideData?.bg_opacity ?? 0.6}
                             onChange={(e) => updateSlide(currentSlide, 'bg_opacity', parseFloat(e.target.value))}
-                            className="w-24 accent-white"
+                            className="w-24 accent-whiteStrong"
                           />
                           <span>{Math.round((currentSlideData?.bg_opacity ?? 0.6) * 100)}%</span>
                         </label>
@@ -575,18 +575,18 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.15 }}
-                        className="flex items-center gap-3 text-xs font-medium text-white/90"
+                        className="flex items-center gap-3 text-xs font-medium text-whiteSoft/90"
                       >
                         <button
                           onClick={() => openSearchDialog('video')}
-                          className="bg-transparent text-white border-b border-transparent hover:border-white/30 focus:border-white/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
+                          className="bg-transparent text-whiteStrong border-b border-transparent hover:border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
                         >
                           {currentSlideData?.bg_value ?? currentSlideData?.video_url ?? 'ID vídeo'}
                         </button>
                         <div className="w-px h-4 bg-white/30" />
                         <button
                           onClick={() => openSearchDialog('route')}
-                          className="bg-transparent text-white border-b border-transparent hover:border-white/30 focus:border-white/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
+                          className="bg-transparent text-whiteStrong border-b border-transparent hover:border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
                         >
                           {currentSlideData?.path ?? '/ruta'}
                         </button>
@@ -601,7 +601,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                     setShowHeroSettings(false);
                     navigate('/hero-settings', { state: { editMode: true } });
                   }}
-                  className="w-8 h-8 flex items-center justify-center bg-transparent text-white/90 hover:text-white transition-colors"
+                  className="w-8 h-8 flex items-center justify-center bg-transparent text-whiteSoft/90 hover:text-whiteStrong transition-colors"
                   aria-label="Obrir hero settings"
                 >
                   {showHeroSettings ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
@@ -618,7 +618,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 type="text"
                 value={currentSlideData?.title || ''}
                 onChange={(e) => updateSlide(currentSlide, 'title', e.target.value)}
-                className={`${getTypographyClasses(typography.hero.title)} mb-3 lg:mb-4 text-white uppercase w-full text-center bg-transparent border-2 border-white/30 rounded-lg px-4 py-2 focus:border-white/60 focus:outline-none placeholder-white/50`}
+                className={`${getTypographyClasses(typography.hero.title)} mb-3 lg:mb-4 text-whiteStrong uppercase w-full text-center bg-transparent border-2 border-whiteSoft/30 rounded-lg px-4 py-2 focus:border-whiteSoft/60 focus:outline-none placeholder-whiteSoft/50`}
                 style={{ fontSize: titleFontSize }}
                 placeholder="Títol del slide"
               />
@@ -626,7 +626,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 value={currentSlideData?.subtitle || ''}
                 onChange={(e) => updateSlide(currentSlide, 'subtitle', e.target.value)}
                 rows={2}
-                className={`${getTypographyClasses(typography.hero.subtitle)} max-w-4xl mx-auto text-gray-100 px-4 py-2 w-full text-center bg-transparent border-2 border-white/30 rounded-lg focus:border-white/60 focus:outline-none placeholder-white/50 resize-none`}
+                className={`${getTypographyClasses(typography.hero.subtitle)} max-w-4xl mx-auto text-whiteSoft px-4 py-2 w-full text-center bg-transparent border-2 border-whiteSoft/30 rounded-lg focus:border-whiteSoft/60 focus:outline-none placeholder-whiteSoft/50 resize-none`}
                 style={{ fontSize: subtitleFontSize }}
                 placeholder="Subtítol del slide"
               />
@@ -642,7 +642,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 transition={{ duration: 0.6, ease: "easeOut" }}
               >
                 <motion.h1
-                  className={`${getTypographyClasses(typography.hero.title)} mb-3 lg:mb-4 drop-shadow-lg text-white uppercase`}
+                  className={`${getTypographyClasses(typography.hero.title)} mb-3 lg:mb-4 drop-shadow-lg text-whiteStrong uppercase`}
                   style={{ fontSize: titleFontSize }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -651,7 +651,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                   {slides[currentSlide]?.title}
                 </motion.h1>
                 <motion.p
-                  className={`${getTypographyClasses(typography.hero.subtitle)} max-w-4xl mx-auto drop-shadow-md text-gray-100 px-2`}
+                  className={`${getTypographyClasses(typography.hero.subtitle)} max-w-4xl mx-auto drop-shadow-md text-whiteSoft px-2`}
                   style={{ fontSize: subtitleFontSize }}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -672,7 +672,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 className="w-9 h-9 flex items-center justify-center transition-colors"
                 aria-label="Slide anterior"
               >
-                <ChevronLeft className="w-5 h-5 text-white" />
+                <ChevronLeft className="w-5 h-5 text-whiteStrong" />
               </button>
             )}
 
@@ -686,7 +686,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                       setCurrentSlide(index);
                     }}
                     className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentSlide ? 'bg-white w-8' : 'bg-white/50 hover:bg-white/80'
+                      index === currentSlide ? 'bg-whiteStrong w-8' : 'bg-whiteSoft/50 hover:bg-whiteSoft/80'
                     }`}
                     aria-label={`Anar al slide ${index + 1}`}
                   />
@@ -700,7 +700,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 className="w-9 h-9 flex items-center justify-center transition-colors"
                 aria-label="Slide següent"
               >
-                <ChevronRight className="w-5 h-5 text-white" />
+                <ChevronRight className="w-5 h-5 text-whiteStrong" />
               </button>
             )}
           </div>
@@ -715,36 +715,36 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50"
+              className="fixed inset-0 bg-foreground/50 z-50"
               onClick={() => setDeleteConfirmDialog(false)}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-lg shadow-xl z-50"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-background rounded-lg shadow-xl z-50"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-foreground">
                     Esborrar slide
                   </h3>
                   <button
                     onClick={() => setDeleteConfirmDialog(false)}
-                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
-                <p className="text-sm text-gray-600 mb-6">
+                <p className="text-sm text-muted-foreground mb-6">
                   Estàs segur que vols esborrar aquest slide? Aquesta acció no es pot desfer.
                 </p>
 
                 <div className="flex gap-3 justify-end">
                   <button
                     onClick={() => setDeleteConfirmDialog(false)}
-                    className="px-4 py-2 text-sm text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors"
+                    className="px-4 py-2 text-sm text-foreground bg-background border border-border rounded-md hover:bg-muted transition-colors"
                   >
                     Cancel·lar
                   </button>
@@ -753,7 +753,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                       deleteSlide(currentSlide);
                       setDeleteConfirmDialog(false);
                     }}
-                    className="px-4 py-2 text-sm text-white bg-red-600 rounded-md hover:bg-red-700 transition-colors"
+                    className="px-4 py-2 text-sm text-whiteStrong bg-red-600 rounded-md hover:bg-red-700 transition-colors"
                   >
                     Esborrar
                   </button>
@@ -772,36 +772,36 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-50"
+              className="fixed inset-0 bg-foreground/50 z-50"
               onClick={closeSearchDialog}
             />
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-lg shadow-xl z-50"
+              className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-background rounded-lg shadow-xl z-50"
             >
               <div className="p-6">
                 <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                  <h3 className="text-lg font-semibold text-foreground">
                     {searchDialog.type === 'video' ? 'Selecciona un vídeo' : 'Selecciona una ruta'}
                   </h3>
                   <button
                     onClick={closeSearchDialog}
-                    className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
+                    className="p-1 text-muted-foreground hover:text-foreground transition-colors"
                   >
                     <X className="w-5 h-5" />
                   </button>
                 </div>
 
                 <div className="relative mb-4">
-                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Cerca..."
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full pl-10 pr-4 py-2 border border-border rounded-md focus:ring-2 focus:ring-ring focus:border-transparent"
                     autoFocus
                   />
                 </div>
@@ -811,25 +811,25 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                     <button
                       key={searchDialog.type === 'video' ? option.id : option.path}
                       onClick={() => selectValue(searchDialog.type === 'video' ? option.id : option.path)}
-                      className="w-full text-left px-4 py-3 rounded-md hover:bg-gray-100 transition-colors"
+                      className="w-full text-left px-4 py-3 rounded-md hover:bg-muted transition-colors"
                     >
-                      <div className="font-medium text-gray-900">
+                      <div className="font-medium text-foreground">
                         {searchDialog.type === 'video' ? option.id : option.path}
                       </div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm text-muted-foreground">
                         {option.label}
                       </div>
                     </button>
                   ))}
                   {getFilteredOptions().length === 0 && (
-                    <div className="text-center py-8 text-gray-500">
+                    <div className="text-center py-8 text-muted-foreground">
                       No s'han trobat resultats
                     </div>
                   )}
                 </div>
 
                 {searchDialog.type === 'video' && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <input
                       type="text"
                       value={searchQuery}
@@ -840,12 +840,12 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                         }
                       }}
                       placeholder="O escriu un ID personalitzat"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-md focus:ring-2 focus:ring-ring focus:border-transparent"
                     />
                     <button
                       onClick={() => searchQuery.trim() && selectValue(searchQuery.trim())}
                       disabled={!searchQuery.trim()}
-                      className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="w-full mt-2 px-4 py-2 bg-blue-600 text-whiteStrong rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Usar ID personalitzat
                     </button>
@@ -853,7 +853,7 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                 )}
 
                 {searchDialog.type === 'route' && (
-                  <div className="mt-4 pt-4 border-t border-gray-200">
+                  <div className="mt-4 pt-4 border-t border-border">
                     <input
                       type="text"
                       value={searchQuery}
@@ -864,12 +864,12 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
                         }
                       }}
                       placeholder="O escriu una ruta personalitzada"
-                      className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      className="w-full px-4 py-2 border border-border rounded-md focus:ring-2 focus:ring-ring focus:border-transparent"
                     />
                     <button
                       onClick={() => searchQuery.trim() && selectValue(searchQuery.trim())}
                       disabled={!searchQuery.trim()}
-                      className="w-full mt-2 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="w-full mt-2 px-4 py-2 bg-blue-600 text-whiteStrong rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                       Usar ruta personalitzada
                     </button>
