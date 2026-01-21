@@ -7,36 +7,48 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scrollbar-gutter: stable;
+}
+
+html.scrollbar-compensate [data-main-header="true"].cart-open,
+html.scrollbar-compensate .offers-header-cart-open {
+  padding-right: var(--scrollbar-width, 0);
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 222.2 47.4% 11.2%;
+    --foreground: 0 100% 50%;
+
+    --white-strong: var(--background);
+    --white-soft: var(--background);
 
     --muted: 0 0% 96%;
-    --muted-foreground: 0 0% 47%;
+    --muted-foreground: 0 100% 82.35%;
 
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 47.4% 11.2%;
+    --popover-foreground: 0 100% 50%;
 
     --border: 0 0% 91%;
     --input: 0 0% 91%;
 
     --card: 0 0% 100%;
-    --card-foreground: 222.2 47.4% 11.2%;
+    --card-foreground: 0 100% 50%;
 
-    --primary: 222.2 47.4% 11.2%;
+    --primary: 0 100% 50%;
     --primary-foreground: 0 0% 98%;
 
     --secondary: 0 0% 96%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary-foreground: 0 100% 50%;
 
     --accent: 0 0% 96%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    --accent-foreground: 0 100% 50%;
 
     --destructive: 0 100% 50%;
     --destructive-foreground: 0 0% 98%;
 
-    --ring: 222.2 47.4% 11.2%;
+    --ring: 0 100% 50%;
 
     --radius: 0.5rem;
   }
@@ -76,11 +88,6 @@ body.cart-open {
   overflow: hidden !important;
 }
 
-header.cart-open,
-.offers-header-cart-open {
-  padding-right: var(--scrollbar-width, 0);
-}
-
 .debug-containers * {
   outline: 2px solid rgba(255, 0, 0, 0.65) !important;
   outline-offset: -1px;
@@ -92,6 +99,16 @@ header.cart-open,
 .debug-exempt {
   outline: none !important;
   cursor: auto !important;
+  pointer-events: auto !important;
+}
+
+.debug-containers .debug-exempt[data-dev-overlay="true"],
+.debug-exempt[data-dev-overlay="true"] {
+  pointer-events: none !important;
+}
+
+.debug-containers .debug-exempt[data-dev-overlay="true"] [data-dev-overlay-interactive="true"],
+.debug-exempt[data-dev-overlay="true"] [data-dev-overlay-interactive="true"] {
   pointer-events: auto !important;
 }
 
