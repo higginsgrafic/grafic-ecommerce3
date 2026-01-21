@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { useAdmin } from '@/contexts/AdminContext';
 import { useToast } from '@/contexts/ToastContext';
 
-export default function AdminBanner() {
+export default function AdminBanner({ rulerInset = 0 }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { isAdmin, disableAdmin, bypassUnderConstruction, toggleBypassUnderConstruction } = useAdmin();
@@ -48,7 +48,10 @@ export default function AdminBanner() {
   };
 
   return (
-    <div className="fixed left-0 right-0 top-0 z-[30000] bg-red-600 h-[40px] w-full flex items-center debug-exempt" data-debug-exempt="true">
+    <div
+      className="fixed left-0 right-0 top-0 z-[30000] bg-red-600 h-[40px] w-full flex items-center"
+      style={rulerInset ? { top: `${rulerInset}px`, left: `${rulerInset}px`, right: 0 } : undefined}
+    >
       {/* Left: Navigation Arrows */}
       <div className="flex items-center gap-1.5 pl-4">
         {/* Back Arrow */}
@@ -64,7 +67,7 @@ export default function AdminBanner() {
         </Button>
 
         {/* Logo GRÀFIC */}
-        <Link to="/" className="block transition-transform hover:scale-105 active:scale-95" title="GRÀFIC - Inici">
+        <Link to="/" className="relative z-10 pointer-events-auto block transition-transform hover:scale-105 active:scale-95" title="GRÀFIC - Inici">
           <img
             src="/custom_logos/brand/marca-grafic-logo.svg"
             alt="GRAFC"

@@ -14,6 +14,7 @@ import SkipLink from '@/components/SkipLink';
 import OffersHeader from '@/components/OffersHeader';
 import AdminBanner from '@/components/AdminBanner';
 import Header from '@/components/Header';
+import AdidasInspiredHeader from '@/components/AdidasInspiredHeader';
 import NikeInspiredHeader from '@/components/NikeInspiredHeader';
 import DevHeader from '@/components/DevHeader';
 import ScrollToTop from '@/components/ScrollToTop';
@@ -73,12 +74,16 @@ const GelatoBlankProductsPage = lazy(() => import('@/pages/GelatoBlankProductsPa
 const AdminUploadPage = lazy(() => import('@/pages/AdminUploadPage'));
 const UnitatsCanviPage = lazy(() => import('@/pages/UnitatsCanviPage'));
 const RuletaDemoPage = lazy(() => import('@/pages/RuletaDemoPage'));
+const AdminControlsPage = lazy(() => import('@/pages/AdminControlsPage'));
+const AdminStudioLayout = lazy(() => import('@/components/AdminStudioLayout'));
 
 const NikeTambePage = lazy(() => import('@/pages/NikeTambePage.jsx'));
 const AdidasDemoPage = lazy(() => import('@/pages/AdidasDemoPage'));
 const AdidasPdpPage = lazy(() => import('@/pages/AdidasPdpPage.jsx'));
+const AdidasPdpTdpPage = lazy(() => import('@/pages/AdidasPdpTdpPage.jsx'));
 const AdidasStripeZoomDevPage = lazy(() => import('@/pages/AdidasStripeZoomDevPage'));
 const DevLinksPage = lazy(() => import('@/pages/DevLinksPage'));
+const DevComponentsCatalogPage = lazy(() => import('@/pages/DevComponentsCatalogPage'));
 const TheHumanInsidePage = lazy(() => import('@/pages/TheHumanInsidePage'));
 const LabDemosPage = lazy(() => import('@/pages/LabDemosPage.jsx'));
 const LabWipPage = lazy(() => import('@/pages/LabWipPage.jsx'));
@@ -87,6 +92,49 @@ const LabHomePage = lazy(() => import('@/pages/LabHomePage.jsx'));
 // Pàgines administratives
 const AppsPage = lazy(() => import('@/pages/AppsPage'));
 const DocumentationPage = lazy(() => import('@/pages/DocumentationPage'));
+
+const devHexToHslTriplet = (hex) => {
+  const raw = (hex || '').toString().trim();
+  const m = raw.match(/^#?([0-9a-f]{6})$/i);
+  if (!m) return null;
+  const n = parseInt(m[1], 16);
+  const r = ((n >> 16) & 255) / 255;
+  const g = ((n >> 8) & 255) / 255;
+  const b = (n & 255) / 255;
+
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const delta = max - min;
+
+  let h = 0;
+  if (delta !== 0) {
+    if (max === r) h = ((g - b) / delta) % 6;
+    else if (max === g) h = (b - r) / delta + 2;
+    else h = (r - g) / delta + 4;
+    h *= 60;
+    if (h < 0) h += 360;
+  }
+
+  const l = (max + min) / 2;
+  const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
+  const sPct = Math.round(s * 10000) / 100;
+  const lPct = Math.round(l * 10000) / 100;
+  const hDeg = Math.round(h * 100) / 100;
+  return `${hDeg} ${sPct}% ${lPct}%`;
+};
+
+const applyDevThemeVarsFromStorage = () => {
+  try {
+    const savedStrong = window.localStorage.getItem('DEV_THEME_STRONG_HEX');
+    const savedSoft = window.localStorage.getItem('DEV_THEME_SOFT_HEX');
+    const strongTriplet = devHexToHslTriplet(savedStrong);
+    const softTriplet = devHexToHslTriplet(savedSoft);
+    if (strongTriplet) document.documentElement.style.setProperty('--foreground', strongTriplet);
+    if (softTriplet) document.documentElement.style.setProperty('--muted-foreground', softTriplet);
+  } catch {
+    // ignore
+  }
+};
 
 function App() {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -98,11 +146,11 @@ function App() {
   const [copyContainerStatus, setCopyContainerStatus] = useState('idle');
   const [selectionStatus, setSelectionStatus] = useState('idle');
   const [layoutInspectorEnabled, setLayoutInspectorEnabled] = useState(false);
-  const [debugCaptureClicks, setDebugCaptureClicks] = useState(false);
   const [guidesEnabled, setGuidesEnabled] = useState(false);
+  const [clicksEnabled, setClicksEnabled] = useState(false);
+  const [clickMarks, setClickMarks] = useState([]);
   const [nikeTambeBgOn, setNikeTambeBgOn] = useState(true);
   const debugButtonsWrapRef = useRef(null);
-  const [debugButtonsRect, setDebugButtonsRect] = useState({ left: 16, top: 0, width: 150, height: 60 });
   const selectedElementNodeRef = useRef(null);
   const lastCopiedTokenRef = useRef('');
   const pickCycleRef = useRef({ x: null, y: null, idx: 0, sig: '' });
@@ -121,8 +169,11 @@ function App() {
   const { shouldRedirect, redirectUrl, loading: redirectLoading } = useGlobalRedirect(bypassUnderConstruction);
 
   useEffect(() => {
+    applyDevThemeVarsFromStorage();
+  }, []);
+
+  useEffect(() => {
     try {
-      localStorage.removeItem('debugCaptureClicks');
       localStorage.removeItem('layoutInspectorPickEnabled');
       localStorage.removeItem('adminTools');
       localStorage.removeItem('NIKE_DEMO_MANUAL');
@@ -131,6 +182,33 @@ function App() {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('DEV_CLICKS_ENABLED', clicksEnabled ? '1' : '0');
+    } catch {
+      // ignore
+    }
+  }, [clicksEnabled]);
+
+  useEffect(() => {
+    if (!clicksEnabled) return;
+    if (!layoutInspectorEnabled) return;
+
+    const onPointerDown = (e) => {
+      if (typeof e.clientX !== 'number' || typeof e.clientY !== 'number') return;
+      const toolbar = debugButtonsWrapRef.current;
+      if (toolbar && e.target && toolbar.contains(e.target)) return;
+
+      setClickMarks((prev) => {
+        const next = [...prev, { x: e.clientX, y: e.clientY, t: Date.now() }];
+        return next.slice(-40);
+      });
+    };
+
+    window.addEventListener('pointerdown', onPointerDown, { capture: true, passive: true });
+    return () => window.removeEventListener('pointerdown', onPointerDown, { capture: true });
+  }, [clicksEnabled, layoutInspectorEnabled]);
 
   useEffect(() => {
     window.__GLOBAL_REDIRECT_STATE__ = {
@@ -251,14 +329,32 @@ function App() {
 
   const isNikeDemoRoute = location.pathname === '/nike-tambe' || location.pathname.startsWith('/proves/demo-nike-tambe');
   const isNikeHeroDemoRoute = false;
+  const isHomeRoute = location.pathname === '/';
   const isAdidasDemoRoute =
     location.pathname === '/adidas-demo' ||
-    location.pathname.startsWith('/adidas-demo/') ||
+    location.pathname === '/adidas-demo-lite' ||
     location.pathname === '/adidas-pdp' ||
     location.pathname.startsWith('/adidas-pdp/') ||
     location.pathname.startsWith('/proves/demo-adidas');
   const isDevDemoRoute = isNikeDemoRoute || isAdidasDemoRoute;
   const layoutInspectorActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && layoutInspectorEnabled;
+
+  useEffect(() => {
+    if (layoutInspectorActive) return;
+    setClicksEnabled(false);
+    setClickMarks([]);
+  }, [layoutInspectorActive]);
+
+  useEffect(() => {
+    try {
+      document.body.classList.toggle('debug-containers', !!layoutInspectorActive);
+      return () => {
+        document.body.classList.remove('debug-containers');
+      };
+    } catch {
+      return undefined;
+    }
+  }, [layoutInspectorActive]);
 
   useEffect(() => {
     try {
@@ -336,34 +432,6 @@ function App() {
       // ignore
     }
   }, [layoutInspectorPickEnabled]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('debugCaptureClicks', JSON.stringify(debugCaptureClicks));
-    } catch {
-      // ignore
-    }
-  }, [debugCaptureClicks]);
-
-  useEffect(() => {
-    const el = debugButtonsWrapRef.current;
-    if (!el) return;
-
-    const update = () => {
-      const rect = el.getBoundingClientRect();
-      if (!rect?.width || !rect?.height) return;
-      setDebugButtonsRect({ left: rect.left, top: rect.top, width: rect.width, height: rect.height });
-    };
-
-    update();
-    const ro = new ResizeObserver(update);
-    ro.observe(el);
-    window.addEventListener('resize', update);
-    return () => {
-      ro.disconnect();
-      window.removeEventListener('resize', update);
-    };
-  }, [isAdmin, isDevDemoRoute, location.pathname]);
 
   useEffect(() => {
     const update = () => {
@@ -489,11 +557,6 @@ function App() {
         return;
       }
 
-      if (layoutInspectorPickEnabled && debugCaptureClicks) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-
       const target = picked;
       const previousSelected = document.querySelector('.debug-selected');
       if (previousSelected) previousSelected.classList.remove('debug-selected');
@@ -511,22 +574,22 @@ function App() {
     };
 
     const onClickCapture = (e) => {
-      if (!layoutInspectorPickEnabled) return;
-      if (!debugCaptureClicks) return;
-      if (!(e.target instanceof Element)) return;
-      const main = document.getElementById('main-content');
-      if (!(main && main.contains(e.target))) return;
-      if (isFixedElement(e.target)) return;
+      if (!layoutInspectorActive) return;
       const toolbar = debugButtonsWrapRef.current;
       if (toolbar && toolbar.contains(e.target)) return;
-      if (e.target.closest('.debug-exempt,[data-debug-exempt="true"]')) return;
+      if (e.target && e.target.closest && e.target.closest('.debug-exempt,[data-debug-exempt="true"]')) return;
       if (isDevOverlay(e.target)) return;
-      e.preventDefault();
-      e.stopPropagation();
+      const main = document.getElementById('main-content');
+      if (!(main && e.target instanceof Element && main.contains(e.target))) return;
+
+      // Blocatge per defecte: evita navegació i handlers de click quan el debug està actiu.
+      if (typeof e.preventDefault === 'function') e.preventDefault();
+      if (typeof e.stopPropagation === 'function') e.stopPropagation();
+      if (typeof e.stopImmediatePropagation === 'function') e.stopImmediatePropagation();
     };
 
-    window.addEventListener('pointerdown', onPointerDown, { capture: true, passive: !debugCaptureClicks });
-    window.addEventListener('click', onClickCapture, { capture: true, passive: false });
+    window.addEventListener('pointerdown', onPointerDown, { capture: true, passive: true });
+    window.addEventListener('click', onClickCapture, { capture: true });
 
     return () => {
       window.removeEventListener('pointerdown', onPointerDown, { capture: true });
@@ -535,7 +598,7 @@ function App() {
       if (selected) selected.classList.remove('debug-selected');
       selectedElementNodeRef.current = null;
     };
-  }, [layoutInspectorActive, layoutInspectorPickEnabled, debugCaptureClicks]);
+  }, [layoutInspectorActive, layoutInspectorPickEnabled]);
 
   const buildContainerToken = (el) => {
     if (!el || !(el instanceof Element)) return '';
@@ -711,8 +774,10 @@ function App() {
   const isAdminRoute = ['/admin', '/index', '/promotions', '/ec-config', '/system-messages', '/fulfillment', '/fulfillment-settings', '/admin/media', '/admin-login', '/colleccio-settings', '/user-icon-picker', '/mockups', '/admin/gelato-sync', '/admin/gelato-blank', '/admin/products-overview', '/admin/draft', '/admin/draft/fulfillment-settings', '/admin/draft/mockup-settings', '/admin/draft/ruleta'].includes(location.pathname) || location.pathname.startsWith('/fulfillment/') || location.pathname.startsWith('/admin');
   const isHeroSettingsDevRoute = location.pathname === '/hero-settings';
   const isDevLinksRoute = location.pathname === '/dev-links' || location.pathname.startsWith('/proves/dev-links');
+  const isDevComponentsRoute = location.pathname === '/dev-components' || location.pathname.startsWith('/proves/dev-components');
   const isDevToolsRoute =
     isDevLinksRoute ||
+    isDevComponentsRoute ||
     location.pathname === '/adidas-stripe-zoom-dev' ||
     location.pathname.startsWith('/proves/dev-adidas-stripe-zoom');
   // DEV layout routes: hide offers/footer, show AdminBanner, etc.
@@ -727,7 +792,7 @@ function App() {
   const isAdminStudioRoute = location.pathname.startsWith('/admin');
   const devHeaderVisible = !isFullScreenRoute && (isDevHeaderRoute || isAdminStudioRoute);
 
-  const offersHeaderVisible = !isAdminRoute && !isFullScreenRoute && !isDevLayoutRoute && offersEnabled && !offersLoading;
+  const offersHeaderVisible = !isAdminRoute && !isFullScreenRoute && !isDevLayoutRoute && !isHomeRoute && offersEnabled && !offersLoading;
 
   const baseHeaderHeight = isLargeScreen ? 80 : 64;
   const heroSettingsDevHeaderHeight = isDevHeaderRoute ? baseHeaderHeight : 0;
@@ -735,9 +800,13 @@ function App() {
   const adminBannerVisible = isAdmin || isDevDemoRoute || isAdminRoute;
   const adminBannerHeight = adminBannerVisible ? 40 : 0;
   const adminRouteDevHeaderHeight = (isAdminRoute && devHeaderVisible) ? baseHeaderHeight : 0;
-  const adminRouteOffset = `${adminBannerHeight + adminRouteDevHeaderHeight}px`;
-  const appHeaderOffset = `${(isDevHeaderRoute ? heroSettingsDevHeaderHeight : baseHeaderHeight) + offersHeaderHeight + adminBannerHeight}px`;
-  const adidasHeaderOffset = `${adminBannerHeight}px`;
+
+  const rulersOverlayActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite';
+  const rulerInset = rulersOverlayActive ? 18 : 0;
+
+  const adminRouteOffset = `${adminBannerHeight + adminRouteDevHeaderHeight + rulerInset}px`;
+  const appHeaderOffset = `${(isDevHeaderRoute ? heroSettingsDevHeaderHeight : baseHeaderHeight) + offersHeaderHeight + adminBannerHeight + rulerInset}px`;
+  const adidasHeaderOffset = `${adminBannerHeight + rulerInset}px`;
 
   return (
   <ErrorBoundary>
@@ -745,7 +814,7 @@ function App() {
       <SkipLink />
       {isNavigating && !isAdminRoute && <LoadingScreen />}
 
-      {adminBannerVisible && <AdminBanner />}
+      {adminBannerVisible && <AdminBanner rulerInset={rulerInset} />}
 
       {!isFullScreenRoute && !isAdminRoute && !isDevLayoutRoute && offersHeaderVisible && (
         <OffersHeader adminBannerVisible={adminBannerVisible} />
@@ -754,6 +823,7 @@ function App() {
       {devHeaderVisible && (
         <DevHeader
           adminBannerHeight={adminBannerHeight}
+          rulerInset={rulerInset}
           cartItemCount={getTotalItems()}
           onCartClick={() => setIsCartOpen(true)}
           onUserClick={() => setIsUserSidebarOpen(true)}
@@ -762,7 +832,7 @@ function App() {
 
       {/* Main Header - NO mostrar a pàgines full-screen ni admin ni a dev tools */}
       {!isFullScreenRoute && !isAdminRoute && !isAdidasDemoRoute && !isDevHeaderRoute && (
-        isNikeDemoRoute ? (
+        isHomeRoute ? null : isNikeDemoRoute ? (
           <NikeInspiredHeader
             cartItemCount={getTotalItems()}
             onCartClick={() => setIsCartOpen(true)}
@@ -786,10 +856,12 @@ function App() {
           className={`flex-grow ${isAdminRoute ? 'overflow-y-auto' : ''} ${!isFullScreenRoute ? 'transition-[padding-top] duration-[350ms] ease-[cubic-bezier(0.32,0.72,0,1)]' : ''} ${layoutInspectorActive ? 'debug-containers' : ''}`}
           style={!isFullScreenRoute ? (
             isAdminRoute
-              ? { paddingTop: adminRouteOffset, '--appHeaderOffset': adminRouteOffset }
+              ? { paddingTop: adminRouteOffset, paddingLeft: `${rulerInset}px`, '--appHeaderOffset': adminRouteOffset, '--rulerInset': `${rulerInset}px` }
               : {
                   paddingTop: isAdidasDemoRoute ? adidasHeaderOffset : appHeaderOffset,
+                  paddingLeft: `${rulerInset}px`,
                   '--appHeaderOffset': isAdidasDemoRoute ? adidasHeaderOffset : appHeaderOffset,
+                  '--rulerInset': `${rulerInset}px`,
                 }
           ) : {}}
           tabIndex={-1}
@@ -804,6 +876,13 @@ function App() {
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
+                    <div className="w-full max-w-none" style={{ '--appHeaderOffset': adidasHeaderOffset }}>
+                      <AdidasInspiredHeader
+                        cartItemCount={getTotalItems()}
+                        onCartClick={() => setIsCartOpen(true)}
+                        onUserClick={() => setIsUserSidebarOpen(true)}
+                      />
+                    </div>
                     <Home {...pageProps} />
                   </motion.div>
                 } />
@@ -861,8 +940,10 @@ function App() {
 
                 <Route path="/proves/demo-adidas" element={<AdidasDemoPage />} />
                 <Route path="/proves/demo-adidas-pdp" element={<AdidasPdpPage />} />
+                <Route path="/proves/demo-adidas-pdp-tdp" element={<AdidasPdpTdpPage />} />
                 <Route path="/proves/demo-nike-tambe" element={<NikeTambePage />} />
                 <Route path="/proves/dev-links" element={<DevLinksPage />} />
+                <Route path="/proves/dev-components" element={<DevComponentsCatalogPage />} />
                 <Route path="/proves/dev-adidas-stripe-zoom" element={<AdidasStripeZoomDevPage />} />
 
                 <Route
@@ -979,8 +1060,10 @@ function App() {
                 <Route path="/new" element={<NewPage />} />
                 <Route path="/adidas-demo" element={<Navigate to="/proves/demo-adidas" replace />} />
                 <Route path="/adidas-pdp" element={<Navigate to="/proves/demo-adidas-pdp" replace />} />
+                <Route path="/adidas-pdp-tdp" element={<Navigate to="/proves/demo-adidas-pdp-tdp" replace />} />
                 <Route path="/adidas-stripe-zoom-dev" element={<Navigate to="/proves/dev-adidas-stripe-zoom" replace />} />
                 <Route path="/dev-links" element={<Navigate to="/proves/dev-links" replace />} />
+                <Route path="/dev-components" element={<Navigate to="/proves/dev-components" replace />} />
                 <Route path="/nike-tambe" element={<Navigate to="/proves/demo-nike-tambe" replace />} />
                 <Route path="/status" element={<Navigate to="/track" replace />} />
                 <Route path="/track" element={<OrderTrackingPage />} />
@@ -1006,27 +1089,30 @@ function App() {
                 {/* Admin Login - Login d'administrador */}
                 <Route path="/admin-login" element={<AdminLoginPage />} />
 
-                {/* Admin - Single entry point under /admin */}
-                <Route path="/admin" element={<AdminStudioHomePage />} />
-                <Route path="/admin/draft" element={<Navigate to="/admin/draft/ruleta" replace />} />
-                <Route path="/admin/demos" element={<AdminDemosPage />} />
-                <Route path="/admin/index" element={<IndexPage />} />
-                <Route path="/admin/promotions" element={<PromotionsManagerPage />} />
-                <Route path="/admin/ec-config" element={<ECConfigPage />} />
-                <Route path="/admin/system-messages" element={<SystemMessagesPage />} />
-                <Route path="/admin/media" element={<AdminMediaPage />} />
-                <Route path="/admin/hero" element={<HeroSettingsPage />} />
-                <Route path="/admin/collections" element={<ColleccioSettingsPage {...pageProps} />} />
-                <Route path="/admin/mockups" element={<MockupsManagerPage />} />
-                <Route path="/admin/upload" element={<AdminUploadPage />} />
-                <Route path="/admin/fulfillment" element={<FulfillmentPage />} />
-                <Route path="/admin/fulfillment-settings" element={<FulfillmentSettingsPage />} />
-                <Route path="/admin/gelato-sync" element={<GelatoProductsManagerPage />} />
-                <Route path="/admin/gelato-blank" element={<GelatoBlankProductsPage />} />
-                <Route path="/admin/gelato-templates" element={<GelatoTemplatesPage />} />
-                <Route path="/admin/products-overview" element={<ProductsOverviewPage />} />
-                <Route path="/admin/unitats" element={<UnitatsCanviPage />} />
-                <Route path="/admin/draft/ruleta" element={<RuletaDemoPage />} />
+                {/* Admin - Nested under AdminStudioLayout for persistent mega-menu */}
+                <Route path="/admin" element={<AdminStudioLayout />}>
+                  <Route index element={<AdminStudioHomePage />} />
+                  <Route path="controls" element={<AdminControlsPage />} />
+                  <Route path="draft" element={<Navigate to="/admin/draft/ruleta" replace />} />
+                  <Route path="demos" element={<AdminDemosPage />} />
+                  <Route path="index" element={<IndexPage />} />
+                  <Route path="promotions" element={<PromotionsManagerPage />} />
+                  <Route path="ec-config" element={<ECConfigPage />} />
+                  <Route path="system-messages" element={<SystemMessagesPage />} />
+                  <Route path="media" element={<AdminMediaPage />} />
+                  <Route path="hero" element={<HeroSettingsPage />} />
+                  <Route path="collections" element={<ColleccioSettingsPage {...pageProps} />} />
+                  <Route path="mockups" element={<MockupsManagerPage />} />
+                  <Route path="upload" element={<AdminUploadPage />} />
+                  <Route path="fulfillment" element={<FulfillmentPage />} />
+                  <Route path="fulfillment-settings" element={<FulfillmentSettingsPage />} />
+                  <Route path="gelato-sync" element={<GelatoProductsManagerPage />} />
+                  <Route path="gelato-blank" element={<GelatoBlankProductsPage />} />
+                  <Route path="gelato-templates" element={<GelatoTemplatesPage />} />
+                  <Route path="products-overview" element={<ProductsOverviewPage />} />
+                  <Route path="unitats" element={<UnitatsCanviPage />} />
+                  <Route path="draft/ruleta" element={<RuletaDemoPage />} />
+                </Route>
 
                 {/* Legacy admin routes -> redirects to /admin */}
                 <Route path="/admin/studio" element={<AdminStudioHomePage />} />
@@ -1100,11 +1186,51 @@ function App() {
         {/* Toggle button for Debug - Moved outside debug-containers */}
         {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && (
           <>
-            <div ref={debugButtonsWrapRef} className="fixed bottom-4 left-4 z-[99999] flex items-center gap-2 debug-exempt">
+            <div
+              ref={debugButtonsWrapRef}
+              className="flex items-center gap-2 relative debug-exempt"
+              style={{ position: 'fixed', left: 71, bottom: 16, zIndex: 99999 }}
+            >
               <button
-                onClick={() => setLayoutInspectorEnabled((v) => !v)}
-                className="h-12 w-12 bg-gradient-to-br from-orange-600 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl hover:scale-110 transition-all duration-200 flex items-center justify-center debug-exempt"
+                type="button"
+                tabIndex={-1}
+                aria-pressed={clicksEnabled ? 'true' : 'false'}
+                aria-label="Clics"
+                className={`absolute left-0 top-0 z-0 inline-flex h-12 items-center justify-end rounded-full pl-[60px] pr-4 text-[12px] font-semibold shadow-lg ${
+                  !layoutInspectorActive
+                    ? 'bg-[#EDEDED] text-black/70'
+                    : clicksEnabled
+                      ? 'bg-[#1E62B8] text-white'
+                      : 'bg-[#BFD9F4] text-[#0f172a]'
+                }`}
+                style={{ transform: 'rotate(-90deg)', transformOrigin: '24px 50%' }}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  if (!layoutInspectorActive) return;
+                  setClicksEnabled((v) => !v);
+                }}
+              >
+                <span style={{ display: 'inline-block', transform: 'rotate(90deg)' }}>
+                  {'Clics'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() =>
+                  setLayoutInspectorEnabled((v) => {
+                    const next = !v;
+                    if (!next) {
+                      setClicksEnabled(false);
+                      setClickMarks([]);
+                    }
+                    return next;
+                  })
+                }
+                className="relative z-20 h-12 w-12 bg-gradient-to-br from-orange-600 to-red-600 text-white rounded-full shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center debug-exempt"
                 aria-label="Mostrar/Ocultar debug"
+                style={{ boxShadow: '10px 2px 14px rgba(0,0,0,0.34)' }}
               >
                 <svg
                   className="block w-5 h-5"
@@ -1116,25 +1242,46 @@ function App() {
                 </svg>
               </button>
 
-              <button
-                type="button"
-                className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
-                  debugCaptureClicks
-                    ? 'border-slate-900/15 bg-slate-900 text-white hover:bg-slate-800'
-                    : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
-                }`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  setDebugCaptureClicks((v) => !v);
-                }}
-              >
-                {debugCaptureClicks ? 'Clicks OFF' : 'Clicks ON'}
-              </button>
+              <div className="relative -ml-[56px]">
+                <button
+                  type="button"
+                  className={`relative z-10 inline-flex h-12 items-center justify-end rounded-full pl-[60px] pr-4 text-[12px] font-semibold shadow-lg disabled:cursor-not-allowed debug-exempt ${
+                    !layoutInspectorActive
+                      ? 'bg-[#EDEDED] text-black/70'
+                      : !selectedContainerToken
+                        ? 'bg-[#CFE0D2] text-black/70'
+                        : selectionStatus === 'selected_same'
+                          ? 'bg-[#F97316] text-white hover:bg-[#EA580C] active:bg-[#C2410C]'
+                          : 'bg-[#387D22] text-white hover:bg-[#2F6B1D] active:bg-[#275A18]'
+                  }`}
+                  disabled={!layoutInspectorActive || !selectedContainerToken}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    copySelectedContainer();
+                  }}
+                  aria-label="Copiar selecció"
+                  style={{ boxShadow: '-10px 8px 16px rgba(0,0,0,0.32)' }}
+                >
+                  {!layoutInspectorActive
+                    ? 'Copy'
+                    : !selectedContainerToken
+                      ? 'Copy'
+                      : copyContainerStatus === 'copied'
+                        ? 'Copied'
+                        : copyContainerStatus === 'copied_again'
+                          ? 'Copied again'
+                          : selectionStatus === 'selected_new'
+                            ? 'Selected'
+                            : selectionStatus === 'selected_same'
+                              ? 'Same'
+                              : 'Copy'}
+                </button>
+              </div>
 
               <button
                 type="button"
-                className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
+                className={`relative z-10 h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
                   guidesEnabled
                     ? 'border-[#337AC6]/40 bg-[#337AC6]/10 text-[#0f172a] hover:bg-[#337AC6]/15'
                     : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
@@ -1177,32 +1324,6 @@ function App() {
                 </button>
               )}
 
-              <button
-                type="button"
-                className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 disabled:opacity-50 disabled:cursor-not-allowed debug-exempt ${
-                  selectedContainerToken
-                    ? 'border-emerald-500/50 bg-emerald-50 text-emerald-900 hover:bg-emerald-100'
-                    : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
-                } ${selectionStatus === 'selected_new' ? 'ring-2 ring-emerald-400/60' : ''} ${selectionStatus === 'selected_same' ? 'ring-2 ring-amber-400/60' : ''}`}
-                disabled={!layoutInspectorActive || !selectedContainerToken}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  copySelectedContainer();
-                }}
-                aria-label="Copiar contenidor seleccionat"
-              >
-                {copyContainerStatus === 'copied'
-                  ? 'Copied'
-                  : copyContainerStatus === 'copied_again'
-                    ? 'Copied again'
-                    : selectionStatus === 'selected_new'
-                      ? 'Selected'
-                      : selectionStatus === 'selected_same'
-                        ? 'Same'
-                        : 'Copy container'}
-              </button>
-
               {isDevDemoRoute && (
                 <div className="flex items-center gap-2">
                   {isNikeHeroDemoRoute && (
@@ -1236,8 +1357,31 @@ function App() {
             </div>
           </>
         )}
-        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && guidesEnabled && (
-          <DevGuidesOverlay />
+        {rulersOverlayActive && (
+          <DevGuidesOverlay guidesEnabled={guidesEnabled} />
+        )}
+
+        {clicksEnabled && clickMarks.length > 0 && (
+          <div
+            className="fixed inset-0 z-[99998] pointer-events-none debug-exempt"
+            data-dev-overlay="true"
+          >
+            {clickMarks.map((m) => (
+              <div
+                key={m.t}
+                style={{
+                  position: 'absolute',
+                  left: m.x,
+                  top: m.y,
+                  width: 10,
+                  height: 10,
+                  borderRadius: 9999,
+                  background: 'rgba(0,0,0,0.65)',
+                  transform: 'translate(-50%, -50%)',
+                }}
+              />
+            ))}
+          </div>
         )}
       </>
     </ErrorBoundary>

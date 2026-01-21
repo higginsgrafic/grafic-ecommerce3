@@ -55,38 +55,38 @@ export default function AdminDemosPage() {
 
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <div className="text-xs font-semibold tracking-[0.18em] text-black/50">ADMIN</div>
-          <h1 className="mt-2 text-2xl font-semibold text-black">Demos</h1>
-          <div className="mt-1 text-sm text-black/55">Accés ràpid a totes les pàgines demo.</div>
+          <div className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">ADMIN</div>
+          <h1 className="mt-2 text-2xl font-semibold text-foreground">Demos</h1>
+          <div className="mt-1 text-sm text-muted-foreground">Accés ràpid a totes les pàgines demo.</div>
         </div>
 
         <Link
           to="/admin"
-          className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-4 py-2 text-sm font-medium text-black/80 shadow-sm hover:bg-black/5"
+          className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-4 py-2 text-sm font-medium text-foreground/80 shadow-sm hover:bg-muted"
         >
           <ArrowLeft className="h-4 w-4" />
           Tornar
         </Link>
       </div>
 
-      <div className="rounded-2xl border border-gray-200 bg-white p-5 shadow-md">
-        <div className="text-sm font-semibold text-gray-900">Demos disponibles</div>
-        <div className="mt-1 text-xs text-gray-600">Accés ràpid + URL copiables.</div>
+      <div className="rounded-2xl border border-border bg-background p-5 shadow-md">
+        <div className="text-sm font-semibold text-foreground">Demos disponibles</div>
+        <div className="mt-1 text-xs text-muted-foreground">Accés ràpid + URL copiables.</div>
 
         <div className="mt-4 grid gap-3 sm:grid-cols-2">
           {demos.map((demo) => (
-            <div key={demo.path} className="rounded-xl border border-gray-100 bg-white p-4 shadow-sm">
+            <div key={demo.path} className="rounded-xl border border-border bg-background p-4 shadow-sm">
               <div className="min-w-0">
-                <div className="text-sm font-semibold text-gray-900 truncate">{demo.title}</div>
-                <div className="mt-0.5 text-xs text-gray-600">{demo.description}</div>
-                <div className="mt-2 text-[11px] text-gray-400 font-mono">{demo.path}</div>
+                <div className="text-sm font-semibold text-foreground truncate">{demo.title}</div>
+                <div className="mt-0.5 text-xs text-muted-foreground">{demo.description}</div>
+                <div className="mt-2 text-[11px] text-muted-foreground font-mono">{demo.path}</div>
               </div>
 
               <div className="mt-3 flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => copyUrl(demo.path)}
-                  className="inline-flex items-center gap-2 rounded-full border border-black/15 bg-white px-3 py-2 text-xs font-medium text-black/80 hover:bg-black/5"
+                  className="inline-flex items-center gap-2 rounded-full border border-border bg-background px-3 py-2 text-xs font-medium text-foreground/80 hover:bg-muted"
                   aria-label={`Copiar ${demo.path}`}
                   title="Copiar URL"
                 >
@@ -95,7 +95,7 @@ export default function AdminDemosPage() {
                 </button>
                 <Link
                   to={demo.path}
-                  className="inline-flex items-center gap-2 rounded-full bg-black px-4 py-2 text-xs font-medium text-white hover:bg-black/90"
+                  className="inline-flex items-center gap-2 rounded-full bg-foreground px-4 py-2 text-xs font-medium text-whiteStrong hover:bg-foreground/90"
                 >
                   Obrir
                   <ExternalLink className="h-3.5 w-3.5" />

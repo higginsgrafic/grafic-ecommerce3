@@ -46,7 +46,7 @@ export default function DevLinksPage() {
     TMP: 'border-amber-500/30 bg-amber-500/10 text-amber-800',
     UTIL: 'border-slate-500/25 bg-slate-500/10 text-slate-800',
     WIP: 'border-red-500/30 bg-red-500/10 text-red-800',
-    LEGACY: 'border-black/20 bg-black/5 text-black/70',
+    LEGACY: 'border-border bg-muted text-muted-foreground',
   };
 
   const pickPrimaryTag = (tags) => {
@@ -61,7 +61,7 @@ export default function DevLinksPage() {
   const getTagTextClass = (tag) => {
     const raw = badgeClassByTag[tag] || '';
     const cls = raw.split(' ').find((c) => c.startsWith('text-'));
-    return cls || 'text-black/60';
+    return cls || 'text-muted-foreground';
   };
 
   const groups = useMemo(
@@ -156,40 +156,40 @@ export default function DevLinksPage() {
   };
 
   return (
-    <div className="h-screen overflow-y-auto bg-white">
+    <div className="h-screen overflow-y-auto bg-background">
       <SEO title="Dev links" description="Índex d'enllaços ràpids" />
 
       <div className="mx-auto w-full px-4 pt-[25px] pb-3">
         <div className="flex items-center justify-center">
           <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <div className="text-xs text-black/65">
-              <span className="font-semibold text-black">{selectedPaths.length}</span>/{allPaths.length}
+            <div className="text-xs text-muted-foreground">
+              <span className="font-semibold text-foreground">{selectedPaths.length}</span>/{allPaths.length}
               <span className="ml-1">seleccionats</span>
             </div>
             <button
               type="button"
-              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-black/80 hover:border-black/40"
+              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-foreground/80 hover:border-border"
               onClick={() => setAllSelected(true)}
             >
               Seleccioneu-ho tot
             </button>
             <button
               type="button"
-              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-black/80 hover:border-black/40"
+              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-foreground/80 hover:border-border"
               onClick={() => setAllSelected(false)}
             >
               Netegeu
             </button>
             <button
               type="button"
-              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-black hover:border-black/40"
+              className="border-b border-transparent px-2 py-1 text-xs font-semibold text-foreground hover:border-border"
               onClick={copySelected}
             >
               Copieu ítems
             </button>
 
             {copyStatus !== 'idle' && (
-              <div className="text-xs font-semibold text-black/60">
+              <div className="text-xs font-semibold text-muted-foreground">
                 {copyStatus === 'ok' && 'Copiat'}
                 {copyStatus === 'empty' && 'No hi ha selecció'}
                 {copyStatus === 'err' && 'Error copiant'}
@@ -202,10 +202,10 @@ export default function DevLinksPage() {
           {groups.map((group) => (
             <div key={group.title}>
               <div className="text-center">
-                <div className="text-sm font-semibold text-black">
+                <div className="text-sm font-semibold text-foreground">
                   {group.title}
-                  <span className="mx-2 text-black/25">·</span>
-                  <span className="text-[11px] font-semibold text-black/45">{group.items.length}</span>
+                  <span className="mx-2 text-muted-foreground/40">·</span>
+                  <span className="text-[11px] font-semibold text-muted-foreground">{group.items.length}</span>
                 </div>
               </div>
 
@@ -219,11 +219,11 @@ export default function DevLinksPage() {
                     <div
                       key={item.path}
                       className={`grid items-center gap-x-3 gap-y-1 py-1 ${
-                        active ? 'text-black' : 'text-black/75 hover:text-black'
+                        active ? 'text-foreground' : 'text-foreground/75 hover:text-foreground'
                       }`}
                       style={{ gridTemplateColumns: 'minmax(160px,1fr) 56px 28px minmax(200px,1.2fr)' }}
                     >
-                      <div className="min-w-0 text-right font-mono text-[11px] text-black/45 truncate" title={item.path}>
+                      <div className="min-w-0 text-right font-mono text-[11px] text-muted-foreground truncate" title={item.path}>
                         {item.path}
                       </div>
 
@@ -232,7 +232,7 @@ export default function DevLinksPage() {
                       </div>
 
                       <label
-                        className="flex h-7 w-7 cursor-pointer items-center justify-center text-black/70"
+                        className="flex h-7 w-7 cursor-pointer items-center justify-center text-muted-foreground"
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();

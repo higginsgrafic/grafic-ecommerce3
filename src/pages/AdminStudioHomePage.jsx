@@ -31,18 +31,18 @@ function loadUnitats() {
 
 function Section({ title, items }) {
   return (
-    <div className="border-l border-black">
-      <div className="pl-3 pr-[28px] text-xs font-semibold text-gray-900 uppercase tracking-wide">{title}</div>
+    <div className="border-l border-border">
+      <div className="pl-3 pr-[28px] text-xs font-semibold text-foreground uppercase tracking-wide">{title}</div>
       <div className="mt-2">
         {items.map((it) => (
           <Link
             key={it.path}
             to={it.path}
             title={it.path}
-            className="flex items-start gap-3 pl-3 pr-[28px] py-2 text-sm font-light text-gray-900 hover:bg-gray-50/60"
+            className="flex items-start gap-3 pl-3 pr-[28px] py-2 text-sm font-light text-foreground hover:bg-muted/60"
           >
             <span className="min-w-0 flex-1 whitespace-normal break-words text-left">{it.label}</span>
-            <span className="mt-0.5 text-xs text-gray-400">›</span>
+            <span className="mt-0.5 text-xs text-muted-foreground">›</span>
           </Link>
         ))}
       </div>
@@ -54,8 +54,8 @@ function Region({ title, subtitle, children }) {
   return (
     <section>
       <div className="pl-0 pr-[28px]">
-        <div className="text-sm font-semibold text-gray-900 uppercase tracking-wide">{title}</div>
-        {subtitle ? <div className="mt-1 text-xs text-gray-500">{subtitle}</div> : null}
+        <div className="text-sm font-semibold text-foreground uppercase tracking-wide">{title}</div>
+        {subtitle ? <div className="mt-1 text-xs text-muted-foreground">{subtitle}</div> : null}
       </div>
       <div className="mt-3">{children}</div>
     </section>
@@ -136,13 +136,13 @@ export default function AdminStudioHomePage() {
 
       <div className="mx-auto max-w-[2000px] px-4 pt-16 pb-6 overflow-hidden sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 gap-2.5 lg:grid-cols-8">
-          <div className="lg:col-span-3 bg-gray-50">
+          <div className="lg:col-span-3 bg-muted/60">
             <Region title="Control de Projecte" subtitle="Unitats de canvi pendents (to-do)">
-              <div className="border-l border-black">
+              <div className="border-l border-border">
                 <div className="pl-3 pr-[28px]">
                   <Link
                     to="/admin/unitats"
-                    className="inline-flex items-center gap-2 text-sm font-medium text-gray-900 hover:underline"
+                    className="inline-flex items-center gap-2 text-sm font-medium text-foreground hover:underline"
                   >
                     <ClipboardList className="h-4 w-4" />
                     Obrir Unitats de Canvi
@@ -151,7 +151,7 @@ export default function AdminStudioHomePage() {
 
                 <div className="mt-4">
                   {tasksByUpdated.length === 0 ? (
-                    <div className="pl-3 pr-[28px] py-3 text-sm text-gray-600">No hi ha cap unitat pendent.</div>
+                    <div className="pl-3 pr-[28px] py-3 text-sm text-muted-foreground">No hi ha cap unitat pendent.</div>
                   ) : (
                     tasksByUpdated.slice(0, 12).map((t) => {
                       const Icon = statusIcon(t.status);
@@ -159,11 +159,11 @@ export default function AdminStudioHomePage() {
                       return (
                         <div key={t.id} className="flex items-start gap-3 pl-3 pr-[28px] py-2">
                           <div className="mt-0.5 flex h-5 w-5 items-center justify-center">
-                            <Icon className="h-4 w-4 text-gray-700" />
+                            <Icon className="h-4 w-4 text-muted-foreground" />
                           </div>
                           <div className="min-w-0 flex-1">
-                            <div className="text-sm font-medium text-gray-900">{t.title}</div>
-                            <div className="mt-0.5 text-[11px] text-gray-500">
+                            <div className="text-sm font-medium text-foreground">{t.title}</div>
+                            <div className="mt-0.5 text-[11px] text-muted-foreground">
                               {statusLabel(t.status)}{when ? ` · ${when}` : ''}
                             </div>
                           </div>

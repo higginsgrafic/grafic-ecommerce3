@@ -261,15 +261,15 @@ export default function RulerTool() {
             style={{ zIndex: 99999, cursor: 'crosshair' }}
           />
 
-          <div className="fixed top-4 right-4 bg-white rounded-lg shadow-xl p-4 border-2 border-blue-500 min-w-[280px] debug-exempt" style={{ zIndex: 99999 }}>
+          <div className="fixed top-4 right-4 bg-background rounded-lg shadow-xl p-4 border-2 border-blue-500 min-w-[280px] debug-exempt" style={{ zIndex: 99999 }}>
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-2">
                 <Ruler className="w-5 h-5 text-blue-600" />
-                <h3 className="font-bold text-gray-900">Eina de Mesura</h3>
+                <h3 className="font-bold text-foreground">Eina de Mesura</h3>
               </div>
               <button
                 onClick={() => setIsActive(false)}
-                className="text-gray-500 hover:text-gray-700"
+                className="text-muted-foreground hover:text-foreground"
                 title="Tancar (Ctrl+R)"
               >
                 <X className="w-5 h-5" />
@@ -296,43 +296,43 @@ export default function RulerTool() {
             </Button>
           </div>
 
-          <div className="bg-gray-50 rounded p-3 space-y-2 text-sm">
+          <div className="bg-muted rounded p-3 space-y-2 text-sm">
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Mode actual:</span>
-              <span className="font-semibold text-gray-900">
+              <span className="text-muted-foreground">Mode actual:</span>
+              <span className="font-semibold text-foreground">
                 {mode === 'distance' ? 'Distància' : 'Angle'}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Punts seleccionats:</span>
-              <span className="font-semibold text-gray-900">
+              <span className="text-muted-foreground">Punts seleccionats:</span>
+              <span className="font-semibold text-foreground">
                 {points.length} / {mode === 'distance' ? '2' : '3'}
               </span>
             </div>
             <div className="flex items-center justify-between">
-              <span className="text-gray-600">Mesures guardades:</span>
-              <span className="font-semibold text-gray-900">
+              <span className="text-muted-foreground">Mesures guardades:</span>
+              <span className="font-semibold text-foreground">
                 {measurements.length}
               </span>
             </div>
           </div>
 
-          <div className="space-y-1.5 text-xs text-gray-600">
+          <div className="space-y-1.5 text-xs text-muted-foreground">
             <div className="flex items-center gap-2">
-              <kbd className="px-1.5 py-0.5 bg-gray-200 rounded font-mono">Ctrl+R</kbd>
+              <kbd className="px-1.5 py-0.5 bg-muted rounded font-mono">Ctrl+R</kbd>
               <span>Activar/Desactivar</span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-1.5 py-0.5 bg-gray-200 rounded font-mono">M</kbd>
+              <kbd className="px-1.5 py-0.5 bg-muted rounded font-mono">M</kbd>
               <span>Canviar mode</span>
             </div>
             <div className="flex items-center gap-2">
-              <kbd className="px-1.5 py-0.5 bg-gray-200 rounded font-mono">Esc</kbd>
+              <kbd className="px-1.5 py-0.5 bg-muted rounded font-mono">Esc</kbd>
               <span>Cancel·lar mesura actual</span>
             </div>
           </div>
 
-          <div className="pt-2 border-t space-y-2">
+          <div className="pt-2 border-t border-border space-y-2">
             <Button
               onClick={clearMeasurements}
               variant="outline"
@@ -345,13 +345,13 @@ export default function RulerTool() {
           </div>
 
           {mode === 'distance' && (
-            <div className="text-xs text-gray-500 bg-blue-50 p-2 rounded">
+            <div className="text-xs text-muted-foreground bg-muted/60 p-2 rounded">
               Shift+Click (o Alt+Click) en dos punts per mesurar la distància
             </div>
           )}
 
           {mode === 'angle' && (
-            <div className="text-xs text-gray-500 bg-amber-50 p-2 rounded">
+            <div className="text-xs text-muted-foreground bg-muted/60 p-2 rounded">
               Shift+Click (o Alt+Click) en tres punts per mesurar l'angle (el segon punt és el vèrtex)
             </div>
           )}
