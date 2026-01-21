@@ -104,7 +104,7 @@ function IconButton({ label, onClick, children }) {
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="inline-flex h-9 w-9 items-center justify-center rounded-md text-black hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2 lg:h-10 lg:w-10"
+      className="inline-flex h-9 w-9 items-center justify-end rounded-md text-foreground hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-10 lg:w-10"
     >
       {children}
     </button>
@@ -114,14 +114,14 @@ function IconButton({ label, onClick, children }) {
 function FirstContactDibuix00Buttons({ onWhite, onBlack }) {
   return (
     <div className="relative mt-2 aspect-square w-full">
-      <div className="absolute inset-0 overflow-hidden rounded-md bg-black/[0.06]">
+      <div className="absolute inset-0 overflow-hidden rounded-md bg-muted">
         <button
           type="button"
           aria-label="Blanc"
           onClick={onWhite}
-          className="absolute left-0 top-0 h-1/2 w-full bg-black focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
+          className="absolute left-0 top-0 h-1/2 w-full bg-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-oswald text-[20px] font-normal uppercase text-white">
+          <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-oswald text-[20px] font-normal uppercase text-whiteStrong">
             Blanc
           </span>
         </button>
@@ -129,9 +129,9 @@ function FirstContactDibuix00Buttons({ onWhite, onBlack }) {
           type="button"
           aria-label="Negre"
           onClick={onBlack}
-          className="absolute left-0 bottom-0 h-1/2 w-full bg-white focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
+          className="absolute left-0 bottom-0 h-1/2 w-full bg-background focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
-          <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-oswald text-[20px] font-normal uppercase text-black">
+          <span className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 font-oswald text-[20px] font-normal uppercase text-foreground">
             Negre
           </span>
         </button>
@@ -146,15 +146,15 @@ function FirstContactDibuix09Buttons({ onPrev, onNext, tileSize }) {
 
   return (
     <div className="relative mt-2 aspect-square w-full">
-      <div className="absolute inset-0 overflow-hidden rounded-md bg-black/[0.06]">
+      <div className="absolute inset-0 overflow-hidden rounded-md bg-muted">
         <button
           type="button"
           aria-label="Anterior"
           onClick={onPrev}
-          className="absolute left-0 top-0 h-full w-1/2 bg-transparent hover:bg-black/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
+          className="absolute left-0 top-0 h-full w-1/2 bg-transparent hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ChevronLeft
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black/80"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground"
             style={{ height: `${iconH}px`, width: `${iconW}px` }}
             strokeWidth={1.5}
           />
@@ -163,10 +163,10 @@ function FirstContactDibuix09Buttons({ onPrev, onNext, tileSize }) {
           type="button"
           aria-label="Següent"
           onClick={onNext}
-          className="absolute right-0 top-0 h-full w-1/2 bg-transparent hover:bg-black/[0.10] focus:outline-none focus-visible:ring-2 focus-visible:ring-black/30"
+          className="absolute right-0 top-0 h-full w-1/2 bg-transparent hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring"
         >
           <ChevronRight
-            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-black/80"
+            className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-foreground"
             style={{ height: `${iconH}px`, width: `${iconW}px` }}
             strokeWidth={1.5}
           />
@@ -252,9 +252,9 @@ function MegaColumn({
               <div
                 className={`mt-2 w-full rounded-md transition-opacity duration-300 ease-in-out ${
                   isFirstContact && firstContactVariant === 'white'
-                    ? 'bg-black opacity-100'
+                    ? 'bg-foreground opacity-100'
                     : isHumanInside && humanInsideVariant === 'white'
-                      ? 'bg-black opacity-100'
+                      ? 'bg-foreground opacity-100'
                       : 'bg-transparent opacity-100'
                   }`}
                 style={tileSize ? { height: `${tileSize}px` } : undefined}
@@ -304,7 +304,7 @@ function MegaColumn({
                     ) : (
                       <Link
                         to="#"
-                        className="relative z-40 flex h-4 w-full items-center justify-center whitespace-nowrap rounded-none bg-black/10 px-2 text-xs leading-4 text-black/70 hover:text-black"
+                        className="relative z-40 flex h-4 w-full items-center justify-center whitespace-nowrap rounded-none bg-muted px-2 text-xs leading-4 text-muted-foreground hover:text-foreground"
                       >
                         {it}
                       </Link>
@@ -398,7 +398,7 @@ function MegaColumn({
                       </div>
                     ) : (
                       <div
-                        className="mt-2 aspect-square w-full rounded-md bg-black/5"
+                        className="mt-2 aspect-square w-full rounded-md bg-muted"
                         ref={idx === 1 ? tileSizeRef : undefined}
                       />
                     )}
@@ -414,7 +414,7 @@ function MegaColumn({
             <Link
               key={it}
               to="#"
-              className="text-sm text-black/70 hover:text-black whitespace-nowrap"
+              className="text-sm text-muted-foreground hover:text-foreground whitespace-nowrap"
             >
               {it}
             </Link>
@@ -764,26 +764,37 @@ export default function AdidasInspiredHeader({
   return (
     <header
       ref={headerRef}
-      className="fixed left-0 right-0 z-[10000] bg-white"
-      style={{ top: 'var(--appHeaderOffset, 0px)' }}
+      className="fixed z-[10000] bg-background"
+      style={{ top: 'var(--appHeaderOffset, 0px)', left: 'var(--rulerInset, 0px)', right: 0 }}
     >
-      <div className="border-b border-black/10">
+      <div className="border-b border-border">
         <div className="mx-auto flex h-16 max-w-[1400px] items-center gap-3 px-4 sm:px-6 lg:h-20 lg:px-10">
           <div className="flex items-center gap-2">
             <button
               type="button"
-              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-black hover:bg-black/5 lg:hidden"
+              className="inline-flex h-10 w-10 items-center justify-center rounded-full text-foreground hover:bg-muted lg:hidden"
               aria-label={mobileOpen ? 'Tancar menú' : 'Obrir menú'}
               onClick={() => setMobileOpen((v) => !v)}
             >
               {mobileOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
 
-            <Link to="/" className="flex items-center gap-2 font-black tracking-tight text-black">
-              <img
-                src="/custom_logos/brand/marca-grafic-logo.svg"
-                alt="GRÀFIC"
-                className="h-8 w-auto"
+            <Link to="/" className="relative z-10 pointer-events-auto flex items-center gap-2 font-black tracking-tight text-foreground">
+              <span
+                aria-hidden="true"
+                data-brand-logo="1"
+                className="h-8 w-[140px] block text-foreground"
+                style={{
+                  backgroundColor: 'currentColor',
+                  WebkitMaskImage: 'url(/custom_logos/brand/marca-grafic-logo.svg)',
+                  maskImage: 'url(/custom_logos/brand/marca-grafic-logo.svg)',
+                  WebkitMaskRepeat: 'no-repeat',
+                  maskRepeat: 'no-repeat',
+                  WebkitMaskPosition: 'left center',
+                  maskPosition: 'left center',
+                  WebkitMaskSize: 'contain',
+                  maskSize: 'contain'
+                }}
               />
             </Link>
           </div>
@@ -795,7 +806,7 @@ export default function AdidasInspiredHeader({
                 <button
                   key={item.id}
                   type="button"
-                  className={`inline-flex items-center gap-1 text-xs font-semibold tracking-[0.18em] uppercase ${open ? 'text-black' : 'text-black/50 hover:text-black'}`}
+                  className={`inline-flex items-center gap-1 text-xs font-semibold tracking-[0.18em] uppercase ${open ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                   aria-expanded={open ? 'true' : 'false'}
                   onMouseEnter={() => setActive(item.id)}
                   onFocus={() => setActive(item.id)}
@@ -808,9 +819,13 @@ export default function AdidasInspiredHeader({
             })}
           </nav>
 
-          <div className="ml-auto flex items-center gap-1">
+          <div
+            className="ml-auto flex items-center gap-1 mr-0 pr-0"
+            style={{ marginRight: 0 }}
+            data-icons-wrap="true"
+          >
             <IconButton label="Search" onClick={() => {}}>
-              <svg className="h-5 w-5 text-black relative top-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-5 w-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </IconButton>
@@ -818,24 +833,36 @@ export default function AdidasInspiredHeader({
               type="button"
               onClick={() => onCartClick?.()}
               aria-label="Cart"
-              className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-black hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-gray-900 focus-visible:ring-offset-2 lg:h-10 lg:w-10"
+              className="relative inline-flex h-9 w-9 items-center justify-end rounded-md text-foreground hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-10 lg:w-10"
             >
-              <img
-                src={cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'}
-                alt="Carro"
-                className="h-[27px] w-[27px] transition-all duration-200"
-              />
-              {cartItemCount > 0 ? (
+              <span aria-hidden="true" className="relative block h-[27px] w-[27px] transition-all duration-200">
                 <span
-                  className="absolute left-1/2 -translate-x-1/2 text-white text-[13.75px] font-bold"
-                  style={{ top: 'calc(60% - 1px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}
-                >
-                  {cartItemCount}
-                </span>
-              ) : null}
+                  className="absolute inset-0"
+                  style={{
+                    display: 'block',
+                    backgroundColor: 'currentColor',
+                    WebkitMaskImage: `url(${cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                    maskImage: `url(${cartItemCount > 0 ? '/custom_logos/icons/basket-full-2.svg' : '/custom_logos/icons/basket-empty.svg'})`,
+                    WebkitMaskRepeat: 'no-repeat',
+                    maskRepeat: 'no-repeat',
+                    WebkitMaskPosition: 'center',
+                    maskPosition: 'center',
+                    WebkitMaskSize: 'contain',
+                    maskSize: 'contain',
+                  }}
+                />
+                {cartItemCount > 0 ? (
+                  <span
+                    className="absolute left-1/2 -translate-x-1/2 text-whiteStrong text-[13.75px] font-bold"
+                    style={{ top: 'calc(60% + 0.5px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}
+                  >
+                    {cartItemCount}
+                  </span>
+                ) : null}
+              </span>
             </button>
             <IconButton label="Account" onClick={() => onUserClick?.()}>
-              <UserRound className="h-5 w-5 text-black relative top-1" strokeWidth={1.5} />
+              <UserRound className="h-5 w-5 text-foreground" strokeWidth={1.5} />
             </IconButton>
           </div>
         </div>
@@ -844,7 +871,7 @@ export default function AdidasInspiredHeader({
       {canUseDom && createPortal(
         active ? (
           <div
-            className="fixed inset-0 z-[9990] bg-black/25"
+            className="fixed inset-0 z-[9990] bg-foreground/25"
             onClick={() => {
               if (demoManualEnabled) return;
               setActive(null);
@@ -862,8 +889,11 @@ export default function AdidasInspiredHeader({
         }}
       >
         {active ? (
-          <div className="hidden lg:block border-b border-black/10 bg-white">
-            <div ref={megaMenuRef} className="mx-auto max-w-[1400px] overflow-x-hidden px-10 py-8">
+          <div className="hidden lg:block border-b border-border bg-background">
+            <div
+              ref={megaMenuRef}
+              className="mx-auto max-w-[1400px] overflow-x-hidden px-4 sm:px-6 lg:px-10 py-8"
+            >
               <div className="grid grid-cols-1 gap-10">
                 {(mega[active] || []).map((col, idx) => (
                   <MegaColumn
@@ -893,7 +923,7 @@ export default function AdidasInspiredHeader({
                     ? {
                         marginTop: '13px',
                         width: '100%',
-                        height: `${megaTileSize}px`,
+                        height: `${megaTileSize + 36}px`,
                       }
                     : undefined
                 }
@@ -922,13 +952,13 @@ export default function AdidasInspiredHeader({
       </div>
 
       {mobileOpen ? (
-        <div className="lg:hidden border-b border-black/10 bg-white">
+        <div className="lg:hidden border-b border-border bg-background">
           <div className="px-4 py-4 grid gap-2">
             {nav.map((item) => (
               <button
                 key={item.id}
                 type="button"
-                className="flex items-center justify-between rounded-xl px-3 py-3 text-left text-xs font-semibold tracking-[0.18em] uppercase text-black/60 hover:bg-black/5 hover:text-black"
+                className="flex items-center justify-between rounded-xl px-3 py-3 text-left text-xs font-semibold tracking-[0.18em] uppercase text-muted-foreground hover:bg-muted hover:text-foreground"
                 onClick={() => setActive((prev) => (prev === item.id ? null : item.id))}
               >
                 {item.label}
@@ -938,10 +968,10 @@ export default function AdidasInspiredHeader({
           </div>
 
           {active ? (
-            <div className="border-t border-black/10 px-4 py-4">
+            <div className="border-t border-border px-4 py-4">
               <div className="grid gap-4">
                 {(mega[active] || []).map((col) => (
-                  <div key={col.title} className="rounded-2xl bg-black/5 p-4">
+                  <div key={col.title} className="rounded-2xl bg-muted p-4">
                     <div
                       ref={active === 'the_human_inside' && Array.isArray(col.items) && col.items.length > 9 ? mobileHumanScrollRef : undefined}
                       className={
@@ -969,7 +999,7 @@ export default function AdidasInspiredHeader({
                             ) : (
                               <Link
                                 to="#"
-                                className="flex h-4 w-full items-center justify-center rounded-none bg-black/10 px-2 text-xs text-black/70 hover:text-black"
+                                className="flex h-4 w-full items-center justify-center rounded-none bg-muted px-2 text-xs text-muted-foreground hover:text-foreground"
                               >
                                 {it}
                               </Link>
@@ -980,7 +1010,7 @@ export default function AdidasInspiredHeader({
                                   <div
                                     className={`absolute inset-0 rounded-md ${
                                       firstContactVariant === 'white'
-                                        ? 'bg-black'
+                                        ? 'bg-foreground'
                                         : 'bg-transparent'
                                     }`}
                                   />
@@ -1062,7 +1092,7 @@ export default function AdidasInspiredHeader({
                                 }
                               />
                             ) : (
-                              <div className="mt-2 aspect-square w-full rounded-md bg-black/10" />
+                              <div className="mt-2 aspect-square w-full rounded-md bg-muted" />
                             )}
                           </div>
                         ))}

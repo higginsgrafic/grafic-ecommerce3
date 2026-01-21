@@ -444,59 +444,6 @@ export default function AdidasPdpPage() {
               </div>
             </div>
 
-            <section className="pb-12 lg:pb-16 lg:-mt-[100px]" data-section="respesca">
-              <div className="lg:px-[100px]">
-                <div className="border-t border-black/10 pt-24">
-                  <div style={{ fontSize: '32pt', lineHeight: 1.1, color: '#111', fontFamily: 'Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif' }}>
-                    també et pot interessar
-                  </div>
-                  <div
-                    style={{
-                      marginTop: '2px',
-                      fontSize: '13pt',
-                      fontWeight: 500,
-                      lineHeight: 1.2,
-                      color: '#9ca3af',
-                      fontKerning: 'normal',
-                      letterSpacing: '0.08em',
-                      fontFamily: 'Roboto, system-ui, -apple-system, Segoe UI, Arial, sans-serif',
-                    }}
-                  >
-                    COSES DIFERENTS
-                  </div>
-
-                  <div className="mt-24 grid gap-8 sm:grid-cols-2 lg:grid-cols-3" data-container="related-grid">
-                    <ProductTeaserCard
-                      to="/adidas-pdp"
-                      imgSrc={product.imgSrc}
-                      name="IRON KONG"
-                      subtitle="THE HUMAN INSIDE"
-                      status={null}
-                      colors={[]}
-                      price="19,99 €"
-                    />
-                    <ProductTeaserCard
-                      to="/adidas-pdp"
-                      imgSrc={product.imgSrc}
-                      name="MAZINGER"
-                      subtitle="THE HUMAN INSIDE"
-                      status={null}
-                      colors={[]}
-                      price="19,99 €"
-                    />
-                    <ProductTeaserCard
-                      to="/adidas-pdp"
-                      imgSrc={product.imgSrc}
-                      name="ROBOCOP"
-                      subtitle="THE HUMAN INSIDE"
-                      status={null}
-                      colors={[]}
-                      price="19,99 €"
-                    />
-                  </div>
-                </div>
-              </div>
-            </section>
           </div>
         </div>
 

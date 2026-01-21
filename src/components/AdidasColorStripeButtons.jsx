@@ -200,11 +200,7 @@ export default function AdidasColorStripeButtons({
             }}
           >
             <div
-              className={`absolute inset-0 transition-shadow duration-150 ease-out ${
-                isSelected
-                  ? 'shadow-[0_0_0_1px_rgba(0,0,0,0.45),0_10px_18px_rgba(0,0,0,0.08)]'
-                  : ''
-              }`}
+              className="absolute inset-0 transition-shadow duration-150 ease-out"
               style={{ pointerEvents: 'none' }}
             >
               {src ? (
@@ -221,6 +217,18 @@ export default function AdidasColorStripeButtons({
                 </span>
               ) : null}
             </div>
+
+            <div
+              className="pointer-events-none absolute left-1/2 rounded-full bg-foreground transition-opacity duration-150 ease-out"
+              style={{
+                top: `${megaTileSize + Math.max(4, Math.round(megaTileSize * 0.02))}px`,
+                width: `${Math.max(44, Math.round(buttonW * 0.36)) + 19}px`,
+                height: `${Math.max(8, Math.round(megaTileSize * 0.024))}px`,
+                transform: `translateX(calc(-50% - ${9.5 + (isFirst && isSelected ? 4 : 0)}px))`,
+                opacity: isSelected ? 1 : 0,
+              }}
+              aria-hidden="true"
+            />
 
             {isFirst ? (
               <>

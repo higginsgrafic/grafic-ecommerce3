@@ -1,29 +1,31 @@
 import React, { useState } from 'react';
 import AdidasInspiredHeader from '@/components/AdidasInspiredHeader';
 import NikeHeroSlider from '@/components/NikeHeroSlider.jsx';
+import Cart from '@/components/Cart';
+import { useProductContext } from '@/contexts/ProductContext';
 
 function Tile({ title, body }) {
   return (
-    <div className="rounded-3xl bg-white p-6 shadow-[0_1px_0_rgba(0,0,0,0.06),0_18px_40px_rgba(0,0,0,0.06)]">
-      <div className="text-xs font-semibold tracking-wide text-black/60">PLACEHOLDER</div>
-      <div className="mt-2 text-xl font-semibold tracking-tight text-black">{title}</div>
-      <div className="mt-2 text-sm leading-relaxed text-black/60">{body}</div>
+    <div className="rounded-3xl bg-background p-6 shadow-[0_1px_0_hsl(var(--foreground)/0.06),0_18px_40px_hsl(var(--foreground)/0.06)]">
+      <div className="text-xs font-semibold tracking-wide text-muted-foreground opacity-60">PLACEHOLDER</div>
+      <div className="mt-2 text-xl font-semibold tracking-tight text-foreground">{title}</div>
+      <div className="mt-2 text-sm leading-relaxed text-muted-foreground opacity-60">{body}</div>
     </div>
   );
 }
 
 function PlaceholderMedia({ label }) {
   return (
-    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-zinc-200 via-zinc-100 to-zinc-200">
+    <div className="relative overflow-hidden rounded-3xl bg-muted">
       <div
         className="absolute inset-0 opacity-70"
         style={{
           backgroundImage:
-            'radial-gradient(circle at 20% 10%, rgba(0,0,0,0.08), transparent 45%), radial-gradient(circle at 70% 80%, rgba(0,0,0,0.08), transparent 55%)',
+            'radial-gradient(circle at 20% 10%, hsl(var(--foreground) / 0.08), transparent 45%), radial-gradient(circle at 70% 80%, hsl(var(--foreground) / 0.08), transparent 55%)',
         }}
       />
       <div className="relative flex h-[320px] w-full items-end p-4 sm:h-[420px]">
-        <div className="rounded-full bg-white/70 px-3 py-1 text-xs font-medium text-black/70 backdrop-blur">
+        <div className="rounded-full bg-background/70 px-3 py-1 text-xs font-medium text-foreground/70 backdrop-blur">
           {label}
         </div>
       </div>
@@ -33,25 +35,40 @@ function PlaceholderMedia({ label }) {
 
 export default function AdidasDemoPage() {
   const [stripeDebugHit, setStripeDebugHit] = useState(false);
+  const [cartOpen, setCartOpen] = useState(false);
+  const { cartItems, getTotalItems, getTotalPrice, updateQuantity, removeFromCart, updateSize } = useProductContext();
 
   const stripeItemLeftOffsetPxByIndex = {
     13: -12,
   };
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-background">
       <AdidasInspiredHeader
+        cartItemCount={getTotalItems()}
+        onCartClick={() => setCartOpen(true)}
         forceStripeDebugHit={stripeDebugHit}
         ignoreStripeDebugFromUrl
         stripeItemLeftOffsetPxByIndex={stripeItemLeftOffsetPxByIndex}
         redistributeStripeBetweenFirstAndLast
       />
 
+      <Cart
+        isOpen={cartOpen}
+        onClose={() => setCartOpen(false)}
+        items={cartItems}
+        onUpdateQuantity={updateQuantity}
+        onRemove={removeFromCart}
+        totalPrice={getTotalPrice()}
+        onCheckout={() => setCartOpen(false)}
+        onUpdateSize={updateSize}
+      />
+
       <div className="fixed bottom-4 right-4 z-[9999]">
         <button
           type="button"
-          className={`h-10 rounded-full border px-4 text-sm font-semibold shadow-sm hover:bg-black/5 ${
-            stripeDebugHit ? 'border-emerald-400/60 bg-emerald-50 text-emerald-900' : 'border-black/15 bg-white text-black/80'
+          className={`h-10 rounded-full border px-4 text-sm font-semibold shadow-sm hover:bg-muted ${
+            stripeDebugHit ? 'border-emerald-400/60 bg-emerald-50 text-emerald-900' : 'border-border bg-background text-foreground/80'
           }`}
           onClick={() => setStripeDebugHit((v) => !v)}
         >
@@ -62,11 +79,11 @@ export default function AdidasDemoPage() {
       <main className="pt-[calc(var(--appHeaderOffset,0px)+64px)] lg:pt-[calc(var(--appHeaderOffset,0px)+80px)]">
         <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
           <div className="py-8 lg:py-10">
-            <div className="text-xs font-semibold tracking-[0.18em] text-black/50">ADIDAS-STYLE DEMO</div>
-            <h1 className="mt-4 text-4xl font-black tracking-tight text-black sm:text-5xl">
+            <div className="text-xs font-semibold tracking-[0.18em] text-muted-foreground opacity-50">ADIDAS-STYLE DEMO</div>
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-foreground sm:text-5xl">
               Header + Mega-menú (placeholders)
             </h1>
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-black/60">
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground opacity-60">
               Aquesta pàgina és una demo per iterar ràpidament sobre un header tipus adidas.es: sticky, mega-menú desktop,
               menú mobile i layout de categories. Les lògiques les podem ajustar fins trobar el que busques.
             </p>
@@ -130,10 +147,10 @@ export default function AdidasDemoPage() {
           </div>
 
           <div className="mt-12 pb-20 lg:mt-16">
-            <div className="rounded-3xl bg-black p-10 text-white">
-              <div className="text-xs font-semibold tracking-[0.2em] text-white/70">PLACEHOLDER FOOTER STRIP</div>
+            <div className="rounded-3xl bg-foreground p-10 text-whiteStrong">
+              <div className="text-xs font-semibold tracking-[0.2em] text-whiteSoft/70">PLACEHOLDER FOOTER STRIP</div>
               <div className="mt-3 text-2xl font-black tracking-tight">Newsletter + USP bar</div>
-              <div className="mt-2 max-w-2xl text-sm text-white/75">
+              <div className="mt-2 max-w-2xl text-sm text-whiteSoft/75">
                 Exemple d’un strip inferior típic amb USP/CTA. No substitueix el footer global del site.
               </div>
             </div>
