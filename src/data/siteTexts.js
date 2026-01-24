@@ -137,9 +137,9 @@ export const siteTexts = {
 
   // CHECKOUT
   checkout: {
-    title: "Caixa segura",
+    title: "Pagament segur",
     contact: {
-      title: "Informació de contacte",
+      title: "T’enviarem la factura a",
       email: "Correu electrònic"
     },
     shipping: {
@@ -165,7 +165,7 @@ export const siteTexts = {
     },
     actions: {
       processing: "Processant...",
-      pay: "Pagueu {amount}€"
+      pay: "Valida el pagament"
     },
     error: "Hi ha hagut un problema a l'hora de processar la comanda. Si us plau, torneu-ho a provar."
   },

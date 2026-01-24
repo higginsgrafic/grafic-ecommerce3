@@ -1,5 +1,5 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Menu, X, UserRound, ChevronDown, ChevronLeft, ChevronRight, Layers, LayoutGrid } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
@@ -32,35 +32,35 @@ const FIRST_CONTACT_MEDIA_WHITE = {
 };
 
 const THE_HUMAN_INSIDE_MEDIA = {
-  'C3P0': '/custom_logos/drawings/the_human_inside/negre/7. C3P0 b4.webp',
-  'Vader': '/custom_logos/drawings/the_human_inside/negre/8. VADER b4.webp',
-  'Afrodita': '/custom_logos/drawings/the_human_inside/negre/9. AFRODITA-A b3.webp',
-  'Mazinger': '/custom_logos/drawings/the_human_inside/negre/10. MAZINGER b4.webp',
-  'Cylon 78': '/custom_logos/drawings/the_human_inside/negre/11. CYLON 78 b4.webp',
-  'Cylon 03': '/custom_logos/drawings/the_human_inside/negre/12. CYLON 03 b1.webp',
-  'Iron Man 68': '/custom_logos/drawings/the_human_inside/negre/13. IRON MAN 68 b1.webp',
-  'Iron Man 08': '/custom_logos/drawings/the_human_inside/negre/14. IRONMAN 08 b4.webp',
-  'Cyberman': '/custom_logos/drawings/the_human_inside/negre/15. CYBERMAN b4.webp',
-  'Maschinenmensch': '/custom_logos/drawings/the_human_inside/negre/16. MASCHINENMENSCH b1.webp',
-  'Robocop': '/custom_logos/drawings/the_human_inside/negre/17. ROBOCOP b4.webp',
-  'Terminator': '/custom_logos/drawings/the_human_inside/negre/18. TERMINATOR b4.webp',
-  'Robbie the Robot': '/custom_logos/drawings/the_human_inside/negre/19. ROBBIE THE ROBOT b1.webp',
+  'C3P0': '/custom_logos/drawings/the_human_inside/negre/7-c3p0-b4.webp',
+  'Vader': '/custom_logos/drawings/the_human_inside/negre/8-vader-b4.webp',
+  'Afrodita': '/custom_logos/drawings/the_human_inside/negre/9-afrodita-a-b3.webp',
+  'Mazinger': '/custom_logos/drawings/the_human_inside/negre/10-mazinger-b4.webp',
+  'Cylon 78': '/custom_logos/drawings/the_human_inside/negre/11-cylon-78-b4.webp',
+  'Cylon 03': '/custom_logos/drawings/the_human_inside/negre/12-cylon-03-b1.webp',
+  'Iron Man 68': '/custom_logos/drawings/the_human_inside/negre/13-iron-man-68-b1.webp',
+  'Iron Man 08': '/custom_logos/drawings/the_human_inside/negre/14-ironman-08-b4.webp',
+  'Cyberman': '/custom_logos/drawings/the_human_inside/negre/15-cyberman-b4.webp',
+  'Maschinenmensch': '/custom_logos/drawings/the_human_inside/negre/16-maschinenmensch-b1.webp',
+  'Robocop': '/custom_logos/drawings/the_human_inside/negre/17-robocop-b4.webp',
+  'Terminator': '/custom_logos/drawings/the_human_inside/negre/18-terminator-b4.webp',
+  'Robbie the Robot': '/custom_logos/drawings/the_human_inside/negre/19-robbie-the-robot-b1.webp',
 };
 
 const THE_HUMAN_INSIDE_MEDIA_WHITE = {
-  'C3P0': '/custom_logos/drawings/the_human_inside/blanc/7. C3P0 w1.webp',
-  'Vader': '/custom_logos/drawings/the_human_inside/blanc/8. VADER w4.webp',
-  'Afrodita': '/custom_logos/drawings/the_human_inside/blanc/9. AFRODITA w4.webp',
-  'Mazinger': '/custom_logos/drawings/the_human_inside/blanc/10. MAZINGER w1.webp',
-  'Cylon 78': '/custom_logos/drawings/the_human_inside/blanc/11. CYLON 78 w4.webp',
-  'Cylon 03': '/custom_logos/drawings/the_human_inside/blanc/12. CYLON 03 w3.webp',
-  'Iron Man 68': '/custom_logos/drawings/the_human_inside/blanc/13. IRON MAN 68 w4.webp',
-  'Iron Man 08': '/custom_logos/drawings/the_human_inside/blanc/14. IRON MAN 08 w4.webp',
-  'Cyberman': '/custom_logos/drawings/the_human_inside/blanc/15. CYBERMAN w1.webp',
-  'Maschinenmensch': '/custom_logos/drawings/the_human_inside/blanc/16. MASCHINENMENSCH w1.webp',
-  'Robocop': '/custom_logos/drawings/the_human_inside/blanc/17. ROBOCOP w3.webp',
-  'Terminator': '/custom_logos/drawings/the_human_inside/blanc/18. TERMINATOR w1.webp',
-  'Robbie the Robot': '/custom_logos/drawings/the_human_inside/blanc/19. ROBBIE THE ROBOT w2.webp',
+  'C3P0': '/custom_logos/drawings/the_human_inside/blanc/7-c3p0-w1.webp',
+  'Vader': '/custom_logos/drawings/the_human_inside/blanc/8-vader-w4.webp',
+  'Afrodita': '/custom_logos/drawings/the_human_inside/blanc/9-afrodita-w4.webp',
+  'Mazinger': '/custom_logos/drawings/the_human_inside/blanc/10-mazinger-w1.webp',
+  'Cylon 78': '/custom_logos/drawings/the_human_inside/blanc/11-cylon-78-w4.webp',
+  'Cylon 03': '/custom_logos/drawings/the_human_inside/blanc/12-cylon-03-w3.webp',
+  'Iron Man 68': '/custom_logos/drawings/the_human_inside/blanc/13-iron-man-68-w4.webp',
+  'Iron Man 08': '/custom_logos/drawings/the_human_inside/blanc/14-iron-man-08-w4.webp',
+  'Cyberman': '/custom_logos/drawings/the_human_inside/blanc/15-cyberman-w1.webp',
+  'Maschinenmensch': '/custom_logos/drawings/the_human_inside/blanc/16-maschinenmensch-w1.webp',
+  'Robocop': '/custom_logos/drawings/the_human_inside/blanc/17-robocop-w3.webp',
+  'Terminator': '/custom_logos/drawings/the_human_inside/blanc/18-terminator-w1.webp',
+  'Robbie the Robot': '/custom_logos/drawings/the_human_inside/blanc/19-robbie-the-robot-w2.webp',
 };
 
 const OptimizedImg = React.forwardRef(function OptimizedImg({ src, alt, className, style, ...rest }, ref) {
@@ -104,7 +104,7 @@ function IconButton({ label, onClick, children }) {
       type="button"
       aria-label={label}
       onClick={onClick}
-      className="inline-flex h-9 w-9 items-center justify-end rounded-md text-foreground hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-10 lg:w-10"
+      className="inline-flex h-9 w-9 items-end justify-center pb-[2px] rounded-md text-foreground hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-10 lg:w-10 lg:pb-[3px]"
     >
       {children}
     </button>
@@ -434,6 +434,8 @@ export default function AdidasInspiredHeader({
   stripeItemLeftOffsetPxByIndex,
   redistributeStripeBetweenFirstAndLast = false,
 }) {
+  const navigate = useNavigate();
+  const cartClickTimeoutRef = useRef(null);
   const [active, setActive] = useState(() => {
     try {
       return window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1' ? 'first_contact' : null;
@@ -819,23 +821,32 @@ export default function AdidasInspiredHeader({
             })}
           </nav>
 
-          <div
-            className="ml-auto flex items-center gap-1 mr-0 pr-0"
-            style={{ marginRight: 0 }}
-            data-icons-wrap="true"
-          >
+          <div className="ml-auto flex items-center gap-1" data-icons-wrap="true">
             <IconButton label="Search" onClick={() => {}}>
-              <svg className="h-5 w-5 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-[25px] w-[25px] text-foreground -translate-x-[1px] lg:h-[29px] lg:w-[29px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
             </IconButton>
             <button
               type="button"
-              onClick={() => onCartClick?.()}
+              onClick={(e) => {
+                e.preventDefault();
+                if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                cartClickTimeoutRef.current = window.setTimeout(() => {
+                  cartClickTimeoutRef.current = null;
+                  onCartClick?.();
+                }, 320);
+              }}
+              onDoubleClick={(e) => {
+                e.preventDefault();
+                if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                cartClickTimeoutRef.current = null;
+                navigate('/cart');
+              }}
               aria-label="Cart"
-              className="relative inline-flex h-9 w-9 items-center justify-end rounded-md text-foreground hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-10 lg:w-10"
+              className="relative inline-flex h-9 w-9 items-center justify-center rounded-md text-foreground hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-10 lg:w-10"
             >
-              <span aria-hidden="true" className="relative block h-[27px] w-[27px] transition-all duration-200">
+              <span aria-hidden="true" className="relative block h-[27px] w-[27px] transition-all duration-200 lg:h-[31px] lg:w-[31px]">
                 <span
                   className="absolute inset-0"
                   style={{
@@ -853,8 +864,8 @@ export default function AdidasInspiredHeader({
                 />
                 {cartItemCount > 0 ? (
                   <span
-                    className="absolute left-1/2 -translate-x-1/2 text-whiteStrong text-[13.75px] font-bold"
-                    style={{ top: 'calc(60% + 0.5px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}
+                    className="absolute left-1/2 -translate-x-1/2 text-whiteStrong text-[13.75px] font-bold lg:text-[16.25px]"
+                    style={{ top: 'calc(60% - 0.5px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}
                   >
                     {cartItemCount}
                   </span>
@@ -862,7 +873,7 @@ export default function AdidasInspiredHeader({
               </span>
             </button>
             <IconButton label="Account" onClick={() => onUserClick?.()}>
-              <UserRound className="h-5 w-5 text-foreground" strokeWidth={1.5} />
+              <UserRound className="h-[25px] w-[25px] text-foreground lg:h-[29px] lg:w-[29px]" strokeWidth={1.5} />
             </IconButton>
           </div>
         </div>
@@ -923,7 +934,7 @@ export default function AdidasInspiredHeader({
                     ? {
                         marginTop: '13px',
                         width: '100%',
-                        height: `${megaTileSize + 36}px`,
+                        height: `${megaTileSize}px`,
                       }
                     : undefined
                 }

@@ -36,6 +36,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { useProductContext } from '@/contexts/ProductContext';
 import EpisodeControls from '@/components/EpisodeControls';
 import EpisodeDisplay from '@/components/EpisodeDisplay';
+import { formatPrice } from '@/utils/formatters';
 
 const EPISODES_VERSION = '1.1';
 
@@ -493,11 +494,11 @@ export default function ProductDetailPageEnhanced() {
 
                 <div className="flex items-baseline gap-3 mb-6">
                   <p className="font-oswald text-4xl font-normal text-foreground">
-                    {currentPrice.toFixed(2).replace('.', ',')} €
+                    {formatPrice(currentPrice)}
                   </p>
                   {selectedVariant && selectedVariant.price !== product.price && (
                     <p className="font-roboto text-xl text-gray-400 line-through">
-                      {product.price.toFixed(2).replace('.', ',')} €
+                      {formatPrice(product.price)}
                     </p>
                   )}
                 </div>
@@ -559,7 +560,7 @@ export default function ProductDetailPageEnhanced() {
                         >
                           <div className="font-oswald font-bold text-lg">{size}</div>
                           <div className={`text-xs ${selectedSize === size ? 'text-gray-300' : 'text-muted-foreground'}`}>
-                            {size === '11oz' ? '325ml' : '444ml'} • {sizePrice.toFixed(2)}€
+                            {size === '11oz' ? '325ml' : '444ml'} • {formatPrice(sizePrice)}
                           </div>
                         </button>
                       );
@@ -588,7 +589,7 @@ export default function ProductDetailPageEnhanced() {
                         className={`group relative transition-all ${
                           selectedColor === variant.color ? 'scale-110' : ''
                         }`}
-                        title={`${variant.color} - ${variant.price.toFixed(2)}€`}
+                        title={`${variant.color} - ${formatPrice(variant.price)}`}
                       >
                         <div
                           className={`w-14 h-14 rounded-lg border-4 transition-all ${
@@ -633,7 +634,7 @@ export default function ProductDetailPageEnhanced() {
                     </div>
                     <div>
                       <p className="text-gray-700 mb-1">Preu</p>
-                      <p className="font-semibold text-gray-900">{selectedVariant.price.toFixed(2)} €</p>
+                      <p className="font-semibold text-gray-900">{formatPrice(selectedVariant.price)}</p>
                     </div>
                     <div>
                       <p className="text-gray-700 mb-1">Disponibilitat</p>

@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, ZoomIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useGridDebug } from '@/contexts/GridDebugContext';
+import { formatPrice } from '@/utils/formatters';
 
 function ProductDetail({ product, onClose, onAddToCart }) {
   const [selectedSize, setSelectedSize] = useState('M');
@@ -181,7 +182,7 @@ function ProductDetail({ product, onClose, onAddToCart }) {
                 {/* Preu i descripció */}
                 <div>
                   <p className="font-oswald text-3xl sm:text-4xl font-normal mb-3" style={{ color: "#141414" }}>
-                    {product.price.toFixed(2).replace('.', ',')} €
+                    {formatPrice(product.price)}
                   </p>
                   <p className="text-base leading-relaxed text-justify" style={{ color: "#141414", opacity: 0.7 }}>
                     {product.description}
@@ -217,7 +218,7 @@ function ProductDetail({ product, onClose, onAddToCart }) {
                   className="w-full h-14 text-base font-oswald uppercase tracking-wider rounded-lg"
                   style={{ backgroundColor: '#141414', color: '#FFFFFF' }}
                 >
-                  Afegeix al cistell - {product.price.toFixed(2).replace('.', ',')} €
+                  Afegeix al cistell - {formatPrice(product.price)}
                 </Button>
 
                 {/* Detalls del producte */}

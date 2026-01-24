@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { ShoppingBag, Loader2, Package, TrendingUp } from 'lucide-react';
 import { productsService } from '../api/supabase-products';
+import { formatPrice } from '@/utils/formatters';
 
 export default function FulfillmentPage() {
   const [products, setProducts] = useState([]);
@@ -140,7 +141,7 @@ export default function FulfillmentPage() {
 
                       <div className="flex items-center justify-between pt-4 border-t border-gray-200">
                         <p className="font-oswald text-2xl font-normal" style={{ color: '#141414' }}>
-                          {product.price.toFixed(2).replace('.', ',')} €
+                          {formatPrice(product.price)}
                         </p>
                         <div className="flex items-center gap-2">
                           {product.variants && product.variants.length > 0 && (

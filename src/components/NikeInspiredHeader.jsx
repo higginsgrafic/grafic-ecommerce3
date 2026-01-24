@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, AnimatePresence, animate, useMotionValue } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Search, UserRound, Menu, X } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
@@ -19,6 +19,7 @@ function NikeInspiredHeader({
   const MOTION_EASE = [0, 0, 1, 1];
 
   const location = useLocation();
+  const navigate = useNavigate();
   const texts = useTexts();
 
   const isNikeDemoRoute = location.pathname === '/nike-hero-demo' || location.pathname === '/nike-tambe';
@@ -29,6 +30,7 @@ function NikeInspiredHeader({
   const forceMegaMenuOpenRef = useRef(false);
 
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+  const cartClickTimeoutRef = useRef(null);
   const [activeMenu, setActiveMenu] = useState(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [expandedGroups, setExpandedGroups] = useState({});
@@ -927,7 +929,20 @@ function NikeInspiredHeader({
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={onCartClick}
+                onClick={(e) => {
+                  e.preventDefault();
+                  if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                  cartClickTimeoutRef.current = window.setTimeout(() => {
+                    cartClickTimeoutRef.current = null;
+                    onCartClick?.();
+                  }, 320);
+                }}
+                onDoubleClick={(e) => {
+                  e.preventDefault();
+                  if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                  cartClickTimeoutRef.current = null;
+                  navigate('/cart');
+                }}
                 className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-foreground"
                 aria-label={cartItemCount > 0 ? 'Carro (amb productes)' : 'Carro'}
               >

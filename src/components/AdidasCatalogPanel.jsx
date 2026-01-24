@@ -13,7 +13,7 @@ export default function AdidasCatalogPanel({ megaTileSize }) {
         right: 0,
       }}
     >
-      <div className="relative h-full w-full overflow-hidden rounded-md bg-muted/60">
+      <div className="relative h-full w-full overflow-hidden rounded-md bg-muted">
         <button
           type="button"
           aria-label="CATÀLEG"

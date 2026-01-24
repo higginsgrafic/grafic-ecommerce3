@@ -16,6 +16,7 @@ import { useToast } from '@/contexts/ToastContext';
 import useProductEpisodes from '@/hooks/useProductEpisodes';
 import { useRelatedProducts } from '@/hooks/useProducts';
 import { useAdmin } from '@/contexts/AdminContext';
+import { formatPrice } from '@/utils/formatters';
 
 const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, language = 'ca' }) => {
   const { id } = useParams();
@@ -1225,7 +1226,7 @@ const ProductDetailPage = ({ onAddToCart, cartItems = [], onUpdateQuantity, lang
 
         <div className="flex items-center justify-between mb-4">
           <p className="font-oswald text-2xl sm:text-3xl font-normal">
-            {product.price.toFixed(2).replace('.', ',')} €
+            {formatPrice(product.price)}
           </p>
           {currentEpisode ? (
             <EpisodeControls

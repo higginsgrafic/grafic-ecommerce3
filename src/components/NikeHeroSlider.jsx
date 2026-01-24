@@ -193,20 +193,22 @@ export default function NikeHeroSlider({
               <article key={s.id} className={styles.slide} aria-label={`Slide ${i + 1}`}>
                 <img className={styles.image} src={s.imageSrc} alt={s.imageAlt} />
                 <div className={styles.overlay}>
-                  {s.kicker ? <p className={styles.kicker}>{s.kicker}</p> : null}
-                  {s.headline ? <h2 className={styles.headline}>{s.headline}</h2> : null}
+                  <div className="mx-auto w-full max-w-[1400px] px-4 pb-9 sm:px-6 lg:px-10 lg:pb-10">
+                    {s.kicker ? <p className={styles.kicker}>{s.kicker}</p> : null}
+                    {s.headline ? <h2 className={styles.headline}>{s.headline}</h2> : null}
 
-                  <div className={styles.actions}>
-                    {s.primaryCta ? (
-                      <a className={`${styles.pill} ${styles.primary}`} href={s.primaryCta.href || '#'}>
-                        {s.primaryCta.label}
-                      </a>
-                    ) : null}
-                    {s.secondaryCta ? (
-                      <a className={styles.pill} href={s.secondaryCta.href || '#'}>
-                        {s.secondaryCta.label}
-                      </a>
-                    ) : null}
+                    <div className={styles.actions}>
+                      {s.primaryCta ? (
+                        <a className={`${styles.pill} ${styles.primary}`} href={s.primaryCta.href || '#'}>
+                          {s.primaryCta.label}
+                        </a>
+                      ) : null}
+                      {s.secondaryCta ? (
+                        <a className={styles.pill} href={s.secondaryCta.href || '#'}>
+                          {s.secondaryCta.label}
+                        </a>
+                      ) : null}
+                    </div>
                   </div>
                 </div>
               </article>

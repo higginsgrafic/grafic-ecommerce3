@@ -20,6 +20,7 @@ import { productsService } from '@/api/supabase-products';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/contexts/ToastContext';
 import { useProductContext } from '@/contexts/ProductContext';
+import { formatPrice } from '@/utils/formatters';
 
 export default function GelatoProductDetailPage() {
   const { id } = useParams();
@@ -281,7 +282,7 @@ export default function GelatoProductDetailPage() {
                   {product.name}
                 </h1>
                 <p className="font-oswald text-3xl font-normal mb-6" style={{ color: '#141414' }}>
-                  {currentPrice.toFixed(2).replace('.', ',')} €
+                  {formatPrice(currentPrice)}
                 </p>
                 <p className="font-roboto text-base leading-relaxed" style={{ color: '#141414', opacity: 0.8 }}>
                   {product.description}
@@ -375,7 +376,7 @@ export default function GelatoProductDetailPage() {
                   <div className="space-y-1 text-sm font-roboto text-blue-900">
                     <div className="flex justify-between">
                       <span className="opacity-70">Preu:</span>
-                      <span className="font-semibold">{selectedVariant.price.toFixed(2)} €</span>
+                      <span className="font-semibold">{formatPrice(selectedVariant.price)}</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="opacity-70">Stock:</span>

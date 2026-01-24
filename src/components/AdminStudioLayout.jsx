@@ -25,10 +25,6 @@ export default function AdminStudioLayout() {
               <div className="p-2 bg-foreground rounded-xl shadow-lg">
                 <LayoutDashboard className="w-6 h-6 text-whiteStrong" />
               </div>
-              <div>
-                <h1 className="text-3xl font-bold text-foreground">Admin Studio</h1>
-                <p className="text-muted-foreground text-sm">Eines de gestió i configuració</p>
-              </div>
             </Link>
 
             <AdminMegaMenu />

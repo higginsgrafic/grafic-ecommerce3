@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import AdidasInspiredHeader from '@/components/AdidasInspiredHeader';
 import Footer from '@/components/Footer';
 import ProductTeaserCard from '@/components/ProductTeaserCard';
+import { formatPrice } from '@/utils/formatters';
 
 export default function AdidasPdpPage() {
   const [stripeDebugHit, setStripeDebugHit] = useState(false);
@@ -53,7 +54,7 @@ export default function AdidasPdpPage() {
   const sizeOptions = useMemo(() => ['XS', 'S', 'M', 'L', 'XL', '2XL'], []);
   const unitPriceNumber = useMemo(() => 19.99, []);
   const lineTotal = useMemo(
-    () => (unitPriceNumber * Math.max(1, quantity)).toFixed(2).replace('.', ','),
+    () => formatPrice(unitPriceNumber * Math.max(1, quantity)),
     [quantity, unitPriceNumber]
   );
 
@@ -152,7 +153,7 @@ export default function AdidasPdpPage() {
                               </div>
                               <div className="text-[12px] font-semibold tracking-[0.18em] uppercase text-black/35">
                                 total
-                                <span className="ml-2 text-black/70">{lineTotal} €</span>
+                                <span className="ml-2 text-black/70">{lineTotal}</span>
                               </div>
                             </div>
                           </div>
@@ -378,7 +379,7 @@ export default function AdidasPdpPage() {
                           <div className="flex items-end justify-between gap-6">
                             <div className="text-sm font-semibold text-black/55">Import</div>
                             <div className="text-[15px] font-black text-black">
-                              {cartCount ? `${(unitPriceNumber * cartCount).toFixed(2).replace('.', ',')} €` : '—'}
+                              {cartCount ? formatPrice(unitPriceNumber * cartCount) : '—'}
                             </div>
                           </div>
 

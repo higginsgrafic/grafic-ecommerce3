@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import SEO from '@/components/SEO';
+import { formatPrice } from '@/utils/formatters';
 
 const OrderTrackingPage = () => {
   const [searchParams] = useSearchParams();
@@ -189,7 +190,7 @@ const OrderTrackingPage = () => {
                   <div className="text-right">
                     <div className="text-sm text-gray-600 font-roboto">Total</div>
                     <div className="font-oswald text-2xl font-bold">
-                      {order.totalPrice?.toFixed(2) || '0.00'} €
+                      {formatPrice(order.totalPrice ?? 0)}
                     </div>
                   </div>
                 </div>
@@ -323,7 +324,7 @@ const OrderTrackingPage = () => {
                           </div>
                         </div>
                         <div className="font-roboto font-medium">
-                          {(item.price * item.quantity).toFixed(2)} €
+                          {formatPrice(item.price * item.quantity)}
                         </div>
                       </div>
                     ))}

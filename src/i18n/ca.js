@@ -57,7 +57,7 @@ export const ca = {
   },
 
   product: {
-    addToCart: 'Afegiu al cistell',
+    addToCart: 'Afegeix al cistell',
     size: 'Talla',
     price: 'Preu',
     description: 'Descripció',
@@ -71,8 +71,8 @@ export const ca = {
     shipping: 'Enviament',
     total: 'Total',
     freeShipping: 'Enviament gratuït',
-    checkout: 'Finalitzeu la compra',
-    continueShopping: 'Continueu comprant',
+    checkout: 'Finalitza la compra',
+    continueShopping: 'Continua comprant',
     remove: 'Eliminar',
     quantity: 'Quantitat',
   },
@@ -93,7 +93,7 @@ export const ca = {
     cardNumber: 'Número de Targeta',
     expiryDate: 'MM/AA',
     cvv: 'CVV',
-    payNow: 'Pagueu {amount} €',
+    payNow: 'Valida el pagament',
     processing: 'Processant...',
     securePayment: 'Les vostres dades estan protegides amb encriptació SSL',
     orderSummary: 'Resum de la Comanda',

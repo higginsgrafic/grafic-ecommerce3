@@ -19,11 +19,11 @@ import NikeInspiredHeader from '@/components/NikeInspiredHeader';
 import DevHeader from '@/components/DevHeader';
 import ScrollToTop from '@/components/ScrollToTop';
 import Footer from '@/components/Footer';
-import Cart from '@/components/Cart';
-import UserSidebar from '@/components/UserSidebar';
 import Checkout from '@/components/Checkout';
 import SupabaseCollectionRoute from '@/pages/SupabaseCollectionRoute.jsx';
 import DevGuidesOverlay from '@/components/DevGuidesOverlay.jsx';
+import SlideShell from '@/components/SlideShell';
+import useSlidesConfig from '@/hooks/useSlidesConfig';
 
 const FulfillmentPage = lazy(() => import('@/pages/FulfillmentPage'));
 const FulfillmentSettingsPage = lazy(() => import('@/pages/FulfillmentSettingsPage'));
@@ -76,6 +76,8 @@ const UnitatsCanviPage = lazy(() => import('@/pages/UnitatsCanviPage'));
 const RuletaDemoPage = lazy(() => import('@/pages/RuletaDemoPage'));
 const AdminControlsPage = lazy(() => import('@/pages/AdminControlsPage'));
 const AdminStudioLayout = lazy(() => import('@/components/AdminStudioLayout'));
+const FullWideSlidePage = lazy(() => import('@/pages/FullWideSlidePage'));
+const PlantillaCatalegComponentsPage = lazy(() => import('@/pages/PlantillaCatalegComponentsPage'));
 
 const NikeTambePage = lazy(() => import('@/pages/NikeTambePage.jsx'));
 const AdidasDemoPage = lazy(() => import('@/pages/AdidasDemoPage'));
@@ -88,6 +90,8 @@ const TheHumanInsidePage = lazy(() => import('@/pages/TheHumanInsidePage'));
 const LabDemosPage = lazy(() => import('@/pages/LabDemosPage.jsx'));
 const LabWipPage = lazy(() => import('@/pages/LabWipPage.jsx'));
 const LabHomePage = lazy(() => import('@/pages/LabHomePage.jsx'));
+const AdminWipPage = lazy(() => import('@/pages/AdminWipPage.jsx'));
+const AdminPlantillesPage = lazy(() => import('@/pages/AdminPlantillesPage.jsx'));
 
 // Pàgines administratives
 const AppsPage = lazy(() => import('@/pages/AppsPage'));
@@ -117,33 +121,83 @@ const devHexToHslTriplet = (hex) => {
 
   const l = (max + min) / 2;
   const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-  const sPct = Math.round(s * 10000) / 100;
-  const lPct = Math.round(l * 10000) / 100;
-  const hDeg = Math.round(h * 100) / 100;
-  return `${hDeg} ${sPct}% ${lPct}%`;
+
+  const toFixedTrim = (value, digits) => {
+    const s = Number(value).toFixed(digits);
+    return s.replace(/\.0+$/, '').replace(/(\.[0-9]*?)0+$/, '$1').replace(/\.$/, '');
+  };
+
+  const hDeg = delta === 0 ? 0 : h;
+  const sPct = s * 100;
+  const lPct = l * 100;
+
+  return `${toFixedTrim(hDeg, 6)} ${toFixedTrim(sPct, 6)}% ${toFixedTrim(lPct, 6)}%`;
 };
 
 const applyDevThemeVarsFromStorage = () => {
   try {
     const savedStrong = window.localStorage.getItem('DEV_THEME_STRONG_HEX');
     const savedSoft = window.localStorage.getItem('DEV_THEME_SOFT_HEX');
+    const savedRing = window.localStorage.getItem('DEV_THEME_RING_HEX');
+    const savedAccent = window.localStorage.getItem('DEV_THEME_ACCENT_HEX');
+    const savedRadiusPxRaw = window.localStorage.getItem('DEV_THEME_RADIUS_PX');
+    const savedUiScalePctRaw = window.localStorage.getItem('DEV_UI_SCALE_PCT');
+    const savedShadowHex = window.localStorage.getItem('DEV_UI_SHADOW_HEX');
+    const savedShadowStrengthRaw = window.localStorage.getItem('DEV_UI_SHADOW_STRENGTH');
     const strongTriplet = devHexToHslTriplet(savedStrong);
     const softTriplet = devHexToHslTriplet(savedSoft);
+    const ringTriplet = devHexToHslTriplet(savedRing);
+    const accentTriplet = devHexToHslTriplet(savedAccent);
     if (strongTriplet) document.documentElement.style.setProperty('--foreground', strongTriplet);
     if (softTriplet) document.documentElement.style.setProperty('--muted-foreground', softTriplet);
+    if (ringTriplet) document.documentElement.style.setProperty('--ring', ringTriplet);
+    if (accentTriplet) document.documentElement.style.setProperty('--accent', accentTriplet);
+
+    const radiusPx = savedRadiusPxRaw == null ? NaN : Number(savedRadiusPxRaw);
+    if (Number.isFinite(radiusPx)) {
+      const px = Math.max(0, Math.min(40, radiusPx));
+      document.documentElement.style.setProperty('--radius', `${px / 16}rem`);
+    }
+
+    const uiScalePct = savedUiScalePctRaw == null ? NaN : Number(savedUiScalePctRaw);
+    if (Number.isFinite(uiScalePct)) {
+      const pct = Math.max(70, Math.min(130, uiScalePct));
+      document.documentElement.style.fontSize = `${pct}%`;
+    }
+
+    const shadowTriplet = devHexToHslTriplet(savedShadowHex);
+    if (shadowTriplet) document.documentElement.style.setProperty('--shadow-color', shadowTriplet);
+
+    const shadowStrength = savedShadowStrengthRaw == null ? NaN : Number(savedShadowStrengthRaw);
+    if (Number.isFinite(shadowStrength)) {
+      const s = Math.max(0, Math.min(2, shadowStrength));
+      document.documentElement.style.setProperty('--shadow-strength', String(s));
+    }
   } catch {
     // ignore
   }
 };
 
 function App() {
-  const [isCartOpen, setIsCartOpen] = useState(false);
-  const [isUserSidebarOpen, setIsUserSidebarOpen] = useState(false);
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
+  const [slideOpen, setSlideOpen] = useState(false);
+  const [slidePresetId, setSlidePresetId] = useState('');
   const [selectedElement, setSelectedElement] = useState(null);
   const [selectedContainerToken, setSelectedContainerToken] = useState('');
   const [copyContainerStatus, setCopyContainerStatus] = useState('idle');
+
+  const toggleSlidePreset = (nextPresetId) => {
+    if (!nextPresetId) return;
+    if (slideOpen && slidePresetId === nextPresetId) {
+      setSlideOpen(false);
+      setSlidePresetId('');
+      return;
+    }
+
+    setSlidePresetId(nextPresetId);
+    setSlideOpen(true);
+  };
   const [selectionStatus, setSelectionStatus] = useState('idle');
   const [layoutInspectorEnabled, setLayoutInspectorEnabled] = useState(false);
   const [guidesEnabled, setGuidesEnabled] = useState(false);
@@ -162,6 +216,8 @@ function App() {
   const location = useLocation();
   const navigate = useNavigate();
 
+  const { config: slidesConfig } = useSlidesConfig();
+
   const productContext = useProductContext();
   const { isAdmin, bypassUnderConstruction } = useAdmin();
   const { tools, toggleTool } = useAdminTools();
@@ -170,6 +226,44 @@ function App() {
 
   useEffect(() => {
     applyDevThemeVarsFromStorage();
+  }, []);
+
+  useEffect(() => {
+    try {
+      window.__MEASURE_HEADERS__ = () => {
+        const main = document.querySelector('main#main-content');
+        const results = {};
+
+        const resolveByPath = (root, path) => {
+          let node = root;
+          for (const step of path) {
+            if (!node) return null;
+            node = node.children?.[step] || null;
+          }
+          return node;
+        };
+
+        const toRect = (el) => {
+          const r = el?.getBoundingClientRect?.();
+          if (!r) return null;
+          return { x: Math.round(r.x), y: Math.round(r.y), width: Math.round(r.width), height: Math.round(r.height) };
+        };
+
+        const selA = 'main#main-content>div[0]>header[0]>div[0]>div[0]';
+        const selB = 'main#main-content>div[0]>header[0]>div[1]>div[0]';
+
+        const elA = resolveByPath(main, [0, 0, 0, 0]);
+        const elB = resolveByPath(main, [0, 0, 1, 0]);
+
+        results[selA] = toRect(elA);
+        results[selB] = toRect(elB);
+
+        console.log(results);
+        return results;
+      };
+    } catch {
+      // ignore
+    }
   }, []);
 
   useEffect(() => {
@@ -330,13 +424,17 @@ function App() {
   const isNikeDemoRoute = location.pathname === '/nike-tambe' || location.pathname.startsWith('/proves/demo-nike-tambe');
   const isNikeHeroDemoRoute = false;
   const isHomeRoute = location.pathname === '/';
+  const isPreview = location.pathname === '/ec-preview' || location.pathname === '/ec-preview-lite';
+  const isFullWideSlideRoute = location.pathname === '/full-wide-slide';
   const isAdidasDemoRoute =
     location.pathname === '/adidas-demo' ||
     location.pathname === '/adidas-demo-lite' ||
     location.pathname === '/adidas-pdp' ||
     location.pathname.startsWith('/adidas-pdp/') ||
     location.pathname.startsWith('/proves/demo-adidas');
-  const isDevDemoRoute = isNikeDemoRoute || isAdidasDemoRoute;
+  const isFullWideSlideDemoRoute = isFullWideSlideRoute;
+  const isAdidasStyleLayoutRoute = isAdidasDemoRoute || isFullWideSlideDemoRoute;
+  const isDevDemoRoute = isNikeDemoRoute || isAdidasDemoRoute || isFullWideSlideDemoRoute;
   const layoutInspectorActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && layoutInspectorEnabled;
 
   useEffect(() => {
@@ -371,6 +469,7 @@ function App() {
 
   const [nikeDemoManualEnabled, setNikeDemoManualEnabled] = useState(false);
   const [nikeDemoPhaseOverride, setNikeDemoPhaseOverride] = useState(null);
+  const [fullWideSlideManualEnabled, setFullWideSlideManualEnabled] = useState(false);
 
   useEffect(() => {
     if (!isDevDemoRoute) {
@@ -403,6 +502,39 @@ function App() {
     return () => window.removeEventListener('storage', onStorage);
   }, [isDevDemoRoute]);
 
+  useEffect(() => {
+    if (!isFullWideSlideDemoRoute) {
+      setFullWideSlideManualEnabled(false);
+      return undefined;
+    }
+
+    const readControls = () => {
+      try {
+        const enabled = window.localStorage.getItem('FULL_WIDE_SLIDE_DEMO_MANUAL') === '1';
+        setFullWideSlideManualEnabled(enabled);
+      } catch {
+        setFullWideSlideManualEnabled(false);
+      }
+    };
+
+    const onStorage = (e) => {
+      if (!e || !e.key) return;
+      if (e.key === 'FULL_WIDE_SLIDE_DEMO_MANUAL' || e.key === 'FULL_WIDE_SLIDE_DEMO_PHASE') {
+        readControls();
+      }
+    };
+
+    const onCustom = () => readControls();
+
+    readControls();
+    window.addEventListener('storage', onStorage);
+    window.addEventListener('full-wide-slide-demo-controls-changed', onCustom);
+    return () => {
+      window.removeEventListener('storage', onStorage);
+      window.removeEventListener('full-wide-slide-demo-controls-changed', onCustom);
+    };
+  }, [isFullWideSlideDemoRoute]);
+
   const writeNikeDemoControls = ({ enabled, phase }) => {
     try {
       window.localStorage.setItem('NIKE_DEMO_MANUAL', enabled ? '1' : '0');
@@ -423,6 +555,22 @@ function App() {
 
     setNikeDemoManualEnabled(enabled);
     setNikeDemoPhaseOverride(phase === 'rest' || phase === 'expanded' ? phase : null);
+  };
+
+  const writeFullWideSlideDemoControls = ({ enabled }) => {
+    try {
+      window.localStorage.setItem('FULL_WIDE_SLIDE_DEMO_MANUAL', enabled ? '1' : '0');
+    } catch {
+      // ignore
+    }
+
+    try {
+      window.dispatchEvent(new Event('full-wide-slide-demo-controls-changed'));
+    } catch {
+      // ignore
+    }
+
+    setFullWideSlideManualEnabled(enabled);
   };
 
   useEffect(() => {
@@ -481,21 +629,27 @@ function App() {
       }
     };
 
+    const isInLayoutInspectorRoot = (el) => {
+      if (!el || !(el instanceof Element) || !el.closest) return false;
+      return !!el.closest('[data-layout-inspector-root="true"]');
+    };
+
     const isDevOverlay = (el) => !!(el && el instanceof Element && el.closest('[data-dev-overlay="true"]'));
 
     const pickElementInMain = (clientX, clientY) => {
       const main = document.getElementById('main-content');
-      if (!main) return null;
+      const overlayRoot = document.querySelector('[data-layout-inspector-root="true"]');
+      if (!main && !overlayRoot) return null;
       if (!document.elementsFromPoint) return null;
       const stack = document.elementsFromPoint(clientX, clientY);
       const toolbar = debugButtonsWrapRef.current;
 
       const filtered = stack
         .filter((el) => el instanceof Element)
-        .filter((el) => main.contains(el))
+        .filter((el) => (main && main.contains(el)) || (overlayRoot && overlayRoot.contains(el)))
         .filter((el) => !isDevOverlay(el))
         .filter((el) => !(toolbar && toolbar.contains(el)))
-        .filter((el) => !isFixedElement(el))
+        .filter((el) => !isFixedElement(el) || isInLayoutInspectorRoot(el))
         .filter((el) => {
           try {
             const cs = window.getComputedStyle(el);
@@ -548,7 +702,9 @@ function App() {
       if (isDevOverlay(e.target)) return;
       if (typeof e.clientX !== 'number' || typeof e.clientY !== 'number') return;
       const main = document.getElementById('main-content');
-      if (!(main && e.target instanceof Element && main.contains(e.target))) return;
+      const inMain = main && e.target instanceof Element && main.contains(e.target);
+      const inOverlay = e.target instanceof Element && isInLayoutInspectorRoot(e.target);
+      if (!(inMain || inOverlay)) return;
       const pickedFromPoint = pickElementInMain(e.clientX, e.clientY);
       const pickedFromTarget = (main && main.contains(e.target) && !isDevOverlay(e.target) && !isFixedElement(e.target)) ? e.target : null;
       const picked = pickedFromPoint || pickedFromTarget;
@@ -580,7 +736,9 @@ function App() {
       if (e.target && e.target.closest && e.target.closest('.debug-exempt,[data-debug-exempt="true"]')) return;
       if (isDevOverlay(e.target)) return;
       const main = document.getElementById('main-content');
-      if (!(main && e.target instanceof Element && main.contains(e.target))) return;
+      const inMain = main && e.target instanceof Element && main.contains(e.target);
+      const inOverlay = e.target instanceof Element && isInLayoutInspectorRoot(e.target);
+      if (!(inMain || inOverlay)) return;
 
       // Blocatge per defecte: evita navegació i handlers de click quan el debug està actiu.
       if (typeof e.preventDefault === 'function') e.preventDefault();
@@ -693,9 +851,18 @@ function App() {
   };
 
   const copySelectedContainer = async () => {
+    if (!layoutInspectorActive) return;
+
     const mainContent = document.getElementById('main-content');
+    const overlayRoot = document.querySelector('[data-layout-inspector-root="true"]');
     const node = selectedElementNodeRef.current;
-    const nodeIsValid = !!(mainContent && node && node instanceof Element && mainContent.contains(node) && !node.closest('[data-dev-overlay="true"]') && (window.getComputedStyle(node).position !== 'fixed'));
+    const nodeIsValid = !!(
+      node &&
+      node instanceof Element &&
+      !node.closest('[data-dev-overlay="true"]') &&
+      ((mainContent && mainContent.contains(node)) || (overlayRoot && overlayRoot.contains(node))) &&
+      (window.getComputedStyle(node).position !== 'fixed' || (node.closest && node.closest('[data-layout-inspector-root="true"]')))
+    );
 
     const tokenNow = nodeIsValid ? buildContainerToken(node) : '';
     if (!tokenNow) return;
@@ -759,7 +926,8 @@ function App() {
   const handleAddToCart = (product, size, quantity = 1, shouldOpenCart = true) => {
     addToCart(product, size, quantity);
     if (shouldOpenCart) {
-      setIsCartOpen(true);
+      setSlidePresetId('FastCartSlide');
+      setSlideOpen(true);
     }
   };
 
@@ -780,14 +948,18 @@ function App() {
     isDevComponentsRoute ||
     location.pathname === '/adidas-stripe-zoom-dev' ||
     location.pathname.startsWith('/proves/dev-adidas-stripe-zoom');
+  const isComponentsCatalogTemplateRoute = location.pathname === '/plantilla-cataleg-components';
+
   // DEV layout routes: hide offers/footer, show AdminBanner, etc.
-  const isDevLayoutRoute = isHeroSettingsDevRoute || isDevDemoRoute || isDevToolsRoute;
+  const isDevLayoutRoute = isHeroSettingsDevRoute || isDevDemoRoute || isDevToolsRoute || isComponentsCatalogTemplateRoute;
   // DEV header routes: inject the global white DEV header with links.
   // EXCEPTIONS: header-demo pages keep their own headers, so don't override them.
   const isDevHeaderRoute =
-    isHeroSettingsDevRoute ||
+    location.pathname.startsWith('/proves') ||
+    isNikeDemoRoute ||
     isDevToolsRoute ||
-    (isDevDemoRoute && !isAdidasDemoRoute && !isNikeHeroDemoRoute);
+    isDevComponentsRoute ||
+    isComponentsCatalogTemplateRoute;
 
   const isAdminStudioRoute = location.pathname.startsWith('/admin');
   const devHeaderVisible = !isFullScreenRoute && (isDevHeaderRoute || isAdminStudioRoute);
@@ -799,9 +971,10 @@ function App() {
   const offersHeaderHeight = offersHeaderVisible ? 40 : 0;
   const adminBannerVisible = isAdmin || isDevDemoRoute || isAdminRoute;
   const adminBannerHeight = adminBannerVisible ? 40 : 0;
+  const offersHeaderTop = adminBannerVisible ? adminBannerHeight : 0;
   const adminRouteDevHeaderHeight = (isAdminRoute && devHeaderVisible) ? baseHeaderHeight : 0;
 
-  const rulersOverlayActive = (isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite';
+  const rulersOverlayActive = (isAdmin || isDevDemoRoute || isFullWideSlideRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite';
   const rulerInset = rulersOverlayActive ? 18 : 0;
 
   const adminRouteOffset = `${adminBannerHeight + adminRouteDevHeaderHeight + rulerInset}px`;
@@ -822,31 +995,45 @@ function App() {
 
       {devHeaderVisible && (
         <DevHeader
+          isPreview={isPreview}
+          isAdmin={isAdmin}
+          isDevDemoRoute={isDevDemoRoute}
+          isFullWideSlideRoute={isFullWideSlideRoute}
+          isNikeDemoRoute={isNikeDemoRoute}
+          isAdidasDemoRoute={isAdidasDemoRoute}
           adminBannerHeight={adminBannerHeight}
           rulerInset={rulerInset}
           cartItemCount={getTotalItems()}
-          onCartClick={() => setIsCartOpen(true)}
-          onUserClick={() => setIsUserSidebarOpen(true)}
+          onCartClick={() => toggleSlidePreset('FastCartSlide')}
+          onUserClick={() => toggleSlidePreset('FastViewSlide')}
         />
       )}
 
       {/* Main Header - NO mostrar a pàgines full-screen ni admin ni a dev tools */}
-      {!isFullScreenRoute && !isAdminRoute && !isAdidasDemoRoute && !isDevHeaderRoute && (
+      {!isFullScreenRoute && !isAdminRoute && !isAdidasStyleLayoutRoute && !isDevHeaderRoute && (
         isHomeRoute ? null : isNikeDemoRoute ? (
           <NikeInspiredHeader
             cartItemCount={getTotalItems()}
-            onCartClick={() => setIsCartOpen(true)}
-            onUserClick={() => setIsUserSidebarOpen(true)}
-            offersHeaderVisible={offersHeaderVisible}
+            onCartClick={() => toggleSlidePreset('FastCartSlide')}
+            onUserClick={() => toggleSlidePreset('FastViewSlide')}
             adminBannerVisible={adminBannerVisible}
+            guidesOffsetPx={rulerInset}
+            offersHeaderVisible={offersHeaderVisible}
+            offersHeaderHeight={offersHeaderHeight}
+            offersHeaderTop={offersHeaderTop}
+            isSearchPage={location.pathname === '/search'}
           />
         ) : (
           <Header
             cartItemCount={getTotalItems()}
-            onCartClick={() => setIsCartOpen(true)}
-            onUserClick={() => setIsUserSidebarOpen(true)}
-            offersHeaderVisible={offersHeaderVisible}
+            onCartClick={() => toggleSlidePreset('FastCartSlide')}
+            onUserClick={() => toggleSlidePreset('FastViewSlide')}
             adminBannerVisible={adminBannerVisible}
+            rulerInset={rulerInset}
+            offersHeaderVisible={offersHeaderVisible}
+            offersHeaderHeight={offersHeaderHeight}
+            offersHeaderTop={offersHeaderTop}
+            isSearchPage={location.pathname === '/search'}
           />
         )
       )}
@@ -858,9 +1045,9 @@ function App() {
             isAdminRoute
               ? { paddingTop: adminRouteOffset, paddingLeft: `${rulerInset}px`, '--appHeaderOffset': adminRouteOffset, '--rulerInset': `${rulerInset}px` }
               : {
-                  paddingTop: isAdidasDemoRoute ? adidasHeaderOffset : appHeaderOffset,
+                  paddingTop: isAdidasStyleLayoutRoute ? adidasHeaderOffset : appHeaderOffset,
                   paddingLeft: `${rulerInset}px`,
-                  '--appHeaderOffset': isAdidasDemoRoute ? adidasHeaderOffset : appHeaderOffset,
+                  '--appHeaderOffset': isAdidasStyleLayoutRoute ? adidasHeaderOffset : appHeaderOffset,
                   '--rulerInset': `${rulerInset}px`,
                 }
           ) : {}}
@@ -879,8 +1066,8 @@ function App() {
                     <div className="w-full max-w-none" style={{ '--appHeaderOffset': adidasHeaderOffset }}>
                       <AdidasInspiredHeader
                         cartItemCount={getTotalItems()}
-                        onCartClick={() => setIsCartOpen(true)}
-                        onUserClick={() => setIsUserSidebarOpen(true)}
+                        onCartClick={() => toggleSlidePreset('FastCartSlide')}
+                        onUserClick={() => toggleSlidePreset('FastViewSlide')}
                       />
                     </div>
                     <Home {...pageProps} />
@@ -1020,6 +1207,10 @@ function App() {
                 <Route path="/wishlist" element={<Navigate to="/" replace />} />
                 <Route path="/profile" element={<Navigate to="/" replace />} />
 
+                <Route path="/full-wide-slide" element={<FullWideSlidePage />} />
+
+                <Route path="/plantilla-cataleg-components" element={<PlantillaCatalegComponentsPage />} />
+
                 {/* Checkout Page */}
                 <Route
                   path="/checkout"
@@ -1093,6 +1284,8 @@ function App() {
                 <Route path="/admin" element={<AdminStudioLayout />}>
                   <Route index element={<AdminStudioHomePage />} />
                   <Route path="controls" element={<AdminControlsPage />} />
+                  <Route path="plantilles" element={<AdminPlantillesPage />} />
+                  <Route path="wip" element={<AdminWipPage />} />
                   <Route path="draft" element={<Navigate to="/admin/draft/ruleta" replace />} />
                   <Route path="demos" element={<AdminDemosPage />} />
                   <Route path="index" element={<IndexPage />} />
@@ -1153,23 +1346,46 @@ function App() {
         </main>
 
         {/* Footer - NO mostrar a pàgines full-screen ni admin */}
-        {!isFullScreenRoute && !isAdminRoute && !isDevLayoutRoute && <Footer />}
+        {!isFullScreenRoute && !isAdminRoute && (
+          isComponentsCatalogTemplateRoute ? (
+            null
+          ) : (
+            !isDevLayoutRoute && <Footer />
+          )
+        )}
 
         <ScrollToTop />
 
-        <Cart
-          isOpen={isCartOpen}
-          onClose={() => setIsCartOpen(false)}
-          items={cartItems}
+        <SlideShell
+          open={slideOpen}
+          presetId={slidePresetId}
+          slidesConfig={slidesConfig}
+          onClose={() => {
+            setSlideOpen(false);
+            setSlidePresetId('');
+          }}
+          cartItems={cartItems}
+          totalPrice={getTotalPrice()}
           onUpdateQuantity={updateQuantity}
           onRemove={removeFromCart}
           onUpdateSize={updateSize}
-          totalPrice={getTotalPrice()}
-        />
-
-        <UserSidebar
-          isOpen={isUserSidebarOpen}
-          onClose={() => setIsUserSidebarOpen(false)}
+          onViewCart={() => {
+            navigate('/cart');
+            setSlideOpen(false);
+            setSlidePresetId('');
+          }}
+          onCheckout={() => {
+            setIsCheckoutOpen(true);
+            setSlideOpen(false);
+            setSlidePresetId('');
+          }}
+          onClearCart={() => {
+            clearCart();
+          }}
+          onLogout={() => {
+            setSlideOpen(false);
+            setSlidePresetId('');
+          }}
         />
 
         <Checkout
@@ -1184,7 +1400,7 @@ function App() {
         />
 
         {/* Toggle button for Debug - Moved outside debug-containers */}
-        {(isAdmin || isDevDemoRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && (
+        {(isAdmin || isDevDemoRoute || isFullWideSlideRoute) && location.pathname !== '/ec-preview' && location.pathname !== '/ec-preview-lite' && (
           <>
             <div
               ref={debugButtonsWrapRef}
@@ -1298,7 +1514,7 @@ function App() {
               {isNikeDemoRoute && (
                 <button
                   type="button"
-                  className={`h-12 rounded-full border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
+                  className={`h-12 rounded-md border px-4 text-[12px] font-semibold shadow-lg active:bg-black/10 debug-exempt ${
                     nikeTambeBgOn
                       ? 'border-black/15 bg-white text-black/80 hover:bg-black/5'
                       : 'border-black/15 bg-white text-black/80 hover:bg-black/5'
@@ -1329,7 +1545,7 @@ function App() {
                   {isNikeHeroDemoRoute && (
                     <button
                       type="button"
-                      className="h-12 rounded-full border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5 disabled:opacity-40"
+                      className="h-12 rounded-md border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5 disabled:opacity-40"
                       disabled={!nikeDemoManualEnabled}
                       onClick={() => {
                         const current = (nikeDemoPhaseOverride === 'rest' || nikeDemoPhaseOverride === 'expanded') ? nikeDemoPhaseOverride : 'expanded';
@@ -1341,24 +1557,25 @@ function App() {
                     </button>
                   )}
 
-                  <button
-                    type="button"
-                    className="h-12 rounded-full border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5"
-                    onClick={() => {
-                      const nextEnabled = !nikeDemoManualEnabled;
-                      const phase = (nikeDemoPhaseOverride === 'rest' || nikeDemoPhaseOverride === 'expanded') ? nikeDemoPhaseOverride : 'expanded';
-                      writeNikeDemoControls({ enabled: nextEnabled, phase });
-                    }}
-                  >
-                    Manual: {nikeDemoManualEnabled ? 'ON' : 'OFF'}
-                  </button>
+                  {isFullWideSlideDemoRoute ? (
+                    <button
+                      type="button"
+                      className="h-12 rounded-md border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5"
+                      onClick={() => {
+                        const nextEnabled = !fullWideSlideManualEnabled;
+                        writeFullWideSlideDemoControls({ enabled: nextEnabled });
+                      }}
+                    >
+                      Manual: {fullWideSlideManualEnabled ? 'ON' : 'OFF'}
+                    </button>
+                  ) : null}
                 </div>
               )}
             </div>
           </>
         )}
         {rulersOverlayActive && (
-          <DevGuidesOverlay guidesEnabled={guidesEnabled} />
+          <DevGuidesOverlay guidesEnabled={guidesEnabled} onAutoEnable={() => setGuidesEnabled(true)} />
         )}
 
         {clicksEnabled && clickMarks.length > 0 && (

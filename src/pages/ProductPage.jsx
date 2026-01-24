@@ -6,6 +6,7 @@ import { productsService } from '@/api/supabase-products';
 import { supabase } from '@/api/supabase-products';
 import { useToast } from '@/contexts/ToastContext';
 import { useProductContext } from '@/contexts/ProductContext';
+import { formatPrice } from '@/utils/formatters';
 
 export default function ProductPage() {
   const { id } = useParams();
@@ -227,7 +228,7 @@ export default function ProductPage() {
               <h1 className="font-oswald text-4xl font-bold uppercase mb-4">{product.name}</h1>
 
               <p className="font-oswald text-3xl mb-6">
-                {product.price.toFixed(2).replace('.', ',')} €
+                {formatPrice(product.price)}
               </p>
 
               <div className="mb-6">

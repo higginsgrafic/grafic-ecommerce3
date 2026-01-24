@@ -4,6 +4,7 @@ import CartIcon from './ui/CartIcon';
 import SizeButtonGroup from './ui/SizeButtonGroup';
 import SizeButton from './ui/SizeButton';
 import { useGridDebug } from '@/contexts/GridDebugContext';
+import { formatPrice } from '@/utils/formatters';
 
 function ProductCard({ product, onAddToCart, cartItems = [], variant = 'default' }) {
   const [selectedSize, setSelectedSize] = useState('M');
@@ -12,14 +13,10 @@ function ProductCard({ product, onAddToCart, cartItems = [], variant = 'default'
 
   const priceLabel = (() => {
     const price = product?.price;
-    if (typeof price === 'number') return Number.isFinite(price) ? `${price.toFixed(2).replace('.', ',')} €` : '—';
-    if (typeof price === 'string') {
-      const cleaned = price.replace(',', '.').replace(/[^0-9.\-]/g, '');
-      const parsed = Number.parseFloat(cleaned);
-      if (Number.isFinite(parsed)) return `${parsed.toFixed(2).replace('.', ',')} €`;
-      return price.trim() ? price : '—';
-    }
-    return '—';
+    const formatted = formatPrice(price);
+    if (formatted !== '—') return formatted;
+    if (typeof price === 'string') return price.trim() ? price : '—';
+    return formatted;
   })();
 
   const productId = product?.id;

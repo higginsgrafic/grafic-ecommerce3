@@ -5,7 +5,7 @@
 .inner {
   max-width: 1400px;
   margin: 0 auto;
-  padding: 1.25rem 3rem 0;
+  padding: 0 2.5rem;
 }
 
 .innerFlush {
@@ -53,7 +53,7 @@
   inset: 0;
   display: grid;
   align-content: end;
-  padding: 2.25rem;
+  padding: 0;
   background: linear-gradient(
     to top,
     rgba(0, 0, 0, 0.65) 0%,
@@ -195,10 +195,6 @@
 }
 
 @media (max-width: 768px) {
-  .inner {
-    padding: 1rem 1.5rem 0;
-  }
-
   .image {
     height: 360px;
   }

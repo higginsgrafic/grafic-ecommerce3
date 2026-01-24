@@ -13,6 +13,7 @@ function clamp(n, min, max) {
 
 export default function RulersGuidesOverlay({
   guidesEnabled = true,
+  onAutoEnable,
   storageKey = DEFAULT_STORAGE_KEY,
   anchorElementId = 'main-content',
   headerOffsetCssVar = '--appHeaderOffset',
@@ -170,6 +171,7 @@ export default function RulersGuidesOverlay({
   }, [zoom]);
 
   const onRulerTopClick = (e) => {
+    if (!guidesEnabled) onAutoEnable?.();
     if (e.clientX < interactionLeft) return;
     const maxW = (window.innerWidth || 0) / zoom;
     const x = clamp(toDocX(e.clientX), 0, maxW);
@@ -177,6 +179,7 @@ export default function RulersGuidesOverlay({
   };
 
   const onRulerLeftClick = (e) => {
+    if (!guidesEnabled) onAutoEnable?.();
     if (e.clientY < interactionTop) return;
     const maxH = (window.innerHeight || 0) / zoom;
     const y = clamp(toDocY(e.clientY), 0, maxH);
@@ -375,10 +378,10 @@ export default function RulersGuidesOverlay({
           width: '100vw',
           height: `${rulerSize}px`,
           background: 'transparent',
-          pointerEvents: guidesEnabled ? 'auto' : 'none',
+          pointerEvents: 'auto',
         }}
-        data-dev-overlay-interactive={guidesEnabled ? 'true' : undefined}
-        onClick={guidesEnabled ? onRulerTopClick : undefined}
+        data-dev-overlay-interactive="true"
+        onClick={onRulerTopClick}
       />
       <div
         className="fixed debug-exempt"
@@ -388,10 +391,10 @@ export default function RulersGuidesOverlay({
           width: `${rulerSize}px`,
           height: '100vh',
           background: 'transparent',
-          pointerEvents: guidesEnabled ? 'auto' : 'none',
+          pointerEvents: 'auto',
         }}
-        data-dev-overlay-interactive={guidesEnabled ? 'true' : undefined}
-        onClick={guidesEnabled ? onRulerLeftClick : undefined}
+        data-dev-overlay-interactive="true"
+        onClick={onRulerLeftClick}
       />
 
       {guidesEnabled ? vGuides.map((x, idx) => (

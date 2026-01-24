@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { useGridDebug } from '@/contexts/GridDebugContext';
 import { trackRemoveFromCart } from '@/utils/analytics';
+import { formatPrice } from '@/utils/formatters';
 
 const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemove, totalPrice, onCheckout, onUpdateSize }) => {
   const navigate = useNavigate();
@@ -219,7 +220,7 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemove, totalPrice, 
                   </div>
 
                   <div className="font-oswald text-xl leading-none mt-1 font-normal text-foreground">
-                    {(item.price * item.quantity).toFixed(2).replace('.', ',')} €
+                    {formatPrice(item.price * item.quantity)}
                   </div>
 
                   <div className="flex items-center gap-2 mt-2">
@@ -264,7 +265,7 @@ const Cart = ({ isOpen, onClose, items, onUpdateQuantity, onRemove, totalPrice, 
           <div className="p-4 sm:p-6 border-t border-border bg-muted space-y-4">
             <div className="flex justify-between items-center pb-4 border-b border-border">
               <span className="font-oswald text-xl sm:text-2xl font-normal text-foreground">Total</span>
-              <span className="font-oswald text-xl sm:text-2xl font-normal text-foreground">{totalPrice.toFixed(2).replace('.', ',')} €</span>
+              <span className="font-oswald text-xl sm:text-2xl font-normal text-foreground">{formatPrice(totalPrice)}</span>
             </div>
 
             <div className="grid grid-cols-2 gap-2 sm:gap-3">

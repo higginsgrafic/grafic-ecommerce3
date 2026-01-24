@@ -5,11 +5,11 @@ import { Helmet } from 'react-helmet';
 import { Elements } from '@stripe/react-stripe-js';
 import { Lock, CreditCard, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import PaymentForm from '@/components/PaymentForm';
-import { getStripe } from '@/api/stripe';
+import { useCart } from '@/contexts/CartContext';
+import { useToast } from '@/contexts/ToastContext';
+import { formatPrice } from '@/utils/formatters';
 import { validateEmail, validateRequired, validatePostalCode, validateForm } from '@/utils/validation';
 import { trackBeginCheckout, trackPurchase } from '@/utils/analytics';
-import { useToast } from '@/contexts/ToastContext';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 // Verificar si Stripe està configurat
@@ -170,7 +170,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
             Tornar al cistell
           </Link>
           <h1 className="text-xl sm:text-2xl md:text-3xl font-bold font-oswald uppercase text-foreground">
-            Checkout Segur
+            Pagament segur
           </h1>
           <p className="mt-1 sm:mt-2 text-xs sm:text-sm text-muted-foreground opacity-60">
             Completa la teva comanda de manera segura
@@ -188,79 +188,118 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                 </h2>
               </div>
 
+              <p className="text-xs text-muted-foreground opacity-70 mb-3">
+                <span className="text-red-600 font-bold">*</span> Els camps amb asterisc són obligatoris.
+              </p>
+
               <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
                 {/* Contacte */}
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 text-foreground">Contacte</h3>
-                  <input
-                    type="email"
-                    name="email"
-                    placeholder="Correu electrònic"
-                    value={formData.email}
-                    onChange={handleChange}
-                    required
-                    className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
-                  />
+                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 text-foreground">T’enviarem la factura a</h3>
+                  <div>
+                    <label className="block text-xs text-foreground opacity-70 mb-1">
+                      Correu electrònic <span className="text-red-600 font-bold">*</span>
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      placeholder="Correu electrònic"
+                      value={formData.email}
+                      onChange={handleChange}
+                      required
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
                 </div>
 
                 {/* Enviament */}
                 <div>
-                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 text-foreground">Adreça d'Enviament</h3>
+                  <h3 className="font-bold text-xs sm:text-sm uppercase mb-2 sm:mb-3 text-foreground">Dades d'enviament</h3>
                   <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <input
-                      type="text"
-                      name="firstName"
-                      placeholder="Nom"
-                      value={formData.firstName}
-                      onChange={handleChange}
-                      required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <input
-                      type="text"
-                      name="lastName"
-                      placeholder="Cognoms"
-                      value={formData.lastName}
-                      onChange={handleChange}
-                      required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <input
-                      type="text"
-                      name="address"
-                      placeholder="Adreça"
-                      value={formData.address}
-                      onChange={handleChange}
-                      required
-                      className="col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <input
-                      type="text"
-                      name="city"
-                      placeholder="Ciutat"
-                      value={formData.city}
-                      onChange={handleChange}
-                      required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <input
-                      type="text"
-                      name="postalCode"
-                      placeholder="Codi Postal"
-                      value={formData.postalCode}
-                      onChange={handleChange}
-                      required
-                      className="px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
-                    <input
-                      type="text"
-                      name="country"
-                      placeholder="País"
-                      value={formData.country}
-                      onChange={handleChange}
-                      required
-                      className="col-span-2 px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
-                    />
+                    <div>
+                      <label className="block text-xs text-foreground opacity-70 mb-1">
+                        Nom <span className="text-red-600 font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="firstName"
+                        placeholder="Nom"
+                        value={formData.firstName}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-foreground opacity-70 mb-1">
+                        Cognoms <span className="text-red-600 font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="lastName"
+                        placeholder="Cognoms"
+                        value={formData.lastName}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-xs text-foreground opacity-70 mb-1">
+                        Adreça <span className="text-red-600 font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="address"
+                        placeholder="Adreça"
+                        value={formData.address}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-foreground opacity-70 mb-1">
+                        Ciutat <span className="text-red-600 font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="city"
+                        placeholder="Ciutat"
+                        value={formData.city}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-foreground opacity-70 mb-1">
+                        Codi postal <span className="text-red-600 font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="postalCode"
+                        placeholder="Codi Postal"
+                        value={formData.postalCode}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
+                    <div className="col-span-2">
+                      <label className="block text-xs text-foreground opacity-70 mb-1">
+                        País <span className="text-red-600 font-bold">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        name="country"
+                        placeholder="País"
+                        value={formData.country}
+                        onChange={handleChange}
+                        required
+                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-border rounded-md text-sm text-foreground bg-white focus:outline-none focus:ring-2 focus:ring-ring"
+                      />
+                    </div>
                   </div>
                 </div>
 
@@ -279,7 +318,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                           const orderId = 'GRF-2024-' + Math.random().toString(36).substr(2, 9).toUpperCase();
                           trackPurchase(orderId, cartItems, total, shipping, 0);
                           if (onClearCart) onClearCart();
-                          success('Pagament processat');
+                          success('Sia servit i gràcies');
                           navigate(`/order-confirmation/${orderId}`);
                         }}
                       />
@@ -341,7 +380,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                           Processant...
                         </span>
                       ) : (
-                        `Pagar ${total.toFixed(2).replace('.', ',')} €`
+                        'Valida el pagament'
                       )}
                     </Button>
                     <p className="text-xs text-center mt-3 text-muted-foreground opacity-50">
@@ -378,7 +417,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                           Talla: {item.size} · Qty: {item.quantity}
                         </p>
                         <p className="text-sm font-medium mt-1 text-foreground">
-                          {(item.price * item.quantity).toFixed(2).replace('.', ',')} €
+                          {formatPrice(item.price * item.quantity)}
                         </p>
                       </div>
                     </div>
@@ -389,15 +428,15 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                 <div className="space-y-2 mb-6 pb-6 border-b">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground opacity-60">Subtotal</span>
-                    <span className="text-foreground">{subtotal.toFixed(2).replace('.', ',')} €</span>
+                    <span className="text-foreground">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground opacity-60">Enviament</span>
-                    <span className="text-foreground">{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
+                    <span className="text-foreground">{shipping === 0 ? 'Gratuït' : formatPrice(shipping)}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t">
-                    <span className="font-oswald text-xl font-normal text-foreground">Total</span>
-                    <span className="font-oswald text-xl font-normal text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
+                    <span className="font-oswald text-xl font-normal text-foreground">Tot plegat fa</span>
+                    <span className="font-oswald text-xl font-normal text-foreground">{formatPrice(total)}</span>
                   </div>
                 </div>
 
@@ -416,7 +455,7 @@ const CheckoutPage = ({ cartItems, onClearCart }) => {
                           Processant...
                         </span>
                       ) : (
-                        `Pagar ${total.toFixed(2).replace('.', ',')} €`
+                        'Valida el pagament'
                       )}
                     </Button>
                     <p className="text-xs text-center mt-3 text-muted-foreground opacity-50">

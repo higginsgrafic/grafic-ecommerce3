@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { formatPrice } from '@/utils/formatters';
 
 function ProductTeaserCard({
   to,
@@ -16,7 +17,8 @@ function ProductTeaserCard({
   const dots = safeColors.slice(0, 3);
 
   const priceText = (() => {
-    if (typeof price === 'number') return `${price.toFixed(2).replace('.', ',')} €`;
+    const formatted = formatPrice(price);
+    if (formatted !== '—') return formatted;
     if (typeof price === 'string') return price;
     return null;
   })();

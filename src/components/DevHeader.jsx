@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserRound } from 'lucide-react';
 import SearchDialog from '@/components/SearchDialog';
@@ -11,21 +12,25 @@ export default function DevHeader({
   onCartClick,
   onUserClick,
 }) {
+  const location = useLocation();
+  const navigate = useNavigate();
+  const suppressThemeOverrides = location.pathname === '/admin/controls';
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
+  const cartClickTimeoutRef = useRef(null);
 
   const [strongHex, setStrongHex] = useState(() => {
     try {
-      return window.localStorage.getItem('DEV_THEME_STRONG_HEX') || '#ff0000';
+      return window.localStorage.getItem('DEV_THEME_STRONG_HEX') || '#171717';
     } catch {
-      return '#ff0000';
+      return '#171717';
     }
   });
 
   const [softHex, setSoftHex] = useState(() => {
     try {
-      return window.localStorage.getItem('DEV_THEME_SOFT_HEX') || '#ffa5a5';
+      return window.localStorage.getItem('DEV_THEME_SOFT_HEX') || '#b2b2b2';
     } catch {
-      return '#ffa5a5';
+      return '#b2b2b2';
     }
   });
 
@@ -56,10 +61,17 @@ export default function DevHeader({
 
     const l = (max + min) / 2;
     const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1));
-    const sPct = Math.round(s * 10000) / 100;
-    const lPct = Math.round(l * 10000) / 100;
-    const hDeg = Math.round(h * 100) / 100;
-    return `${hDeg} ${sPct}% ${lPct}%`;
+
+    const toFixedTrim = (value, digits) => {
+      const s = Number(value).toFixed(digits);
+      return s.replace(/\.0+$/, '').replace(/(\.[0-9]*?)0+$/, '$1').replace(/\.$/, '');
+    };
+
+    const hDeg = delta === 0 ? 0 : h;
+    const sPct = s * 100;
+    const lPct = l * 100;
+
+    return `${toFixedTrim(hDeg, 6)} ${toFixedTrim(sPct, 6)}% ${toFixedTrim(lPct, 6)}%`;
   };
 
   const applyThemeVars = ({ strong, soft }) => {
@@ -70,10 +82,12 @@ export default function DevHeader({
   };
 
   useEffect(() => {
+    if (suppressThemeOverrides) return;
     applyThemeVars({ strong: strongHex, soft: softHex });
   }, []);
 
   useEffect(() => {
+    if (suppressThemeOverrides) return;
     applyThemeVars({ strong: strongHex, soft: softHex });
     try {
       window.localStorage.setItem('DEV_THEME_STRONG_HEX', strongHex);
@@ -81,7 +95,7 @@ export default function DevHeader({
     } catch {
       // ignore
     }
-  }, [strongHex, softHex]);
+  }, [strongHex, softHex, suppressThemeOverrides]);
 
   const demoLinks = [
     { label: 'Nike També', href: '/nike-tambe' },
@@ -183,7 +197,7 @@ export default function DevHeader({
               className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               aria-label="Obrir cerca"
             >
-              <svg className="h-6 w-6 text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="h-6 w-6 translate-y-[5px] text-foreground" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
               <span className="sr-only">Cerca</span>
@@ -192,7 +206,20 @@ export default function DevHeader({
             <Button
               variant="ghost"
               size="icon"
-              onClick={onCartClick}
+              onClick={(e) => {
+                e.preventDefault();
+                if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                cartClickTimeoutRef.current = window.setTimeout(() => {
+                  cartClickTimeoutRef.current = null;
+                  onCartClick?.();
+                }, 320);
+              }}
+              onDoubleClick={(e) => {
+                e.preventDefault();
+                if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                cartClickTimeoutRef.current = null;
+                navigate('/cart');
+              }}
               className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-foreground"
               aria-label="Obrir cistell"
             >
@@ -215,7 +242,7 @@ export default function DevHeader({
               {cartItemCount > 0 && (
                 <span
                   className="absolute left-1/2 -translate-x-1/2 text-whiteStrong text-[13.75px] lg:text-[16.25px] font-bold"
-                  style={{ top: 'calc(60% - 1px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}
+                  style={{ top: 'calc(60% - 1.5px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}
                 >
                   {cartItemCount}
                 </span>
@@ -231,7 +258,7 @@ export default function DevHeader({
               aria-label="Obrir menú d'usuari"
               id="dev-header-user"
             >
-              <UserRound className="h-5 w-5 lg:h-6 lg:w-6 text-foreground" />
+              <UserRound className="h-5 w-5 lg:h-6 lg:w-6 translate-y-[5px] text-foreground" />
               <span className="sr-only">Usuari</span>
             </Button>
           </div>

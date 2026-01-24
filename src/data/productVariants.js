@@ -3,6 +3,8 @@
  * Permet gestionar diferents colors, talles, SKUs i preus
  */
 
+import { formatPrice } from '@/utils/formatters';
+
 // Talles disponibles amb informació detallada
 export const SIZES = {
   XS: {
@@ -146,7 +148,7 @@ export class ProductVariant {
   }
 
   getFormattedPrice() {
-    return `${this.price.toFixed(2).replace('.', ',')} €`;
+    return formatPrice(this.price);
   }
 }
 

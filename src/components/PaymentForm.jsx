@@ -148,7 +148,7 @@ const PaymentForm = ({ amount, onSuccess, billingDetails }) => {
             Processant...
           </span>
         ) : (
-          `Pagar ${amount.toFixed(2).replace('.', ',')} €`
+          'Valida el pagament'
         )}
       </Button>
 

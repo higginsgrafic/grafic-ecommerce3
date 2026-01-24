@@ -180,7 +180,7 @@ export default function AdidasHumanInsideSlider({
                   ) : (
                     <Link
                       to="#"
-                      className="relative z-40 flex h-4 w-full items-center justify-center whitespace-nowrap rounded-none bg-black/10 px-2 text-xs leading-4 text-black/70 hover:text-black"
+                      className="relative z-40 flex h-4 w-full items-center justify-center whitespace-nowrap rounded-none bg-muted px-2 text-xs leading-4 text-muted-foreground hover:text-foreground focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                     >
                       {it}
                     </Link>

@@ -4,6 +4,10 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { Trash2, Plus, Minus, ShoppingBag, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useCart } from '@/contexts/CartContext';
+import Checkout from '@/components/Checkout';
+import { useToast } from '@/contexts/ToastContext';
+import { formatPrice } from '@/utils/formatters';
 import Breadcrumbs from '@/components/Breadcrumbs';
 
 const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
@@ -119,7 +123,7 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
                         {/* Preu i controls */}
                         <div className="flex justify-between items-center mt-2">
                           <div className="font-oswald text-base sm:text-lg font-normal text-foreground">
-                            {(item.price * item.quantity).toFixed(2).replace('.', ',')} €
+                            {formatPrice(item.price * item.quantity)}
                           </div>
 
                           {/* Controls */}
@@ -154,15 +158,15 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
                 <div className="space-y-2">
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted-foreground">Subtotal</span>
-                    <span className="text-foreground">{subtotal.toFixed(2).replace('.', ',')} €</span>
+                    <span className="text-foreground">{formatPrice(subtotal)}</span>
                   </div>
                   <div className="flex justify-between text-xs sm:text-sm">
                     <span className="text-muted-foreground">Enviament</span>
-                    <span className="text-foreground">{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
+                    <span className="text-foreground">{shipping === 0 ? 'Gratuït' : formatPrice(shipping)}</span>
                   </div>
                   <div className="flex justify-between pt-2 border-t">
                     <span className="font-oswald text-lg sm:text-xl font-normal text-foreground">Total</span>
-                    <span className="font-oswald text-lg sm:text-xl font-normal text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
+                    <span className="font-oswald text-lg sm:text-xl font-normal text-foreground">{formatPrice(total)}</span>
                   </div>
                 </div>
               </div>
@@ -179,20 +183,20 @@ const CartPage = ({ cartItems, onUpdateQuantity, onRemove }) => {
                   <div className="space-y-3 mb-6">
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Subtotal</span>
-                      <span className="text-foreground">{subtotal.toFixed(2).replace('.', ',')} €</span>
+                      <span className="text-foreground">{formatPrice(subtotal)}</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-muted-foreground">Enviament</span>
-                      <span className="text-foreground">{shipping === 0 ? 'Gratuït' : `${shipping.toFixed(2).replace('.', ',')} €`}</span>
+                      <span className="text-foreground">{shipping === 0 ? 'Gratuït' : formatPrice(shipping)}</span>
                     </div>
                     {shipping === 0 ? null : (
                       <p className="text-xs text-muted-foreground" style={{ opacity: 0.85 }}>
-                        Afegeix {(50 - subtotal).toFixed(2).replace('.', ',')} € més per enviament gratuït
+                        Afegeix {formatPrice(50 - subtotal)} més per enviament gratuït
                       </p>
                     )}
                     <div className="flex justify-between pt-3 border-t">
                       <span className="font-oswald text-xl font-normal text-foreground">Total</span>
-                      <span className="font-oswald text-xl font-normal text-foreground">{total.toFixed(2).replace('.', ',')} €</span>
+                      <span className="font-oswald text-xl font-normal text-foreground">{formatPrice(total)}</span>
                     </div>
                   </div>
 

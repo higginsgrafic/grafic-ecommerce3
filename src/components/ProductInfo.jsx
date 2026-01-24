@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useState } from 'react';
 import { Heart, Share2 } from 'lucide-react';
+import { formatPrice } from '@/utils/formatters';
 
 const ProductInfo = ({
   product,
@@ -145,7 +146,7 @@ const ProductInfo = ({
         <div style={{ position: 'absolute', top: '74px', left: '645px', width: pillWidth || '322.5px', height: '40px', backgroundColor: '#F9FAFB', borderRadius: '4px', transform: 'scale(1.01)', zIndex: 1 }} />
 
         <p className="font-oswald leading-none font-normal" style={{ position: 'absolute', top: '78px', left: '655px', fontSize: '22.5pt', color: '#141414', transform: 'scale(1.01)', zIndex: 2 }}>
-          {product.price.toFixed(2).replace('.', ',')} €
+          {formatPrice(product.price)}
         </p>
 
         {/* Botonera d'acció (Desktop) - ubicada on abans hi havia "COLOR" */}

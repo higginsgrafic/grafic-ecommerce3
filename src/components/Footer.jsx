@@ -5,11 +5,12 @@ import { useTexts } from '@/hooks/useTexts';
 import { useGridDebug } from '@/contexts/GridDebugContext';
 import CCLogo from '@/components/CCLogo';
 
-const Footer = () => {
+const Footer = ({ copyrightOnly = false }) => {
   const containerRef = useRef(null);
   const menuGroupRef = useRef(null);
   const measureRef = useRef(null);
   const mobileContainerRef = useRef(null);
+  const copyrightFooterRef = useRef(null);
   const [gap, setGap] = useState(0);
   const [gapToLogo, setGapToLogo] = useState(0);
   const [mobileGap, setMobileGap] = useState(0);
@@ -34,10 +35,71 @@ const Footer = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (!copyrightOnly) return undefined;
+
+    const update = () => {
+      try {
+        const h = copyrightFooterRef.current?.offsetHeight;
+        if (!Number.isFinite(h) || h <= 0) return;
+        document.documentElement.style.setProperty('--copyrightFooterHeight', `${Math.round(h)}px`);
+      } catch {
+        // ignore
+      }
+    };
+
+    update();
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('resize', update);
+      try {
+        document.documentElement.style.removeProperty('--copyrightFooterHeight');
+      } catch {
+        // ignore
+      }
+    };
+  }, [copyrightOnly]);
+
 
 
   // Creative Commons dinàmic amb any actual
   const currentYear = new Date().getFullYear();
+
+  const copyrightOnlyMarkup = (
+    <footer
+      ref={copyrightFooterRef}
+      className="fixed bottom-0 left-0 right-0 z-[1000] bg-white border-t border-border transition-colors duration-200"
+      style={isSectionEnabled('footer') ? getDebugStyle('footer', 'main') : {}}
+    >
+      <div className="bg-white px-4 lg:px-8 py-12 lg:py-16 transition-colors duration-200">
+        <div className="max-w-7xl mx-auto flex items-center justify-center">
+          {copyrightData ? (
+            <p
+              className="inline-flex items-center justify-center gap-2 text-muted-foreground"
+              style={{
+                fontFamily: copyrightData.font || 'Roboto',
+                fontSize: copyrightData.fontSize || '14px',
+                opacity: 0.7,
+              }}
+            >
+              {copyrightData.text}
+            </p>
+          ) : (
+            <p
+              className="font-roboto text-[12pt] lg:text-[14pt] font-normal inline-flex items-center justify-center gap-2 text-muted-foreground"
+              style={{ opacity: 0.7 }}
+            >
+              <span className="inline-flex items-center">GRÀFIC</span>
+              <span className="inline-flex items-center gap-2">
+                <CCLogo className="h-[1em] w-auto" />
+                <span className="inline-flex items-center">2023-{currentYear}</span>
+              </span>
+            </p>
+          )}
+        </div>
+      </div>
+    </footer>
+  );
 
   // Ordre per mòbil (Higgins al mig - posició 5)
   const collectionsMobile = [
@@ -239,6 +301,8 @@ const Footer = () => {
     };
   }, []);
 
+  if (copyrightOnly) return copyrightOnlyMarkup;
+
   return (
     <footer
       className="bg-white transition-colors duration-200"
@@ -274,26 +338,50 @@ const Footer = () => {
                       marginTop: collection.id === 'first-contact' ? '30px' : '0'
                     }}
                   >
-                    <img
-                      src={collection.icon}
-                      alt={collection.name}
-                      data-collection-id={collection.id}
-                      className={`transition-transform duration-300 w-full h-auto object-contain ${
-                        collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
-                      }`}
-                      style={{
-                        display: 'block',
-                        opacity: 1,
-                        transform: collection.id === 'the-human-inside'
-                          ? 'scale(1.18)'
-                          : collection.id === 'higgins-grafic'
+                    {collection.id === 'the-human-inside' ? (
+                      <span
+                        aria-hidden="true"
+                        data-collection-id={collection.id}
+                        className={`transition-transform duration-300 w-full ${
+                          collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
+                        }`}
+                        style={{
+                          display: 'block',
+                          opacity: 1,
+                          height: '70px',
+                          backgroundColor: 'currentColor',
+                          WebkitMaskImage: `url(${collection.icon})`,
+                          maskImage: `url(${collection.icon})`,
+                          WebkitMaskRepeat: 'no-repeat',
+                          maskRepeat: 'no-repeat',
+                          WebkitMaskPosition: 'center',
+                          maskPosition: 'center',
+                          WebkitMaskSize: 'contain',
+                          maskSize: 'contain',
+                          transform: 'scale(1.18)',
+                          transformOrigin: 'center',
+                        }}
+                      />
+                    ) : (
+                      <img
+                        src={collection.icon}
+                        alt={collection.name}
+                        data-collection-id={collection.id}
+                        className={`transition-transform duration-300 w-full h-auto object-contain ${
+                          collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
+                        }`}
+                        style={{
+                          display: 'block',
+                          opacity: 1,
+                          transform: collection.id === 'higgins-grafic'
                             ? `translateY(${higginsAlignYDesktop}px) scale(1.10)`
                             : undefined,
-                        transformOrigin: (collection.id === 'the-human-inside' || collection.id === 'higgins-grafic') ? 'center' : undefined
-                      }}
-                      loading="lazy"
-                      decoding="async"
-                    />
+                          transformOrigin: collection.id === 'higgins-grafic' ? 'center' : undefined
+                        }}
+                        loading="lazy"
+                        decoding="async"
+                      />
+                    )}
                     <span className="sr-only">{collection.name}</span>
                   </Link>
                 {/* Gap després de cada col·lecció */}
@@ -337,25 +425,48 @@ const Footer = () => {
                     marginTop: collection.id === 'first-contact' ? '20px' : '0'
                   }}
                 >
-                  <img
-                    src={collection.icon}
-                    alt={collection.name}
-                    data-collection-id={collection.id}
-                    className={`w-full h-auto object-contain block transition-transform duration-300 ${
-                      collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
-                    }`}
-                    style={{
-                      opacity: 1,
-                      transform: collection.id === 'the-human-inside'
-                        ? 'scale(1.18)'
-                        : collection.id === 'higgins-grafic'
+                  {collection.id === 'the-human-inside' ? (
+                    <span
+                      aria-hidden="true"
+                      data-collection-id={collection.id}
+                      className={`w-full block transition-transform duration-300 ${
+                        collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
+                      }`}
+                      style={{
+                        opacity: 1,
+                        height: '52px',
+                        backgroundColor: 'currentColor',
+                        WebkitMaskImage: `url(${collection.icon})`,
+                        maskImage: `url(${collection.icon})`,
+                        WebkitMaskRepeat: 'no-repeat',
+                        maskRepeat: 'no-repeat',
+                        WebkitMaskPosition: 'center',
+                        maskPosition: 'center',
+                        WebkitMaskSize: 'contain',
+                        maskSize: 'contain',
+                        transform: 'scale(1.18)',
+                        transformOrigin: 'center',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={collection.icon}
+                      alt={collection.name}
+                      data-collection-id={collection.id}
+                      className={`w-full h-auto object-contain block transition-transform duration-300 ${
+                        collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
+                      }`}
+                      style={{
+                        opacity: 1,
+                        transform: collection.id === 'higgins-grafic'
                           ? `translateY(${higginsAlignYMobile}px) scale(1.10)`
                           : undefined,
-                      transformOrigin: (collection.id === 'the-human-inside' || collection.id === 'higgins-grafic') ? 'center' : undefined
-                    }}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                        transformOrigin: collection.id === 'higgins-grafic' ? 'center' : undefined
+                      }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
                   <span className="sr-only">{collection.name}</span>
                 </Link>
               </motion.div>
@@ -377,19 +488,44 @@ const Footer = () => {
                   }`}
                   title={collection.name}
                 >
-                  <img
-                    src={collection.icon}
-                    alt={collection.name}
-                    data-collection-id={collection.id}
-                    className={`w-full h-auto object-contain block transition-transform duration-300 ${
-                      collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
-                    }`}
-                    style={{
-                      opacity: 1
-                    }}
-                    loading="lazy"
-                    decoding="async"
-                  />
+                  {collection.id === 'the-human-inside' ? (
+                    <span
+                      aria-hidden="true"
+                      data-collection-id={collection.id}
+                      className={`w-full block transition-transform duration-300 ${
+                        collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
+                      }`}
+                      style={{
+                        opacity: 1,
+                        height: '52px',
+                        backgroundColor: 'currentColor',
+                        WebkitMaskImage: `url(${collection.icon})`,
+                        maskImage: `url(${collection.icon})`,
+                        WebkitMaskRepeat: 'no-repeat',
+                        maskRepeat: 'no-repeat',
+                        WebkitMaskPosition: 'center',
+                        maskPosition: 'center',
+                        WebkitMaskSize: 'contain',
+                        maskSize: 'contain',
+                        transform: 'scale(1.18)',
+                        transformOrigin: 'center',
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={collection.icon}
+                      alt={collection.name}
+                      data-collection-id={collection.id}
+                      className={`w-full h-auto object-contain block transition-transform duration-300 ${
+                        collection.id === 'higgins-grafic' ? '' : 'group-hover:scale-110'
+                      }`}
+                      style={{
+                        opacity: 1
+                      }}
+                      loading="lazy"
+                      decoding="async"
+                    />
+                  )}
                   <span className="sr-only">{collection.name}</span>
                 </Link>
               </motion.div>

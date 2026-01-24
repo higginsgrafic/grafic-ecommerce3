@@ -2,8 +2,9 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { CheckCircle, Package, Truck, MapPin, Clock, Mail, Download, ArrowRight } from 'lucide-react';
+import { CheckCircle, Package, Truck, CreditCard } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { formatPrice } from '@/utils/formatters';
 import { useToast } from '@/contexts/ToastContext';
 
 const OrderConfirmationPage = () => {
@@ -84,7 +85,7 @@ const OrderConfirmationPage = () => {
               Comanda confirmada!
             </h1>
             <p className="text-lg" style={{ color: '#141414', opacity: 0.7 }}>
-              Gràcies per la teva compra
+              Sia servit i gràcies
             </p>
             <p className="text-sm mt-2" style={{ color: '#141414', opacity: 0.5 }}>
               Número de comanda: <span className="font-mono font-bold">{orderData.id}</span>
@@ -216,7 +217,7 @@ const OrderConfirmationPage = () => {
                     <p className="text-sm" style={{ color: '#141414', opacity: 0.6 }}>
                       Talla: {item.size} · Quantitat: {item.quantity}
                     </p>
-                    <p className="font-oswald text-lg mt-1">{item.price.toFixed(2).replace('.', ',')} €</p>
+                    <p className="font-oswald text-lg mt-1">{formatPrice(item.price)}</p>
                   </div>
                 </div>
               ))}
@@ -226,15 +227,15 @@ const OrderConfirmationPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between text-sm">
                 <span style={{ color: '#141414', opacity: 0.7 }}>Subtotal</span>
-                <span>{orderData.subtotal.toFixed(2).replace('.', ',')} €</span>
+                <span>{formatPrice(orderData.subtotal)}</span>
               </div>
               <div className="flex justify-between text-sm">
                 <span style={{ color: '#141414', opacity: 0.7 }}>Enviament</span>
-                <span>{orderData.shipping === 0 ? 'Gratuït' : orderData.shipping.toFixed(2).replace('.', ',') + ' €'}</span>
+                <span>{orderData.shipping === 0 ? 'Gratuït' : formatPrice(orderData.shipping)}</span>
               </div>
               <div className="flex justify-between pt-2 border-t font-oswald text-xl">
-                <span>Total</span>
-                <span>{orderData.total.toFixed(2).replace('.', ',')} €</span>
+                <span>Tot plegat fa</span>
+                <span>{formatPrice(orderData.total)}</span>
               </div>
             </div>
           </motion.div>
@@ -247,7 +248,7 @@ const OrderConfirmationPage = () => {
             className="bg-white rounded-lg shadow-sm p-6 mb-6"
           >
             <h2 className="font-oswald text-xl font-bold uppercase mb-4" style={{ color: '#141414' }}>
-              Adreça d'enviament
+              Dades d'enviament
             </h2>
             <div className="text-sm space-y-1" style={{ color: '#141414', opacity: 0.8 }}>
               <p className="font-medium">{orderData.shippingAddress.name}</p>

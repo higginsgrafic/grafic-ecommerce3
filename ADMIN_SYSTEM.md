@@ -2,6 +2,12 @@
 
 Aquest projecte inclou un sistema d'administració inline que permet editar contingut directament sobre els components reals sense duplicar codi.
 
+## ✅ Norma (WIP per defecte)
+
+**A partir d'avui, TOTS els nous projectes (icones, components, pàgines, etc.) s'allotjaran automàticament a la pàgina WIP.**
+
+**Res sortirà de fase WIP (i per tant de la pàgina WIP) fins que s'indiqui expressament.**
+
 ## 🎯 Concepte
 
 - **Mode visualització**: Clients veuen el web normal

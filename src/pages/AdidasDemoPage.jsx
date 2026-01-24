@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import AdidasInspiredHeader from '@/components/AdidasInspiredHeader';
 import NikeHeroSlider from '@/components/NikeHeroSlider.jsx';
-import Cart from '@/components/Cart';
 import { useProductContext } from '@/contexts/ProductContext';
+import SlideShell from '@/components/SlideShell';
+import useSlidesConfig from '@/hooks/useSlidesConfig';
+import { useNavigate } from 'react-router-dom';
 
 function Tile({ title, body }) {
   return (
@@ -35,8 +37,11 @@ function PlaceholderMedia({ label }) {
 
 export default function AdidasDemoPage() {
   const [stripeDebugHit, setStripeDebugHit] = useState(false);
-  const [cartOpen, setCartOpen] = useState(false);
-  const { cartItems, getTotalItems, getTotalPrice, updateQuantity, removeFromCart, updateSize } = useProductContext();
+  const [slideOpen, setSlideOpen] = useState(false);
+  const [slidePresetId, setSlidePresetId] = useState('');
+  const { slidesConfig } = useSlidesConfig();
+  const navigate = useNavigate();
+  const { cartItems, getTotalItems, getTotalPrice, updateQuantity, removeFromCart, updateSize, clearCart } = useProductContext();
 
   const stripeItemLeftOffsetPxByIndex = {
     13: -12,
@@ -46,22 +51,46 @@ export default function AdidasDemoPage() {
     <div className="min-h-screen bg-background">
       <AdidasInspiredHeader
         cartItemCount={getTotalItems()}
-        onCartClick={() => setCartOpen(true)}
+        onCartClick={() => {
+          if (slideOpen && slidePresetId === 'FastCartSlide') {
+            setSlideOpen(false);
+            setSlidePresetId('');
+            return;
+          }
+          setSlidePresetId('FastCartSlide');
+          setSlideOpen(true);
+        }}
         forceStripeDebugHit={stripeDebugHit}
         ignoreStripeDebugFromUrl
         stripeItemLeftOffsetPxByIndex={stripeItemLeftOffsetPxByIndex}
         redistributeStripeBetweenFirstAndLast
       />
 
-      <Cart
-        isOpen={cartOpen}
-        onClose={() => setCartOpen(false)}
-        items={cartItems}
+      <SlideShell
+        open={slideOpen}
+        presetId={slidePresetId}
+        slidesConfig={slidesConfig}
+        onClose={() => {
+          setSlideOpen(false);
+          setSlidePresetId('');
+        }}
+        cartItems={cartItems}
+        totalPrice={getTotalPrice()}
         onUpdateQuantity={updateQuantity}
         onRemove={removeFromCart}
-        totalPrice={getTotalPrice()}
-        onCheckout={() => setCartOpen(false)}
         onUpdateSize={updateSize}
+        onViewCart={() => {
+          navigate('/cart');
+          setSlideOpen(false);
+          setSlidePresetId('');
+        }}
+        onCheckout={() => {
+          setSlideOpen(false);
+          setSlidePresetId('');
+        }}
+        onClearCart={() => {
+          clearCart();
+        }}
       />
 
       <div className="fixed bottom-4 right-4 z-[9999]">
@@ -88,42 +117,45 @@ export default function AdidasDemoPage() {
               menú mobile i layout de categories. Les lògiques les podem ajustar fins trobar el que busques.
             </p>
           </div>
+        </div>
 
-          <div className="grid gap-8 lg:grid-cols-12 lg:gap-10">
-            <div className="lg:col-span-12">
-              <NikeHeroSlider
-                flush
-                slides={[
-                  {
-                    id: 'adidas-demo-1',
-                    imageSrc:
-                      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_royal_gpr-4-0_front.png',
-                    kicker: 'Per marcar la diferència',
-                    headline: 'Mou-te i marca la diferència',
-                    primaryCta: { label: 'Compra', href: '#' },
-                    secondaryCta: { label: 'Descobreix', href: '#' },
-                  },
-                  {
-                    id: 'adidas-demo-2',
-                    imageSrc:
-                      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_black_gpr-4-0_front.png',
-                    kicker: 'Essencials',
-                    headline: 'Minimalisme que combina amb tot',
-                    primaryCta: { label: 'Compra', href: '#' },
-                    secondaryCta: { label: 'Veure novetats', href: '#' },
-                  },
-                  {
-                    id: 'adidas-demo-3',
-                    imageSrc:
-                      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_forest-green_gpr-4-0_front.png',
-                    kicker: 'Studio',
-                    headline: 'Confort i presència, sense soroll',
-                    primaryCta: { label: 'Compra', href: '#' },
-                    secondaryCta: { label: 'Explora col·lecció', href: '#' },
-                  },
-                ]}
-              />
-            </div>
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
+          <NikeHeroSlider
+            flush
+            slides={[
+              {
+                id: 'adidas-demo-1',
+                imageSrc:
+                  '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_royal_gpr-4-0_front.png',
+                kicker: 'Per marcar la diferència',
+                headline: 'Mou-te i marca la diferència',
+                primaryCta: { label: 'Compra', href: '#' },
+                secondaryCta: { label: 'Descobreix', href: '#' },
+              },
+              {
+                id: 'adidas-demo-2',
+                imageSrc:
+                  '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_black_gpr-4-0_front.png',
+                kicker: 'Essencials',
+                headline: 'Minimalisme que combina amb tot',
+                primaryCta: { label: 'Compra', href: '#' },
+                secondaryCta: { label: 'Veure novetats', href: '#' },
+              },
+              {
+                id: 'adidas-demo-3',
+                imageSrc:
+                  '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_forest-green_gpr-4-0_front.png',
+                kicker: 'Studio',
+                headline: 'Confort i presència, sense soroll',
+                primaryCta: { label: 'Compra', href: '#' },
+                secondaryCta: { label: 'Explora col·lecció', href: '#' },
+              },
+            ]}
+          />
+        </div>
+
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
+          <div className="grid gap-8 pt-8 lg:grid-cols-12 lg:gap-10 lg:pt-10">
             <div className="lg:col-span-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <Tile title="Noves arribades" body="Blocs de producte/col·lecció. Placeholder." />
               <Tile title="Drops" body="Espai per destacats o col·laboracions. Placeholder." />

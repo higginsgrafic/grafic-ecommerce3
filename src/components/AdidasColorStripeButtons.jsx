@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 
 export default function AdidasColorStripeButtons({
   megaTileSize,
@@ -19,8 +19,13 @@ export default function AdidasColorStripeButtons({
 }) {
   const items = useMemo(() => (Array.isArray(selectedColorOrder) ? selectedColorOrder.slice(0, 14) : []), [selectedColorOrder]);
 
+  const selectedTileRef = useRef(null);
+  const [selectedTileSize, setSelectedTileSize] = useState({ w: 0, h: 0 });
+  const dotCalibrationRef = useRef(null);
+
   const urlParams = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const debugStripeHit = forceDebugStripeHit || (!ignoreUrlDebugStripeHit && !!urlParams?.has('debugStripeHit'));
+  const stripeRecalibrate = !!urlParams?.has('stripeRecalibrate');
 
   const parseFloatParam = (key, fallback) => {
     const raw = urlParams?.get(key);
@@ -35,6 +40,42 @@ export default function AdidasColorStripeButtons({
     const n = Number.parseInt(raw, 10);
     return Number.isFinite(n) ? n : fallback;
   };
+
+  const stripeDotXPx = parseFloatParam('stripeDotX', 52);
+  const stripeDotYPx = parseFloatParam('stripeDotY', -6.5);
+
+  useEffect(() => {
+    if (!megaTileSize) return;
+    if (items.length === 0) return;
+
+    const el = selectedTileRef.current;
+    if (!el) return;
+
+    const update = () => {
+      const rect = el.getBoundingClientRect();
+      setSelectedTileSize({ w: rect.width, h: rect.height });
+    };
+
+    update();
+
+    const ro = new ResizeObserver(() => update());
+    ro.observe(el);
+
+    return () => ro.disconnect();
+  }, [items.length, megaTileSize, selectedColorSlug]);
+
+  useEffect(() => {
+    if (!megaTileSize) return;
+    if (items.length === 0) return;
+    if (!selectedTileSize.w || !selectedTileSize.h) return;
+
+    if (stripeRecalibrate || !dotCalibrationRef.current) {
+      dotCalibrationRef.current = {
+        rx: stripeDotXPx / selectedTileSize.w,
+        ry: stripeDotYPx / selectedTileSize.h,
+      };
+    }
+  }, [items.length, megaTileSize, selectedTileSize.w, selectedTileSize.h, stripeDotXPx, stripeDotYPx, stripeRecalibrate]);
 
   if (!megaTileSize) return null;
   if (items.length === 0) return null;
@@ -191,6 +232,9 @@ export default function AdidasColorStripeButtons({
           <div
             key={`${slug}-${idx}`}
             className="absolute top-0"
+            data-stripe-tile
+            data-slug={slug}
+            ref={isSelected ? selectedTileRef : null}
             style={{
               width: `${buttonW}px`,
               height: `${megaTileSize}px`,
@@ -203,6 +247,19 @@ export default function AdidasColorStripeButtons({
               className="absolute inset-0 transition-shadow duration-150 ease-out"
               style={{ pointerEvents: 'none' }}
             >
+              {isSelected ? (
+                <div
+                  aria-hidden="true"
+                  className="pointer-events-none absolute z-20 h-2 w-2 rounded-full bg-foreground"
+                  data-stripe-dot
+                  data-slug={slug}
+                  style={{
+                    left: `${((dotCalibrationRef.current?.rx ?? (stripeDotXPx / buttonW)) * (selectedTileSize.w || buttonW))}px`,
+                    top: `${((dotCalibrationRef.current?.ry ?? (stripeDotYPx / megaTileSize)) * (selectedTileSize.h || megaTileSize))}px`,
+                    transform: 'translate(-50%, -50%)',
+                  }}
+                />
+              ) : null}
               {src ? (
                 <span
                   className="absolute inset-0 overflow-visible"
@@ -212,23 +269,13 @@ export default function AdidasColorStripeButtons({
                     src={src}
                     alt={slug}
                     className="pointer-events-none block h-full object-contain object-bottom"
-                    style={{ width: `${buttonW}px` }}
+                    style={{
+                      width: `${buttonW}px`,
+                    }}
                   />
                 </span>
               ) : null}
             </div>
-
-            <div
-              className="pointer-events-none absolute left-1/2 rounded-full bg-foreground transition-opacity duration-150 ease-out"
-              style={{
-                top: `${megaTileSize + Math.max(4, Math.round(megaTileSize * 0.02))}px`,
-                width: `${Math.max(44, Math.round(buttonW * 0.36)) + 19}px`,
-                height: `${Math.max(8, Math.round(megaTileSize * 0.024))}px`,
-                transform: `translateX(calc(-50% - ${9.5 + (isFirst && isSelected ? 4 : 0)}px))`,
-                opacity: isSelected ? 1 : 0,
-              }}
-              aria-hidden="true"
-            />
 
             {isFirst ? (
               <>

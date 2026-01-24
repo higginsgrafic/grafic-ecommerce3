@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { UserRound } from 'lucide-react';
 import { useTexts } from '@/hooks/useTexts';
@@ -12,12 +12,15 @@ function Header({
   onCartClick,
   onUserClick,
   offersHeaderVisible = false,
-  adminBannerVisible = false
+  adminBannerVisible = false,
+  rulerInset = 0
 }) {
   const [isSearchDialogOpen, setIsSearchDialogOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
   const texts = useTexts();
   const { getDebugStyle, isSectionEnabled } = useGridDebug();
+  const cartClickTimeoutRef = React.useRef(null);
 
   const isHomePage = location.pathname === '/';
 
@@ -29,13 +32,15 @@ function Header({
     { name: texts.header.navigation.outcasted, href: '/outcasted' }
   ];
 
+  const topOffsetPx = (adminBannerVisible ? 40 : 0) + (offersHeaderVisible ? 40 : 0) + (Number(rulerInset) || 0);
+
   return (
     <motion.header
       data-main-header="true"
-      className="fixed left-0 right-0 z-[10000] bg-background border-b border-border"
+      className="fixed left-0 right-0 z-[10000] bg-background"
       initial={false}
       animate={{
-        top: adminBannerVisible && offersHeaderVisible ? '80px' : adminBannerVisible ? '40px' : offersHeaderVisible ? '40px' : '0px'
+        top: `${topOffsetPx}px`
       }}
       transition={{
         duration: 0.35,
@@ -141,7 +146,25 @@ function Header({
             </Button>
 
             {/* Cart */}
-            <Button variant="ghost" size="icon" onClick={onCartClick} className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-foreground">
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={(e) => {
+                e.preventDefault();
+                if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                cartClickTimeoutRef.current = window.setTimeout(() => {
+                  cartClickTimeoutRef.current = null;
+                  onCartClick?.();
+                }, 320);
+              }}
+              onDoubleClick={(e) => {
+                e.preventDefault();
+                if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
+                cartClickTimeoutRef.current = null;
+                navigate('/cart');
+              }}
+              className="relative h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 text-foreground"
+            >
               <span
                 aria-hidden="true"
                 className="h-[27px] w-[27px] lg:h-[31px] lg:w-[31px] transition-all duration-200"
@@ -159,7 +182,7 @@ function Header({
                 }}
               />
               {cartItemCount > 0 && (
-                <span className="absolute left-1/2 -translate-x-1/2 text-whiteStrong text-[13.75px] lg:text-[16.25px] font-bold" style={{ top: 'calc(60% - 1px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}>
+                <span className="absolute left-1/2 -translate-x-1/2 text-whiteStrong text-[13.75px] lg:text-[16.25px] font-bold" style={{ top: 'calc(60% - 1.5px)', transform: 'translate(-50%, -50%)', lineHeight: '1' }}>
                   {cartItemCount}
                 </span>
               )}
@@ -173,7 +196,7 @@ function Header({
               onClick={onUserClick}
               className="h-9 w-9 lg:h-10 lg:w-10 hover:bg-transparent focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
             >
-              <UserRound className="h-5 w-5 lg:h-6 lg:w-6 translate-y-[3px] text-foreground" />
+              <UserRound className="h-5 w-5 lg:h-6 lg:w-6 translate-y-[5px] text-foreground" />
               <span className="sr-only">Obrir menú d'usuari</span>
             </Button>
           </motion.div>

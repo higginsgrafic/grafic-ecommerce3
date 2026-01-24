@@ -65,6 +65,34 @@ html.scrollbar-compensate .offers-header-cart-open {
   }
 }
 
+@layer base {
+  :root {
+    --shadow-color: 0 0% 0%;
+    --shadow-strength: 1;
+  }
+}
+
+@layer utilities {
+  .shadow-sm {
+    box-shadow: 0 1px 2px 0 hsl(var(--shadow-color) / calc(0.12 * var(--shadow-strength)));
+  }
+  .shadow {
+    box-shadow:
+      0 1px 3px 0 hsl(var(--shadow-color) / calc(0.14 * var(--shadow-strength))),
+      0 1px 2px -1px hsl(var(--shadow-color) / calc(0.14 * var(--shadow-strength)));
+  }
+  .shadow-md {
+    box-shadow:
+      0 4px 6px -1px hsl(var(--shadow-color) / calc(0.16 * var(--shadow-strength))),
+      0 2px 4px -2px hsl(var(--shadow-color) / calc(0.16 * var(--shadow-strength)));
+  }
+  .shadow-lg {
+    box-shadow:
+      0 10px 15px -3px hsl(var(--shadow-color) / calc(0.18 * var(--shadow-strength))),
+      0 4px 6px -4px hsl(var(--shadow-color) / calc(0.18 * var(--shadow-strength)));
+  }
+}
+
 /* Animacions personalitzades per botons de talla */
 @keyframes pulse-scale {
   0% {
@@ -89,8 +117,8 @@ body.cart-open {
 }
 
 .debug-containers * {
-  outline: 2px solid rgba(255, 0, 0, 0.65) !important;
-  outline-offset: -1px;
+  outline: 1.25px solid rgba(255, 0, 0, 0.65) !important;
+  outline-offset: -0.75px;
   cursor: pointer !important;
 }
 
@@ -118,45 +146,45 @@ body.cart-open {
 }
 
 .debug-containers *.debug-selected {
-  outline: 4px solid rgba(0, 255, 0, 0.85) !important;
+  outline: 2.5px solid rgba(0, 255, 0, 0.85) !important;
   outline-offset: 0px;
   background-color: rgba(0, 255, 0, 0.03) !important;
-  box-shadow: inset 0 0 0 3px rgba(0, 255, 0, 0.95) !important;
+  box-shadow: inset 0 0 0 2px rgba(0, 255, 0, 0.95) !important;
 }
 
 .debug-selected {
-  outline: 4px solid rgba(0, 255, 0, 0.85) !important;
+  outline: 2.5px solid rgba(0, 255, 0, 0.85) !important;
   outline-offset: 0px;
   background-color: rgba(0, 255, 0, 0.03) !important;
-  box-shadow: inset 0 0 0 3px rgba(0, 255, 0, 0.95) !important;
+  box-shadow: inset 0 0 0 2px rgba(0, 255, 0, 0.95) !important;
 }
 
 .debug-containers > * {
-  outline: 3px solid rgba(255, 0, 0, 0.7) !important;
+  outline: 2px solid rgba(255, 0, 0, 0.7) !important;
 }
 
 .debug-containers header {
-  outline: 3px solid rgba(0, 150, 255, 0.8) !important;
+  outline: 2px solid rgba(0, 150, 255, 0.8) !important;
 }
 
 .debug-containers main {
-  outline: 3px solid rgba(0, 255, 0, 0.8) !important;
+  outline: 2px solid rgba(0, 255, 0, 0.8) !important;
 }
 
 .debug-containers footer {
-  outline: 3px solid rgba(255, 140, 0, 0.8) !important;
+  outline: 2px solid rgba(255, 140, 0, 0.8) !important;
 }
 
 .debug-containers [class*="container"] {
-  outline: 2px solid rgba(255, 0, 255, 0.6) !important;
+  outline: 1.25px solid rgba(255, 0, 255, 0.6) !important;
 }
 
 .debug-containers [class*="grid"] {
-  outline: 2px solid rgba(0, 255, 255, 0.6) !important;
+  outline: 1.25px solid rgba(0, 255, 255, 0.6) !important;
 }
 
 .debug-containers [class*="flex"] {
-  outline: 2px solid rgba(255, 255, 0, 0.6) !important;
+  outline: 1.25px solid rgba(180, 83, 9, 0.7) !important;
 }
 
 .debug-indicator {

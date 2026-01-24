@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { Helmet } from 'react-helmet';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ChevronLeft, ChevronRight, Trash2, Search, X, Edit3 } from 'lucide-react';
@@ -8,32 +8,10 @@ import { useProductContext } from '@/contexts/ProductContext';
 import { useTexts } from '@/hooks/useTexts';
 import { supabase } from '@/api/supabase-products';
 import { useToast } from '@/components/ui/use-toast';
-import { typography, getTypographyClasses } from '@/config/typography';
 import { useAdmin } from '@/contexts/AdminContext';
 import HeroSettingsPage from '@/pages/HeroSettingsPage';
-import FullBleedUnderHeader from '@/components/FullBleedUnderHeader';
 import OverlayUnderHeader from '@/components/OverlayUnderHeader';
-
-const useResponsiveFontSize = (config) => {
-  const [fontSize, setFontSize] = useState(config.fontSize?.mobile || config.fontSize?.base || '14px');
-
-  useEffect(() => {
-    const updateFontSize = () => {
-      const width = window.innerWidth;
-      if (width >= 1024 && config.fontSize?.desktop) {
-        setFontSize(config.fontSize.desktop);
-      } else {
-        setFontSize(config.fontSize?.mobile || config.fontSize?.base || '14px');
-      }
-    };
-
-    updateFontSize();
-    window.addEventListener('resize', updateFontSize);
-    return () => window.removeEventListener('resize', updateFontSize);
-  }, [config]);
-
-  return fontSize;
-};
+import NikeHeroSlider from '@/components/NikeHeroSlider';
 
 function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
   const texts = useTexts();
@@ -60,9 +38,6 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
   const initialLoadRef = useRef(true);
   const isDragging = useRef(false);
   const [showHeroSettings, setShowHeroSettings] = useState(false);
-
-  const titleFontSize = useResponsiveFontSize(typography.hero.title);
-  const subtitleFontSize = useResponsiveFontSize(typography.hero.subtitle);
 
   const availableRoutes = [
     { path: '/', label: 'Inici' },
@@ -361,9 +336,30 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
     }
   };
 
-  const getEmbedUrl = (videoId) => {
-    return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${videoId}&showinfo=0&rel=0&iv_load_policy=3&modestbranding=1&playsinline=1&enablejsapi=1&disablekb=1`;
-  };
+
+  const heroSliderSlides = useMemo(() => {
+    const fallbackImages = [
+      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_royal_gpr-4-0_front.png',
+      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_black_gpr-4-0_front.png',
+      '/placeholders/apparel/t-shirt/gildan_5000/gildan-5000_t-shirt_crewneck_unisex_heavyWeight_xl_forest-green_gpr-4-0_front.png',
+    ];
+
+    if (!Array.isArray(slides) || slides.length === 0) return [];
+
+    return slides.map((s, idx) => {
+      const imageSrc = s.image_src || s.imageSrc || fallbackImages[idx % fallbackImages.length];
+      const href = s.path || '/';
+      return {
+        id: s.id || `hero-${idx}`,
+        imageSrc,
+        imageAlt: s.title || s.subtitle || `Hero ${idx + 1}`,
+        kicker: s.title,
+        headline: s.subtitle,
+        primaryCta: { label: 'Compra', href },
+        secondaryCta: { label: 'Descobreix', href },
+      };
+    });
+  }, [slides]);
 
   if (loading) {
     return (
@@ -372,8 +368,6 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
       </div>
     );
   }
-
-  const currentSlideData = slides[currentSlide];
 
   return (
     <>
@@ -389,323 +383,11 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
         />
       </OverlayUnderHeader>
 
-      <FullBleedUnderHeader
-        as="section"
-        className="relative h-[70vh] min-h-[500px] overflow-hidden text-center text-whiteStrong bg-foreground"
-      >
-        {!editMode && (
-          <motion.div
-            className="absolute left-0 right-0 bottom-0 z-30 cursor-pointer active:cursor-grabbing"
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.2}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-            onClick={handleContainerClick}
-            style={{ touchAction: 'pan-y', top: 0 }}
-          />
-        )}
-
-        <AnimatePresence mode='wait'>
-          <motion.div
-            key={currentSlide}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 1 }}
-            className="absolute inset-0 z-0"
-          >
-            {slides[currentSlide]?.bg_type === 'video' && (
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <iframe
-                  className="absolute top-1/2 left-1/2 w-[225%] h-[225%] -translate-x-1/2 -translate-y-1/2 min-w-full min-h-full object-cover"
-                  src={getEmbedUrl(slides[currentSlide].bg_value || slides[currentSlide].video_url)}
-                  title="Background Video"
-                  frameBorder="0"
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  referrerPolicy="strict-origin-when-cross-origin"
-                  style={{
-                    pointerEvents: 'none',
-                    opacity: 1 - (slides[currentSlide].bg_opacity ?? 0.6)
-                  }}
-                />
-              </div>
-            )}
-            <div
-              className="absolute inset-0 bg-foreground"
-              style={{ opacity: slides[currentSlide]?.bg_opacity ?? 0.5 }}
-            />
-          </motion.div>
-        </AnimatePresence>
-
-        <div
-          className="absolute left-0 right-0 z-[10002]"
-          style={{ top: 'calc(var(--appHeaderOffset, 40px) + 12px)' }}
-        >
-          <div className="relative h-8 px-6">
-            {isAdmin && (
-              <div className="absolute left-6 top-0 h-8 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-widest text-whiteSoft/80 select-none">
-                <span className="px-2 py-0.5 rounded bg-whiteSoft/10 border border-whiteSoft/15">DEV</span>
-                <button type="button" onClick={() => navigate('/nike-hero-demo')} className="text-whiteSoft/70 hover:text-whiteStrong transition-colors">Nike Hero</button>
-                <span className="text-whiteSoft/30">/</span>
-                <button type="button" onClick={() => navigate('/nike-tambe')} className="text-whiteSoft/70 hover:text-whiteStrong transition-colors">Nike També</button>
-                <span className="text-whiteSoft/30">/</span>
-                <button type="button" onClick={() => navigate('/adidas-demo')} className="text-whiteSoft/70 hover:text-whiteStrong transition-colors">Adidas</button>
-              </div>
-            )}
-
-            {isAdmin && editMode && (
-              <div className="absolute left-[320px] top-0 h-8 flex items-center gap-3 text-xs font-medium uppercase tracking-wide">
-                <button
-                  onClick={() => setActiveTab('text')}
-                  className={`transition-colors ${
-                    activeTab === 'text'
-                      ? 'text-whiteStrong'
-                      : 'text-whiteSoft/50 hover:text-whiteSoft/80'
-                  }`}
-                >
-                  Text
-                </button>
-                <div className="w-px h-4 bg-white/30" />
-                <button
-                  onClick={() => setActiveTab('background')}
-                  className={`transition-colors ${
-                    activeTab === 'background'
-                      ? 'text-whiteStrong'
-                      : 'text-whiteSoft/50 hover:text-whiteSoft/80'
-                  }`}
-                >
-                  Background
-                </button>
-                <div className="w-px h-4 bg-white/30" />
-                <button
-                  onClick={addSlide}
-                  className="flex items-center gap-1 transition-colors text-whiteSoft/50 hover:text-whiteStrong"
-                  title="Afegir slide"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-                  </svg>
-                </button>
-                <div className="w-px h-4 bg-white/30" />
-                <button
-                  onClick={() => setDeleteConfirmDialog(true)}
-                  className="flex items-center gap-1 transition-colors text-whiteSoft/50 hover:text-red-400"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
-              </div>
-            )}
-
-            {isAdmin && editMode && (
-              <div className="absolute left-1/2 -translate-x-1/2 top-0 h-8 flex items-center gap-2 text-whiteSoft/90 font-mono text-sm">
-                {editingInterval ? (
-                  <>
-                    <input
-                      type="number"
-                      value={tempInterval.seconds}
-                      onChange={(e) => handleIntervalChange('seconds', e.target.value)}
-                      onBlur={handleIntervalBlur}
-                      onKeyDown={handleIntervalKeyDown}
-                      onWheel={(e) => e.stopPropagation()}
-                      className="w-12 h-6 px-1 py-0.5 bg-whiteSoft/20 text-whiteStrong text-center rounded border border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none"
-                      min="0"
-                      autoFocus
-                    />
-                    <span>s</span>
-                    <input
-                      type="number"
-                      value={tempInterval.milliseconds}
-                      onChange={(e) => handleIntervalChange('milliseconds', e.target.value)}
-                      onBlur={handleIntervalBlur}
-                      onKeyDown={handleIntervalKeyDown}
-                      onWheel={(e) => e.stopPropagation()}
-                      className="w-16 h-6 px-1 py-0.5 bg-whiteSoft/20 text-whiteStrong text-center rounded border border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none"
-                      min="0"
-                      max="999"
-                    />
-                    <span className="text-whiteSoft/50">ms</span>
-                  </>
-                ) : (
-                  <button
-                    onClick={handleIntervalClick}
-                    className="flex items-center gap-2 hover:bg-white/10 px-2 h-6 rounded transition-colors cursor-pointer"
-                  >
-                    <span className="text-whiteSoft/50">⏱</span>
-                    <span>{tempInterval.seconds}s</span>
-                    <span className="text-whiteSoft/50">{String(tempInterval.milliseconds).padStart(3, '0')}ms</span>
-                  </button>
-                )}
-              </div>
-            )}
-
-            {isAdmin && (
-              <div className="absolute right-6 top-0 z-[12000] h-8 flex items-center gap-3">
-                <div className="min-w-[280px] flex items-center justify-end">
-                  <AnimatePresence mode="wait">
-                    {editMode && activeTab === 'text' && (
-                      <motion.div
-                        key="text-controls"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className="flex items-center gap-3 text-xs font-medium text-whiteSoft/90"
-                      >
-                        <label className="flex items-center gap-2">
-                          <span>Opacitat fons:</span>
-                          <input
-                            type="range"
-                            min="0"
-                            max="1"
-                            step="0.05"
-                            value={currentSlideData?.bg_opacity ?? 0.6}
-                            onChange={(e) => updateSlide(currentSlide, 'bg_opacity', parseFloat(e.target.value))}
-                            className="w-24 accent-whiteStrong"
-                          />
-                          <span>{Math.round((currentSlideData?.bg_opacity ?? 0.6) * 100)}%</span>
-                        </label>
-                        <div className="w-px h-4 bg-white/30" />
-                      </motion.div>
-                    )}
-                    {editMode && activeTab === 'background' && (
-                      <motion.div
-                        key="background-controls"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.15 }}
-                        className="flex items-center gap-3 text-xs font-medium text-whiteSoft/90"
-                      >
-                        <button
-                          onClick={() => openSearchDialog('video')}
-                          className="bg-transparent text-whiteStrong border-b border-transparent hover:border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
-                        >
-                          {currentSlideData?.bg_value ?? currentSlideData?.video_url ?? 'ID vídeo'}
-                        </button>
-                        <div className="w-px h-4 bg-white/30" />
-                        <button
-                          onClick={() => openSearchDialog('route')}
-                          className="bg-transparent text-whiteStrong border-b border-transparent hover:border-whiteSoft/30 focus:border-whiteSoft/60 focus:outline-none px-1 py-0.5 cursor-pointer transition-colors leading-none"
-                        >
-                          {currentSlideData?.path ?? '/ruta'}
-                        </button>
-                        <div className="w-px h-4 bg-white/30" />
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-                </div>
-
-                <button
-                  onClick={() => {
-                    setShowHeroSettings(false);
-                    navigate('/hero-settings', { state: { editMode: true } });
-                  }}
-                  className="w-8 h-8 flex items-center justify-center bg-transparent text-whiteSoft/90 hover:text-whiteStrong transition-colors"
-                  aria-label="Obrir hero settings"
-                >
-                  {showHeroSettings ? <X className="w-4 h-4" /> : <Edit3 className="w-4 h-4" />}
-                </button>
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="absolute inset-0 z-20 pointer-events-none flex flex-col items-center justify-center p-4">
-          {isAdmin && editMode && activeTab === 'text' ? (
-            <div className="max-w-4xl mx-auto px-4 w-full pointer-events-auto">
-              <input
-                type="text"
-                value={currentSlideData?.title || ''}
-                onChange={(e) => updateSlide(currentSlide, 'title', e.target.value)}
-                className={`${getTypographyClasses(typography.hero.title)} mb-3 lg:mb-4 text-whiteStrong uppercase w-full text-center bg-transparent border-2 border-whiteSoft/30 rounded-lg px-4 py-2 focus:border-whiteSoft/60 focus:outline-none placeholder-whiteSoft/50`}
-                style={{ fontSize: titleFontSize }}
-                placeholder="Títol del slide"
-              />
-              <textarea
-                value={currentSlideData?.subtitle || ''}
-                onChange={(e) => updateSlide(currentSlide, 'subtitle', e.target.value)}
-                rows={2}
-                className={`${getTypographyClasses(typography.hero.subtitle)} max-w-4xl mx-auto text-whiteSoft px-4 py-2 w-full text-center bg-transparent border-2 border-whiteSoft/30 rounded-lg focus:border-whiteSoft/60 focus:outline-none placeholder-whiteSoft/50 resize-none`}
-                style={{ fontSize: subtitleFontSize }}
-                placeholder="Subtítol del slide"
-              />
-            </div>
-          ) : (
-            <AnimatePresence mode='wait'>
-              <motion.div
-                key={currentSlide}
-                className="max-w-4xl mx-auto px-4"
-                initial={{ opacity: 0, y: 30, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: -30, scale: 0.95 }}
-                transition={{ duration: 0.6, ease: "easeOut" }}
-              >
-                <motion.h1
-                  className={`${getTypographyClasses(typography.hero.title)} mb-3 lg:mb-4 drop-shadow-lg text-whiteStrong uppercase`}
-                  style={{ fontSize: titleFontSize }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.1 }}
-                >
-                  {slides[currentSlide]?.title}
-                </motion.h1>
-                <motion.p
-                  className={`${getTypographyClasses(typography.hero.subtitle)} max-w-4xl mx-auto drop-shadow-md text-whiteSoft px-2`}
-                  style={{ fontSize: subtitleFontSize }}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                >
-                  {slides[currentSlide]?.subtitle}
-                </motion.p>
-              </motion.div>
-            </AnimatePresence>
-          )}
-        </div>
-
-        <div className="absolute bottom-8 left-0 right-0 z-40 flex items-center justify-center pointer-events-none">
-          <div className="flex items-center gap-4 h-9 pointer-events-auto">
-            {isAdmin && editMode && (
-              <button
-                onClick={prevSlide}
-                className="w-9 h-9 flex items-center justify-center transition-colors"
-                aria-label="Slide anterior"
-              >
-                <ChevronLeft className="w-5 h-5 text-whiteStrong" />
-              </button>
-            )}
-
-            {!editMode && (
-              <div className="flex items-center gap-2 h-9">
-                {slides.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setCurrentSlide(index);
-                    }}
-                    className={`w-2 h-2 rounded-full transition-all duration-300 ${
-                      index === currentSlide ? 'bg-whiteStrong w-8' : 'bg-whiteSoft/50 hover:bg-whiteSoft/80'
-                    }`}
-                    aria-label={`Anar al slide ${index + 1}`}
-                  />
-                ))}
-              </div>
-            )}
-
-            {isAdmin && editMode && (
-              <button
-                onClick={nextSlide}
-                className="w-9 h-9 flex items-center justify-center transition-colors"
-                aria-label="Slide següent"
-              >
-                <ChevronRight className="w-5 h-5 text-whiteStrong" />
-              </button>
-            )}
-          </div>
-        </div>
-      </FullBleedUnderHeader>
+      <NikeHeroSlider
+        slides={heroSliderSlides}
+        autoplay={autoplay}
+        autoplayIntervalMs={autoplayInterval}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AnimatePresence>

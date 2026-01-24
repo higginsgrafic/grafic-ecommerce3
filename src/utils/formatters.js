@@ -13,7 +13,31 @@ export const formatPrice = (price, options = {}) => {
     useComma = true
   } = options;
 
-  const formatted = price.toFixed(decimals);
+  const parsed = (() => {
+    if (typeof price === 'number') return price;
+    if (typeof price === 'string') {
+      const cleaned = price.replace(',', '.').replace(/[^0-9.\-]/g, '');
+      const asNumber = Number.parseFloat(cleaned);
+      return asNumber;
+    }
+    return Number.NaN;
+  })();
+
+  if (!Number.isFinite(parsed)) return '—';
+
+  const currencyCode = currency === '€' ? 'EUR' : currency;
+
+  if (showCurrency && currencyCode === 'EUR') {
+    const formatter = new Intl.NumberFormat('ca-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    });
+    return formatter.format(parsed);
+  }
+
+  const formatted = parsed.toFixed(decimals);
   const withComma = useComma ? formatted.replace('.', ',') : formatted;
 
   return showCurrency ? `${withComma} ${currency}` : withComma;

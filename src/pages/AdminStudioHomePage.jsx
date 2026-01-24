@@ -89,6 +89,9 @@ export default function AdminStudioHomePage() {
         { label: 'Editor de Textos', path: '/admin/index' },
         { label: 'Textos de Sistema', path: '/admin/system-messages' },
       ],
+      templates: [
+        { label: 'Plantilla catàleg components', path: '/plantilla-cataleg-components' },
+      ],
       storefront: [
         { label: 'Promocions', path: '/admin/promotions' },
         { label: 'Hero', path: '/admin/hero' },
@@ -120,6 +123,7 @@ export default function AdminStudioHomePage() {
         { label: 'Nike Hero Demo', path: '/nike-hero-demo' },
       ],
       wip: [
+        { label: 'FullWideSlide', path: '/full-wide-slide' },
         { label: 'Fulfillment settings', path: '/admin/draft/fulfillment-settings' },
         { label: 'Mockup settings', path: '/admin/draft/mockup-settings' },
         { label: 'Ruleta', path: '/admin/draft/ruleta' },
@@ -197,6 +201,16 @@ export default function AdminStudioHomePage() {
           <div className="lg:col-span-1">
             <Region title="Catàleg" subtitle="Assets i estructura">
               <Section title="Assets" items={tools.assets} />
+              <div className="mt-8">
+                <Section
+                  title={(
+                    <Link to="/admin/plantilles" className="hover:underline">
+                      Plantilles
+                    </Link>
+                  )}
+                  items={tools.templates}
+                />
+              </div>
             </Region>
           </div>
 
@@ -208,7 +222,14 @@ export default function AdminStudioHomePage() {
               </div>
 
               <div className="mt-10">
-                <Section title="WIP" items={tools.wip} />
+                <Section
+                  title={(
+                    <Link to="/admin/wip" className="hover:underline">
+                      WIP
+                    </Link>
+                  )}
+                  items={tools.wip}
+                />
               </div>
             </Region>
           </div>
