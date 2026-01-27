@@ -5,7 +5,6 @@ import { Helmet } from 'react-helmet';
 import { Elements } from '@stripe/react-stripe-js';
 import { Lock, CreditCard, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
 import { useToast } from '@/contexts/ToastContext';
 import { formatPrice } from '@/utils/formatters';
 import { validateEmail, validateRequired, validatePostalCode, validateForm } from '@/utils/validation';

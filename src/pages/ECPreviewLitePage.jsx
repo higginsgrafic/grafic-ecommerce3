@@ -9,13 +9,19 @@ export default function ECPreviewLitePage() {
   const mountedAtRef = useRef(Date.now());
 
   const params = useMemo(() => new URLSearchParams(location.search || ''), [location.search]);
-  const debug = (params.get('debug') || '').trim() === '1';
+  const debug = (params.get('debug') || '').trim() === '1' || (params.get('noRedirect') || '').trim() === '1';
+
+  const defaultVideoUrl = '/video/ec-preview-video.mp4';
 
   const redirectUrl = (params.get('redirect') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_REDIRECT_URL || '').trim();
   const backgroundType = (params.get('bg') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_BG || 'video');
-  const videoUrl = (params.get('video') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_VIDEO_URL || '').trim();
+  const videoUrl =
+    (params.get('video') || '').trim() ||
+    String(import.meta.env.VITE_EC_PREVIEW_LITE_VIDEO_URL || '').trim() ||
+    (backgroundType === 'video' ? defaultVideoUrl : '');
   const imageUrl = (params.get('image') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_IMAGE_URL || '').trim();
   const backgroundColor = (params.get('bgColor') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_BG_COLOR || '#000000');
+  const posterUrl = (params.get('poster') || '').trim() || imageUrl || '';
 
   const title = (params.get('title') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_TITLE || '');
   const subtitle = (params.get('subtitle') || '').trim() || String(import.meta.env.VITE_EC_PREVIEW_LITE_SUBTITLE || '');
@@ -39,6 +45,96 @@ export default function ECPreviewLitePage() {
   const shouldAutoRedirect = redirectMode === 'immediate' || redirectMode === 'onEnd';
 
   useEffect(() => {
+    const shouldMatch = (value) => /\bbolt\b|bolt\.com|bolt\.new|made in bolt/i.test(String(value || ''));
+
+    const getAttr = (el, name) => {
+      try {
+        return el && typeof el.getAttribute === 'function' ? el.getAttribute(name) : null;
+      } catch {
+        return null;
+      }
+    };
+
+    const cleanupBoltNodes = (root) => {
+      const scope = root && root.querySelectorAll ? root : document;
+      if (!scope || !scope.querySelectorAll) return;
+
+      const nodes = Array.from(scope.querySelectorAll('*'));
+      for (const el of nodes) {
+        if (!(el instanceof HTMLElement)) continue;
+        const href = getAttr(el, 'href');
+        const src = getAttr(el, 'src');
+        const alt = getAttr(el, 'alt');
+        const titleAttr = getAttr(el, 'title');
+        const ariaLabel = getAttr(el, 'aria-label');
+        const dataTestId = getAttr(el, 'data-testid');
+        const id = el.id;
+        const className = el.className;
+        const text = (el.innerText || el.textContent || '').trim();
+        const html = el.outerHTML || '';
+
+        if (
+          shouldMatch(href) ||
+          shouldMatch(src) ||
+          shouldMatch(alt) ||
+          shouldMatch(titleAttr) ||
+          shouldMatch(ariaLabel) ||
+          shouldMatch(dataTestId) ||
+          shouldMatch(id) ||
+          shouldMatch(className) ||
+          shouldMatch(text) ||
+          shouldMatch(html)
+        ) {
+          el.style.display = 'none';
+          el.style.visibility = 'hidden';
+          if (el.parentNode) el.parentNode.removeChild(el);
+          continue;
+        }
+
+        if (el.shadowRoot) {
+          cleanupBoltNodes(el.shadowRoot);
+        }
+      }
+    };
+
+    cleanupBoltNodes(document);
+
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        if (m.type !== 'childList' && m.type !== 'attributes' && m.type !== 'characterData') continue;
+        if (m.type === 'childList') {
+          for (const node of Array.from(m.addedNodes || [])) {
+            if (!(node instanceof HTMLElement)) continue;
+            cleanupBoltNodes(node);
+            if (node.shadowRoot) cleanupBoltNodes(node.shadowRoot);
+          }
+        } else {
+          const t = m.target;
+          if (t instanceof HTMLElement) cleanupBoltNodes(t);
+          if (t && t.parentNode instanceof HTMLElement) cleanupBoltNodes(t.parentNode);
+        }
+      }
+    });
+
+    if (document.body) {
+      observer.observe(document.body, { childList: true, subtree: true, attributes: true, characterData: true });
+    }
+
+    const startedAt = Date.now();
+    const aggressiveIntervalId = window.setInterval(() => {
+      cleanupBoltNodes(document);
+      if (Date.now() - startedAt > 10_000) {
+        window.clearInterval(aggressiveIntervalId);
+      }
+    }, 100);
+
+    return () => {
+      observer.disconnect();
+      window.clearInterval(aggressiveIntervalId);
+    };
+  }, []);
+
+  useEffect(() => {
     if (!debug) return;
     // eslint-disable-next-line no-console
     console.log('[ec-preview-lite debug]', {
@@ -54,6 +150,7 @@ export default function ECPreviewLitePage() {
   }, [debug, backgroundType, effectiveBackgroundType, videoUrl, imageUrl, redirectMode, redirectUrl, showButton, buttonLink]);
 
   const doRedirect = () => {
+    if (debug) return;
     const target = String(redirectUrl || '').trim();
     if (!target) return;
     if (target.startsWith('http://') || target.startsWith('https://')) {
@@ -64,6 +161,7 @@ export default function ECPreviewLitePage() {
   };
 
   useEffect(() => {
+    if (debug) return;
     if (!shouldAutoRedirect) return;
     if (!redirectUrl) return;
     if (redirectMode !== 'immediate') return;
@@ -74,27 +172,19 @@ export default function ECPreviewLitePage() {
     }, 50);
 
     return () => window.clearTimeout(timeoutId);
-  }, [shouldAutoRedirect, redirectUrl, redirectMode, backgroundType, videoUrl]);
+  }, [debug, shouldAutoRedirect, redirectUrl, redirectMode, backgroundType, videoUrl]);
 
   const handleVideoEnd = () => {
+    if (debug) return;
     if (!shouldAutoRedirect) return;
     if (!redirectUrl) return;
     if (redirectMode !== 'onEnd') return;
-
-    const minViewMs = 5000;
-    const elapsedMs = Date.now() - mountedAtRef.current;
-    const waitMs = Math.max(0, minViewMs - elapsedMs);
-    if (waitMs > 0) {
-      window.setTimeout(() => {
-        doRedirect();
-      }, waitMs);
-      return;
-    }
 
     doRedirect();
   };
 
   const handleScreenClick = () => {
+    if (debug) return;
     if (showButton) return;
 
     const target = String(redirectUrl || buttonLink || '').trim();
@@ -114,6 +204,20 @@ export default function ECPreviewLitePage() {
       <Helmet>
         <title>En Construcció - GRÀFIC</title>
         <meta name="description" content="Pàgina en construcció" />
+        <style>{`
+          a[href*="bolt"],
+          iframe[src*="bolt"],
+          img[src*="bolt"],
+          script[src*="bolt"],
+          [data-bolt],
+          [data-provider*="bolt" i],
+          [aria-label*="bolt" i],
+          [title*="bolt" i] {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+          }
+        `}</style>
       </Helmet>
 
       <div className="relative w-full h-screen overflow-hidden cursor-pointer" onClick={handleScreenClick} style={{ backgroundColor }}>
@@ -131,9 +235,10 @@ export default function ECPreviewLitePage() {
             autoPlay
             muted
             playsInline
-            preload="auto"
+            preload="metadata"
             loop={!(redirectUrl && shouldAutoRedirect && redirectMode === 'onEnd')}
             crossOrigin="anonymous"
+            poster={posterUrl || undefined}
             onEnded={handleVideoEnd}
           >
             <source src={videoUrl} type="video/mp4" />

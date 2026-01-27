@@ -1,11 +1,13 @@
 import React, { useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Menu, X, UserRound, ChevronDown, ChevronLeft, ChevronRight, Layers, LayoutGrid } from 'lucide-react';
+import { Menu, X, UserRound, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { motion } from 'framer-motion';
 import { getGildan5000Catalog } from '../utils/placeholders.js';
-import FullWideSlideDemoColorStripeButtons from './FullWideSlideDemoColorStripeButtons.jsx';
-import FullWideSlideDemoCatalogPanel from './FullWideSlideDemoCatalogPanel.jsx';
+import { useProductContext } from '@/contexts/ProductContext';
+import AdidasColorStripeButtons from './AdidasColorStripeButtons.jsx';
+import AdidasCatalogPanel from './AdidasCatalogPanel.jsx';
+import MegaStripeCatalogPanel from './MegaStripeCatalogPanel.jsx';
 import FullWideSlideDemoHumanInsideSlider from './FullWideSlideDemoHumanInsideSlider.jsx';
 
 const FIRST_CONTACT_MEDIA = {
@@ -66,11 +68,13 @@ const THE_HUMAN_INSIDE_MEDIA_WHITE = {
 const OptimizedImg = React.forwardRef(function OptimizedImg({ src, alt, className, style, ...rest }, ref) {
   const normalizeSrc = (value) => {
     const s = (value || '').toString();
+    if (!s) return '';
+    if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s) || /^blob:/i.test(s)) return s;
     return s.startsWith('/') ? s : `/${s}`;
   };
 
   const originalSrc = normalizeSrc(src);
-  const webpSrc = originalSrc.replace(/\.(png|jpe?g)$/i, '.webp');
+  const webpSrc = originalSrc.replace(/\.(png|jpe?g)(?=([?#]|$))/i, '.webp');
   const [currentSrc, setCurrentSrc] = useState(webpSrc);
   const triedFallbackRef = useRef(false);
 
@@ -82,13 +86,17 @@ const OptimizedImg = React.forwardRef(function OptimizedImg({ src, alt, classNam
   return (
     <img
       ref={ref}
-      src={encodeURI(currentSrc)}
+      src={currentSrc ? encodeURI(currentSrc) : undefined}
       alt={alt}
       className={className}
       style={style}
       loading="lazy"
       decoding="async"
       onError={() => {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn('[OptimizedImg] error loading', { src, currentSrc, originalSrc });
+        }
         if (triedFallbackRef.current) return;
         triedFallbackRef.current = true;
         if (currentSrc !== originalSrc) setCurrentSrc(originalSrc);
@@ -98,12 +106,15 @@ const OptimizedImg = React.forwardRef(function OptimizedImg({ src, alt, classNam
   );
 });
 
-function IconButton({ label, onClick, children }) {
+function IconButton({ label, onClick, onDoubleClick, onMouseEnter, buttonRef, children }) {
   return (
     <button
+      ref={buttonRef}
       type="button"
       aria-label={label}
       onClick={onClick}
+      onDoubleClick={onDoubleClick}
+      onMouseEnter={onMouseEnter}
       className="inline-flex h-9 w-9 items-end justify-center pb-[2px] rounded-md text-foreground hover:bg-transparent focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 lg:h-10 lg:w-10 lg:pb-[3px]"
     >
       {children}
@@ -401,10 +412,9 @@ function MegaColumn({
 }
  
 export default function FullWideSlideDemoHeader({
-  cartItemCount = 0,
+  cartItemCount,
   onCartClick,
   onUserClick,
-  forceStripeDebugHit = false,
   ignoreStripeDebugFromUrl = false,
   stripeItemLeftOffsetPxByIndex,
   redistributeStripeBetweenFirstAndLast = false,
@@ -418,7 +428,94 @@ export default function FullWideSlideDemoHeader({
   showCatalogPanel = true,
 }) {
   const navigate = useNavigate();
+  const { products: contextProducts } = useProductContext();
   const cartClickTimeoutRef = useRef(null);
+  const accountClickTimeoutRef = useRef(null);
+  const dblClickDelayMs = 240;
+  const MEGA_SLIDES_COUNT = 4;
+  const [searchQuery, setSearchQuery] = useState('');
+  const searchResults = useMemo(() => {
+    const products = Array.isArray(contextProducts) ? contextProducts : [];
+    const q = (searchQuery || '').toString().trim().toLowerCase();
+
+    const normalizeCollectionKey = (value) => {
+      return (value || '')
+        .toString()
+        .trim()
+        .toLowerCase()
+        .replace(/_/g, '-')
+        .replace(/\s+/g, '-')
+        .replace(/[^a-z0-9-]+/g, '-')
+        .replace(/-+/g, '-')
+        .replace(/^-+|-+$/g, '');
+    };
+
+    const allowedCollectionKeys = new Set(['the-human-inside', 'first-contact', 'austen', 'outcasted']);
+    const collectionLabelByKey = {
+      'the-human-inside': 'The Human Inside',
+      'first-contact': 'First Contact',
+      austen: 'Austen',
+      outcasted: 'Outcasted',
+    };
+
+    const isCubeRelated = (p) => {
+      const haystack = `${p?.collection || ''} ${p?.slug || ''} ${p?.name || ''} ${p?.description || ''}`.toLowerCase();
+      return haystack.includes('cube');
+    };
+
+    const matches = (p) => {
+      if (!p) return false;
+      if (!q) return true;
+      const haystack = `${p.slug || ''} ${p.name || ''} ${p.description || ''}`.toLowerCase();
+      return haystack.includes(q);
+    };
+
+    const toPriceLabel = (value) => {
+      if (typeof value === 'number' && Number.isFinite(value)) return `${value.toFixed(2)} €`;
+      if (typeof value === 'string' && value.trim()) return value.trim();
+      return '—';
+    };
+
+    return products
+      .filter((p) => allowedCollectionKeys.has(normalizeCollectionKey(p?.collection)))
+      .filter((p) => !isCubeRelated(p))
+      .filter((p) => matches(p))
+      .slice(0, 160)
+      .map((p) => {
+        const id = p?.slug || p?.id;
+        const slugOrId = p?.slug || p?.id;
+        const collectionKey = normalizeCollectionKey(p?.collection);
+        const collection = (collectionLabelByKey?.[collectionKey] || p?.collection || 'Catàleg').toString();
+        const name = (p?.name || 'Producte').toString();
+        const image = p?.image || p?.images?.[0] || null;
+        return {
+          id: id?.toString() || name,
+          slugOrId,
+          category: collection,
+          title: name,
+          price: toPriceLabel(p?.price),
+          image,
+        };
+      });
+  }, [contextProducts, searchQuery]);
+
+  const searchAccent = '#ef4444';
+  const searchTopLinks = useMemo(() => ['Novetats', 'Samarretes', 'Bosses', 'Promocions'], []);
+
+  const searchSuggestions = useMemo(
+    () => [
+      'Samarreta Gildan 5000',
+      'Dibuixos',
+      'Logotips',
+      'Bosses',
+      'Papereria',
+    ],
+    []
+  );
+  const [searchGridScale, setSearchGridScale] = useState(1);
+  const [searchCaretVisible, setSearchCaretVisible] = useState(true);
+  const [megaPage, setMegaPage] = useState(1);
+  const megaSliderIndex = Math.max(0, Math.min(MEGA_SLIDES_COUNT - 1, (megaPage || 1) - 1));
   const [active, setActive] = useState(() => {
     if (contained) return initialActiveId || 'first_contact';
     try {
@@ -427,6 +524,7 @@ export default function FullWideSlideDemoHeader({
       return null;
     }
   });
+  const forceStripeDebugHit = false;
   const [mobileOpen, setMobileOpen] = useState(false);
   const [demoManualEnabled, setDemoManualEnabled] = useState(() => {
     if (typeof manualEnabledOverride === 'boolean') return manualEnabledOverride;
@@ -447,6 +545,94 @@ export default function FullWideSlideDemoHeader({
   const headerRef = useRef(null);
   const megaMenuRef = useRef(null);
   const mobileHumanScrollRef = useRef(null);
+  const logoMarkRef = useRef(null);
+  const accountButtonRef = useRef(null);
+  const searchHeaderRowRef = useRef(null);
+  const searchGridRowRef = useRef(null);
+  const searchGridScrollRef = useRef(null);
+  const [megaInsetsPx, setMegaInsetsPx] = useState({ left: 0, right: 0 });
+
+  const ensureMegaOpen = () => {
+    setActive((prev) => prev || 'first_contact');
+  };
+
+  const scrollSearchGridBy = (deltaPx) => {
+    const el = searchGridScrollRef.current;
+    if (!el) return;
+    el.scrollBy({ left: deltaPx, behavior: 'smooth' });
+  };
+
+  useLayoutEffect(() => {
+    if (!active) return undefined;
+
+    const containerEl = searchGridScrollRef.current;
+    const rowEl = searchGridRowRef.current;
+    if (!containerEl || !rowEl) return undefined;
+
+    const measure = () => {
+      const containerHeight = containerEl.clientHeight;
+      const rowHeight = rowEl.offsetHeight;
+      if (!containerHeight || !rowHeight) return;
+
+      const nextScale = Math.max(0.5, Math.min(2.5, containerHeight / rowHeight));
+      setSearchGridScale((prev) => (Math.abs(prev - nextScale) < 0.01 ? prev : nextScale));
+    };
+
+    measure();
+    window.addEventListener('resize', measure);
+    return () => window.removeEventListener('resize', measure);
+  }, [active, megaPage, searchResults.length]);
+
+  const isManualLockEnabled = () => {
+    if (demoManualEnabled) return true;
+    try {
+      return window.localStorage.getItem('FULL_WIDE_SLIDE_DEMO_MANUAL') === '1';
+    } catch {
+      return false;
+    }
+  };
+
+  useLayoutEffect(() => {
+    if (!active) return undefined;
+
+    const logoEl = logoMarkRef.current;
+    const accountEl = accountButtonRef.current;
+    const megaEl = megaMenuRef.current;
+    if (!logoEl || !accountEl || !megaEl) return undefined;
+
+    const measure = () => {
+      const megaRect = megaEl.getBoundingClientRect();
+      const logoRect = logoEl.getBoundingClientRect();
+      const accountRect = accountEl.getBoundingClientRect();
+
+      const left = Math.max(0, Math.round(logoRect.right - megaRect.left));
+      const right = Math.max(0, Math.round(megaRect.right - accountRect.left));
+
+      setMegaInsetsPx((prev) => {
+        if (prev.left === left && prev.right === right) return prev;
+        return { left, right };
+      });
+    };
+
+    measure();
+    const ro = new ResizeObserver(measure);
+    ro.observe(logoEl);
+    ro.observe(accountEl);
+    ro.observe(megaEl);
+    window.addEventListener('resize', measure);
+    return () => {
+      window.removeEventListener('resize', measure);
+      ro.disconnect();
+    };
+  }, [active]);
+
+  useEffect(() => {
+    if (!active || megaPage !== 2) return undefined;
+    const id = window.setInterval(() => {
+      setSearchCaretVisible((v) => !v);
+    }, 520);
+    return () => window.clearInterval(id);
+  }, [active, megaPage]);
 
   const selectedColorHex = useMemo(
     () => ({
@@ -557,7 +743,32 @@ export default function FullWideSlideDemoHeader({
   );
 
   const resolvedNav = useMemo(() => {
-    return Array.isArray(navItems) && navItems.length > 0 ? navItems : defaultNav;
+    if (!Array.isArray(navItems) || navItems.length === 0) return defaultNav;
+
+    const byId = new Map();
+    for (const item of defaultNav) {
+      if (!item?.id) continue;
+      byId.set(item.id, item);
+    }
+    for (const item of navItems) {
+      if (!item?.id) continue;
+      byId.set(item.id, item);
+    }
+
+    const out = [];
+    if (byId.has('first_contact')) out.push(byId.get('first_contact'));
+    for (const item of navItems) {
+      if (!item?.id) continue;
+      if (item.id === 'first_contact') continue;
+      out.push(byId.get(item.id));
+    }
+    for (const item of defaultNav) {
+      if (!item?.id) continue;
+      if (item.id === 'first_contact') continue;
+      if (out.some((x) => x?.id === item.id)) continue;
+      out.push(item);
+    }
+    return out;
   }, [defaultNav, navItems]);
 
   const thinDrawings = useMemo(
@@ -667,7 +878,16 @@ export default function FullWideSlideDemoHeader({
   );
 
   const resolvedMega = useMemo(() => {
-    return megaConfig && typeof megaConfig === 'object' ? megaConfig : defaultMega;
+    if (!megaConfig || typeof megaConfig !== 'object') return defaultMega;
+
+    const out = { ...defaultMega };
+    for (const [key, value] of Object.entries(megaConfig)) {
+      if (!Array.isArray(value) || value.length === 0) continue;
+      const hasAnyItems = value.some((col) => Array.isArray(col?.items) && col.items.length > 0);
+      if (!hasAnyItems) continue;
+      out[key] = value;
+    }
+    return out;
   }, [defaultMega, megaConfig]);
 
   useEffect(() => {
@@ -779,6 +999,12 @@ export default function FullWideSlideDemoHeader({
   }, [contained, demoManualEnabled, initialActiveId]);
 
   useEffect(() => {
+    if (!active) {
+      setMegaPage(1);
+    }
+  }, [active]);
+
+  useEffect(() => {
     if (contained) return undefined;
     if (!mobileOpen) return undefined;
     const prev = document.body.style.overflow;
@@ -836,6 +1062,7 @@ export default function FullWideSlideDemoHeader({
 
             <Link to="/" className="relative z-10 pointer-events-auto flex items-center gap-2 font-black tracking-tight text-foreground">
               <span
+                ref={logoMarkRef}
                 aria-hidden="true"
                 data-brand-logo="1"
                 className="h-8 w-[140px] block text-foreground"
@@ -863,9 +1090,18 @@ export default function FullWideSlideDemoHeader({
                   type="button"
                   className={`inline-flex items-center gap-1 text-xs font-semibold tracking-[0.18em] uppercase ${open ? 'text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
                   aria-expanded={open ? 'true' : 'false'}
-                  onMouseEnter={() => setActive(item.id)}
-                  onFocus={() => setActive(item.id)}
-                  onClick={() => setActive((prev) => (prev === item.id ? null : item.id))}
+                  onMouseEnter={() => {
+                    setMegaPage(1);
+                    setActive(item.id);
+                  }}
+                  onFocus={() => {
+                    setMegaPage(1);
+                    setActive(item.id);
+                  }}
+                  onClick={() => {
+                    setMegaPage(1);
+                    setActive((prev) => (prev === item.id ? null : item.id));
+                  }}
                 >
                   {item.label}
                   <ChevronDown className={`h-4 w-4 ${open ? 'rotate-180' : ''}`} />
@@ -875,7 +1111,21 @@ export default function FullWideSlideDemoHeader({
           </nav>
 
           <div className="ml-auto flex items-center gap-1" data-icons-wrap="true">
-            <IconButton label="Search" onClick={() => {}}>
+            <IconButton
+              label="Search"
+              onClick={() => {
+                if (active) {
+                  if (megaPage === 2) {
+                    setActive(null);
+                    return;
+                  }
+                  setMegaPage(2);
+                  return;
+                }
+                ensureMegaOpen();
+                setMegaPage(2);
+              }}
+            >
               <svg className="h-[25px] w-[25px] text-foreground -translate-x-[1px] lg:h-[29px] lg:w-[29px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
@@ -887,13 +1137,23 @@ export default function FullWideSlideDemoHeader({
                 if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
                 cartClickTimeoutRef.current = window.setTimeout(() => {
                   cartClickTimeoutRef.current = null;
-                  onCartClick?.();
-                }, 320);
+                  if (active) {
+                    if (megaPage === 3) {
+                      setActive(null);
+                      return;
+                    }
+                    setMegaPage(3);
+                    return;
+                  }
+                  ensureMegaOpen();
+                  setMegaPage(3);
+                }, dblClickDelayMs);
               }}
               onDoubleClick={(e) => {
                 e.preventDefault();
                 if (cartClickTimeoutRef.current) window.clearTimeout(cartClickTimeoutRef.current);
                 cartClickTimeoutRef.current = null;
+                setActive(null);
                 navigate('/cart');
               }}
               aria-label="Cart"
@@ -925,7 +1185,34 @@ export default function FullWideSlideDemoHeader({
                 ) : null}
               </span>
             </button>
-            <IconButton label="Account" onClick={() => onUserClick?.()}>
+            <IconButton
+              label="Account"
+              buttonRef={accountButtonRef}
+              onClick={(e) => {
+                e.preventDefault();
+                if (accountClickTimeoutRef.current) window.clearTimeout(accountClickTimeoutRef.current);
+                accountClickTimeoutRef.current = window.setTimeout(() => {
+                  accountClickTimeoutRef.current = null;
+                  if (active) {
+                    if (megaPage === 4) {
+                      setActive(null);
+                      return;
+                    }
+                    setMegaPage(4);
+                    return;
+                  }
+                  ensureMegaOpen();
+                  setMegaPage(4);
+                }, dblClickDelayMs);
+              }}
+              onDoubleClick={(e) => {
+                e.preventDefault();
+                if (accountClickTimeoutRef.current) window.clearTimeout(accountClickTimeoutRef.current);
+                accountClickTimeoutRef.current = null;
+                setActive(null);
+                navigate('/profile');
+              }}
+            >
               <UserRound className="h-[25px] w-[25px] text-foreground lg:h-[29px] lg:w-[29px]" strokeWidth={1.5} />
             </IconButton>
           </div>
@@ -938,7 +1225,7 @@ export default function FullWideSlideDemoHeader({
             <div
               className={`${contained ? 'absolute' : 'fixed'} inset-0 z-[9990] bg-foreground/25`}
               onClick={() => {
-                if (demoManualEnabled) return;
+                if (isManualLockEnabled()) return;
                 setActive(null);
               }}
             />
@@ -949,69 +1236,333 @@ export default function FullWideSlideDemoHeader({
       <div
         className="relative"
         onMouseLeave={() => {
-          if (demoManualEnabled) return;
+          if (isManualLockEnabled()) return;
           setActive(null);
         }}
       >
         {active ? (
           <div className="hidden lg:block border-b border-border bg-background">
-            <div ref={megaMenuRef} className="mx-auto max-w-[1400px] overflow-x-hidden px-4 sm:px-6 lg:px-10 py-8">
-              <div className="grid grid-cols-1 gap-10">
-                {(resolvedMega[active] || []).map((col, idx) => (
-                  <MegaColumn
-                    key={`${active}-${idx}`}
-                    title={col.title}
-                    isFirstContact={active === 'first_contact' || active === 'austen' || active === 'cube' || active === 'outcasted'}
-                    isHumanInside={active === 'the_human_inside'}
-                    megaTileSize={megaTileSize}
-                    humanInsideVariant={humanInsideVariant}
-                    items={col.items}
-                    row={true}
-                    firstContactVariant={firstContactVariant}
-                    onFirstContactWhite={() => setFirstContactVariant('white')}
-                    onFirstContactBlack={() => setFirstContactVariant('black')}
-                    onHumanWhite={() => setHumanInsideVariant('white')}
-                    onHumanBlack={() => setHumanInsideVariant('black')}
-                    onHumanPrev={() => setThinStartIndex((v) => v - 1)}
-                    onHumanNext={() => setThinStartIndex((v) => v + 1)}
-                  />
-                ))}
-              </div>
-
-              {showStripe || showCatalogPanel ? (
+            <div
+              ref={megaMenuRef}
+              className="mx-auto max-w-[1400px] overflow-x-hidden px-4 sm:px-6 lg:px-10 py-8"
+            >
+              <div
+                className="overflow-hidden"
+                style={megaTileSize ? { height: `${Math.round(megaTileSize * 2 + 37)}px` } : undefined}
+              >
                 <div
-                  className="relative"
-                  style={
-                    megaTileSize
-                      ? {
-                          marginTop: '13px',
-                          width: '100%',
-                          height: `${megaTileSize}px`,
-                        }
-                      : undefined
-                  }
+                  className="flex h-full"
+                  style={{
+                    width: `${MEGA_SLIDES_COUNT * 100}%`,
+                    transform: `translateX(-${megaSliderIndex * (100 / MEGA_SLIDES_COUNT)}%)`,
+                    transition: 'transform 320ms cubic-bezier(0.32, 0.72, 0, 1)',
+                  }}
                 >
-                  {showStripe ? (
-                    <FullWideSlideDemoColorStripeButtons
+                  <div className="h-full w-full shrink-0" style={{ width: `${100 / MEGA_SLIDES_COUNT}%` }}>
+                    <div className="grid grid-cols-1 gap-10">
+                      {(resolvedMega[active] || []).map((col, idx) => (
+                        <MegaColumn
+                          key={`${active}-${idx}`}
+                          title={col.title}
+                          isFirstContact={active === 'first_contact' || active === 'austen' || active === 'cube' || active === 'outcasted'}
+                          isHumanInside={active === 'the_human_inside'}
+                          megaTileSize={megaTileSize}
+                          humanInsideVariant={humanInsideVariant}
+                          items={col.items}
+                          row={true}
+                          firstContactVariant={firstContactVariant}
+                          onFirstContactWhite={() => setFirstContactVariant('white')}
+                          onFirstContactBlack={() => setFirstContactVariant('black')}
+                          onHumanWhite={() => setHumanInsideVariant('white')}
+                          onHumanBlack={() => setHumanInsideVariant('black')}
+                          onHumanPrev={() => setThinStartIndex((v) => v - 1)}
+                          onHumanNext={() => setThinStartIndex((v) => v + 1)}
+                        />
+                      ))}
+                    </div>
+
+                    <MegaStripeCatalogPanel
                       megaTileSize={megaTileSize}
-                      selectedColorOrder={selectedColorOrder}
-                      selectedColorSlug={selectedColorSlug}
-                      onSelect={setSelectedColorSlug}
-                      colorLabelBySlug={colorLabelBySlug}
-                      colorButtonSrcBySlug={colorButtonSrcBySlug}
-                      itemLeftOffsetPxByIndex={stripeItemLeftOffsetPxByIndex}
-                      redistributeBetweenFirstAndLast={redistributeStripeBetweenFirstAndLast}
-                      firstOffsetPx={-20}
-                      lastOffsetPx={63}
-                      cropFirstRightPx={20}
-                      compressFactor={0.79}
-                      forceDebugStripeHit={forceStripeDebugHit}
-                      ignoreUrlDebugStripeHit={ignoreStripeDebugFromUrl}
+                      StripeButtonsComponent={AdidasColorStripeButtons}
+                      stripeProps={{
+                        selectedColorOrder,
+                        selectedColorSlug,
+                        onSelect: setSelectedColorSlug,
+                        colorLabelBySlug,
+                        colorButtonSrcBySlug,
+                        itemLeftOffsetPxByIndex: stripeItemLeftOffsetPxByIndex,
+                        redistributeBetweenFirstAndLast: redistributeStripeBetweenFirstAndLast,
+                        firstOffsetPx: -20,
+                        lastOffsetPx: 63,
+                        cropFirstRightPx: 20,
+                        compressFactor: 0.79,
+                        forceDebugStripeHit: forceStripeDebugHit,
+                        ignoreUrlDebugStripeHit: ignoreStripeDebugFromUrl,
+                      }}
+                      CatalogPanelComponent={AdidasCatalogPanel}
                     />
-                  ) : null}
-                  {showCatalogPanel ? <FullWideSlideDemoCatalogPanel megaTileSize={megaTileSize} /> : null}
+                  </div>
+
+                  <div className="h-full w-full shrink-0" style={{ width: `${100 / MEGA_SLIDES_COUNT}%` }}>
+                    <div className="flex h-full min-h-0 flex-col">
+                      <div className="relative flex items-center justify-between" ref={searchHeaderRowRef}>
+                        <div
+                          className="pointer-events-none absolute left-1/2 right-10 top-1/2 h-7 -translate-y-1/2 rounded-md"
+                          style={{ backgroundColor: 'rgba(0, 0, 0, 0.01)' }}
+                          aria-hidden="true"
+                        />
+                        <div
+                          className="pointer-events-none absolute left-1/2 top-1/2 z-20 h-5 w-[2px] -translate-x-1/2 -translate-y-1/2"
+                          style={{ backgroundColor: searchAccent, opacity: searchCaretVisible ? 1 : 0 }}
+                          aria-hidden="true"
+                        />
+                        <div className="relative z-10 min-w-0">
+                          <div className="flex min-w-0 items-center gap-2">
+                            {searchTopLinks.map((label, idx) => (
+                              <div key={label} className="flex min-w-0 items-center gap-2">
+                                <button
+                                  type="button"
+                                  className="truncate text-[10px] font-semibold tracking-[0.22em] uppercase"
+                                  style={{ color: searchAccent }}
+                                >
+                                  {label}
+                                </button>
+                                {idx < searchTopLinks.length - 1 ? (
+                                  <span className="text-[10px] font-normal tracking-[0.22em] opacity-50" style={{ color: searchAccent }}>
+                                    |
+                                  </span>
+                                ) : null}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="relative z-10 flex items-center gap-2">
+                          <input
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                            placeholder="Cerca"
+                            className="h-7 w-[280px] bg-transparent px-2 text-[12px] font-semibold tracking-[0.12em] uppercase text-foreground placeholder:text-foreground/40 focus:outline-none"
+                            style={{ color: searchAccent }}
+                          />
+                          <div className="ml-1" style={{ color: searchAccent }}>
+                            <svg
+                              className="h-[25px] w-[25px] origin-top-right scale-[1.15] text-foreground -translate-x-[1px]"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                              />
+                            </svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="mt-2 h-px w-full" style={{ backgroundColor: 'rgba(239, 68, 68, 0.35)' }} />
+
+                      <div className="mt-3 flex-1 min-h-0">
+                        <div className="relative grid h-full min-h-0 grid-cols-2 gap-6">
+                          <div className="relative h-full min-h-0 overflow-hidden border-r border-foreground">
+                            <div className="h-full fw-no-scrollbar">
+                              <div ref={searchGridScrollRef} className="h-full overflow-x-auto overflow-y-hidden fw-no-scrollbar">
+                                <div
+                                  ref={searchGridRowRef}
+                                  className="flex gap-3 snap-x snap-mandatory"
+                                  style={{ transform: `scale(${searchGridScale})`, transformOrigin: 'top left' }}
+                                >
+                                  {searchResults.map((item, itemIdx) => {
+                                    const officialColorSlugs = selectedColorOrder.filter((slug) => gildan5000Catalog?.selectedSlugs?.has(slug));
+                                    const colorSlug = officialColorSlugs.length ? officialColorSlugs[itemIdx % officialColorSlugs.length] : null;
+                                    const placeholderSrc =
+                                      item.image ||
+                                      (colorSlug ? gildan5000Catalog?.getPlaceholderSrc?.(colorSlug) : null) ||
+                                      '/placeholder-product.svg';
+                                    return (
+                                      <div
+                                        key={item.id}
+                                        className="group w-[220px] shrink-0 overflow-hidden rounded-md bg-transparent snap-start"
+                                      >
+                                        <div className="aspect-square w-full bg-muted">
+                                          <OptimizedImg src={placeholderSrc} alt="" className="block h-full w-full object-contain" />
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            </div>
+                            <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center">
+                              <button
+                                type="button"
+                                className="pointer-events-auto ml-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-white/90 text-black/70 shadow-sm"
+                                onClick={() => scrollSearchGridBy(-420)}
+                                aria-label="Desplaçar a l'esquerra"
+                                title="Esquerra"
+                              >
+                                <ChevronLeft className="h-4 w-4" />
+                              </button>
+                            </div>
+                            <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center">
+                              <button
+                                type="button"
+                                className="pointer-events-auto mr-1 inline-flex h-8 w-8 items-center justify-center rounded-full border border-black/10 bg-white/90 text-black/70 shadow-sm"
+                                onClick={() => scrollSearchGridBy(420)}
+                                aria-label="Desplaçar a la dreta"
+                                title="Dreta"
+                              >
+                                <ChevronRight className="h-4 w-4" />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div className="relative flex h-full min-h-0 flex-col">
+                            <div className="flex-1 min-h-0 overflow-y-auto fw-no-scrollbar">
+                              <div className="w-full">
+                                {searchResults.map((item, idx) => (
+                                  <div
+                                    key={item.id}
+                                    style={{
+                                      borderBottom: '0.5px solid hsl(var(--foreground))',
+                                    }}
+                                  >
+                                    <button
+                                      type="button"
+                                      className="grid w-full grid-cols-[1fr_auto] gap-6 px-1 py-3 text-left"
+                                      onClick={() => {
+                                        const dest = item.slugOrId ? `/product/${item.slugOrId}` : null;
+                                        if (!dest) return;
+                                        navigate(dest);
+                                        setActive(null);
+                                      }}
+                                    >
+                                      <div className="min-w-0 py-0.5">
+                                        <div className="flex min-w-0 items-center space-x-2 text-sm uppercase" style={{ color: searchAccent }}>
+                                          <span className="text-muted-foreground">Inici</span>
+                                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                          <span className="text-muted-foreground">{item.category}</span>
+                                          <ChevronRight className="h-4 w-4 text-muted-foreground" />
+                                          <span className="min-w-0 truncate text-foreground font-medium">{item.title}</span>
+                                        </div>
+                                      </div>
+                                      <div className="shrink-0 text-[17px] font-normal text-foreground">
+                                        {item.price}
+                                      </div>
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-px bg-foreground" />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-full w-full shrink-0" style={{ width: `${100 / MEGA_SLIDES_COUNT}%` }}>
+                    <div className="flex h-full min-h-0 flex-col">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Cistell</div>
+                        <button type="button" className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground hover:text-foreground">
+                          Veure cistell
+                        </button>
+                      </div>
+
+                      <div className="mt-3 flex-1 min-h-0 overflow-y-auto pb-4">
+                        <div className="grid gap-3">
+                          {[1, 2, 3].map((i) => (
+                            <div key={i} className="grid grid-cols-[56px_1fr_auto] items-center gap-3 rounded-md bg-muted p-3">
+                              <div className="h-14 w-14 rounded-md bg-background" />
+                              <div className="min-w-0">
+                                <div className="truncate text-[12px] font-medium text-foreground">Samarreta Gildan 5000 — Mock {i}</div>
+                                <div className="mt-1 text-[11px] font-medium text-foreground/60">Color: {selectedColorSlug} · Talla: M · QTY: 1</div>
+                              </div>
+                              <div className="text-right">
+                                <div className="text-[12px] font-semibold text-foreground">12,90 €</div>
+                                <button type="button" className="mt-1 text-[11px] font-semibold text-muted-foreground hover:text-foreground">
+                                  Eliminar
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 border-t border-border pt-3">
+                        <div className="flex items-center justify-between text-[12px]">
+                          <div className="font-medium text-foreground/70">Subtotal</div>
+                          <div className="font-semibold text-foreground">38,70 €</div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <button type="button" className="h-9 rounded-md border border-border bg-background text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                            Checkout
+                          </button>
+                          <button type="button" className="h-9 rounded-md bg-foreground text-xs font-semibold tracking-[0.18em] uppercase text-background">
+                            Pagar ara
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="h-full w-full shrink-0" style={{ width: `${100 / MEGA_SLIDES_COUNT}%` }}>
+                    <div className="flex h-full min-h-0 flex-col">
+                      <div className="flex items-center justify-between">
+                        <div className="text-xs font-semibold tracking-[0.18em] uppercase text-foreground">Compte</div>
+                        <button type="button" className="text-[11px] font-semibold tracking-[0.18em] uppercase text-muted-foreground hover:text-foreground">
+                          Ajuda
+                        </button>
+                      </div>
+
+                      <div className="mt-3 grid flex-1 min-h-0 gap-3 overflow-y-auto pb-4">
+                        <div className="rounded-md bg-muted p-4">
+                          <div className="text-[12px] font-semibold tracking-[0.18em] uppercase text-foreground/70">Accés</div>
+                          <div className="mt-2 text-[12px] text-foreground">Inicia sessió per veure comandes, adreces i dissenys guardats.</div>
+                          <div className="mt-3 grid grid-cols-2 gap-3">
+                            <button type="button" className="h-9 rounded-md bg-foreground text-xs font-semibold tracking-[0.18em] uppercase text-background">
+                              Iniciar sessió
+                            </button>
+                            <button type="button" className="h-9 rounded-md border border-border bg-background text-xs font-semibold tracking-[0.18em] uppercase text-foreground">
+                              Crear compte
+                            </button>
+                          </div>
+                        </div>
+
+                        <div className="rounded-md bg-muted p-4">
+                          <div className="text-[12px] font-semibold tracking-[0.18em] uppercase text-foreground/70">Comandes recents</div>
+                          <div className="mt-3 grid gap-2">
+                            {['#HG-10284', '#HG-10211'].map((code) => (
+                              <button key={code} type="button" className="flex items-center justify-between rounded-md bg-background px-3 py-2 text-left">
+                                <div className="text-[12px] font-medium text-foreground">{code}</div>
+                                <div className="text-[11px] font-semibold text-foreground/60">Veure</div>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="rounded-md bg-muted p-4">
+                          <div className="text-[12px] font-semibold tracking-[0.18em] uppercase text-foreground/70">Preferències</div>
+                          <div className="mt-3 grid gap-2">
+                            <button type="button" className="flex items-center justify-between rounded-md bg-background px-3 py-2 text-left">
+                              <div className="text-[12px] font-medium text-foreground">Dades i adreces</div>
+                              <div className="text-[11px] font-semibold text-foreground/60">Editar</div>
+                            </button>
+                            <button type="button" className="flex items-center justify-between rounded-md bg-background px-3 py-2 text-left">
+                              <div className="text-[12px] font-medium text-foreground">Notificacions</div>
+                              <div className="text-[11px] font-semibold text-foreground/60">Configurar</div>
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
-              ) : null}
+              </div>
             </div>
           </div>
         ) : null}

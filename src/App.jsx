@@ -41,6 +41,7 @@ const OffersPage = lazy(() => import('@/pages/OffersPage'));
 const ProductDetailPage = lazy(() => import('@/pages/ProductDetailPage'));
 const OrderConfirmationPage = lazy(() => import('@/pages/OrderConfirmationPage'));
 const SearchPage = lazy(() => import('@/pages/SearchPage'));
+const ProfilePage = lazy(() => import('@/pages/ProfilePage'));
 const AboutPage = lazy(() => import('@/pages/AboutPage'));
 const ContactPage = lazy(() => import('@/pages/ContactPage'));
 const FAQPage = lazy(() => import('@/pages/FAQPage'));
@@ -315,16 +316,24 @@ function App() {
     };
   }, [shouldRedirect, redirectUrl, redirectLoading, bypassUnderConstruction, isAdmin, location.pathname]);
 
-  if (!productContext) {
-    return <div className="min-h-screen flex items-center justify-center">
-      <div className="text-center">
-        <h1 className="text-2xl font-bold mb-4">Error: ProductContext no disponible</h1>
-        <p>Si us plau, recarrega la pàgina.</p>
-      </div>
-    </div>;
-  }
+  const safeProductContext =
+    productContext ||
+    ({
+      cartItems: [],
+      getTotalItems: () => 0,
+      getTotalPrice: () => 0,
+      addToCart: () => {},
+      updateQuantity: () => {},
+      removeFromCart: () => {},
+      updateSize: () => {},
+      clearCart: () => {},
+      loading: false,
+      error: null,
+      products: [],
+    });
 
-  const { cartItems, getTotalItems, getTotalPrice, addToCart, updateQuantity, removeFromCart, updateSize, clearCart, loading, error, products } = productContext;
+  const { cartItems, getTotalItems, getTotalPrice, addToCart, updateQuantity, removeFromCart, updateSize, clearCart, loading, error, products } =
+    safeProductContext;
 
   // ALL HOOKS MUST BE BEFORE ANY EARLY RETURNS
   // Loading state on route change
@@ -396,26 +405,22 @@ function App() {
     const isECPreview = location.pathname === '/ec-preview';
     const isECPreviewLite = location.pathname === '/ec-preview-lite';
 
-    const hasExternalTarget = !!redirectUrl && /^https?:\/\//i.test(redirectUrl);
-
-    // If global redirect is enabled and an external target is configured,
-    // always send non-admin routes outside.
-    if (shouldRedirect && hasExternalTarget && !isAdminRoute && !isECPreview && !isECPreviewLite) {
-      if ((import.meta?.env?.DEV || isLocalhost) && !enableInDev) {
-        return;
-      }
-      window.location.replace(redirectUrl);
+    // Never redirect directly to the external target from here.
+    // We always route through /ec-preview so the under-construction page can control
+    // UX (video/click) and apply any defensive measures.
+    if ((import.meta?.env?.DEV || isLocalhost) && !enableInDev) {
+      // In dev, keep global redirects disabled unless explicitly enabled.
       return;
     }
 
     // Si hem de redirigir i no estem en una ruta admin ni ja a ec-preview-lite
-    if (shouldRedirect && !isAdminRoute && !isECPreviewLite) {
-      navigate('/ec-preview-lite', { replace: true });
+    if (shouldRedirect && !isAdminRoute && !isECPreview) {
+      navigate('/ec-preview', { replace: true });
       return;
     }
 
     // Si NO hem de redirigir però estem a ec-preview-lite, sortim
-    if (!shouldRedirect && isECPreviewLite) {
+    if (!shouldRedirect && (isECPreview || isECPreviewLite)) {
       navigate('/', { replace: true });
       return;
     }
@@ -503,7 +508,7 @@ function App() {
   }, [isDevDemoRoute]);
 
   useEffect(() => {
-    if (!isFullWideSlideDemoRoute) {
+    if (!(isFullWideSlideDemoRoute || isHomeRoute)) {
       setFullWideSlideManualEnabled(false);
       return undefined;
     }
@@ -524,16 +529,16 @@ function App() {
       }
     };
 
-    const onCustom = () => readControls();
+    const onLocalChange = () => readControls();
 
     readControls();
     window.addEventListener('storage', onStorage);
-    window.addEventListener('full-wide-slide-demo-controls-changed', onCustom);
+    window.addEventListener('full-wide-slide-demo-controls-changed', onLocalChange);
     return () => {
       window.removeEventListener('storage', onStorage);
-      window.removeEventListener('full-wide-slide-demo-controls-changed', onCustom);
+      window.removeEventListener('full-wide-slide-demo-controls-changed', onLocalChange);
     };
-  }, [isFullWideSlideDemoRoute]);
+  }, [isFullWideSlideDemoRoute, isHomeRoute]);
 
   const writeNikeDemoControls = ({ enabled, phase }) => {
     try {
@@ -902,31 +907,17 @@ function App() {
     }
   };
 
-  if (loading) {
-    return <LoadingScreen />;
-  }
+  const showProductsLoadingScreen = !!loading;
+  const showProductsErrorScreen = !!(error && (!products || products.length === 0));
 
-  if (error && (!products || products.length === 0)) {
-    console.error('❌ Error loading products:', error);
-    return <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="text-center p-8 max-w-md">
-        <h1 className="text-2xl font-bold mb-4 text-black">Error carregant productes</h1>
-        <p className="text-gray-600 mb-4">{error.message || 'Si us plau, torna-ho a intentar.'}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
-        >
-          Recarregar
-        </button>
-      </div>
-    </div>;
-  }
+  const cartPresetId = 'FastCartSlide';
+  const viewPresetId = isFullWideSlideRoute ? 'FullWideViewSlide' : 'FastViewSlide';
 
   // Obrir cistell quan s'afegeix un producte
   const handleAddToCart = (product, size, quantity = 1, shouldOpenCart = true) => {
     addToCart(product, size, quantity);
     if (shouldOpenCart) {
-      setSlidePresetId('FastCartSlide');
+      setSlidePresetId(cartPresetId);
       setSlideOpen(true);
     }
   };
@@ -981,8 +972,42 @@ function App() {
   const appHeaderOffset = `${(isDevHeaderRoute ? heroSettingsDevHeaderHeight : baseHeaderHeight) + offersHeaderHeight + adminBannerHeight + rulerInset}px`;
   const adidasHeaderOffset = `${adminBannerHeight + rulerInset}px`;
 
+  useEffect(() => {
+    try {
+      if (isFullScreenRoute) return;
+      const nextOffset = isAdminRoute ? adminRouteOffset : (isAdidasStyleLayoutRoute ? adidasHeaderOffset : appHeaderOffset);
+      document.documentElement.style.setProperty('--appHeaderOffset', nextOffset);
+      document.documentElement.style.setProperty('--rulerInset', `${rulerInset}px`);
+    } catch {
+      // ignore
+    }
+  }, [adminRouteOffset, adidasHeaderOffset, appHeaderOffset, isAdminRoute, isAdidasStyleLayoutRoute, isFullScreenRoute, rulerInset]);
+
   return (
   <ErrorBoundary>
+    {!productContext ? (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold mb-4">Error: ProductContext no disponible</h1>
+          <p>Si us plau, recarrega la pàgina.</p>
+        </div>
+      </div>
+    ) : showProductsLoadingScreen ? (
+      <LoadingScreen />
+    ) : showProductsErrorScreen ? (
+      <div className="min-h-screen flex items-center justify-center bg-white">
+        <div className="text-center p-8 max-w-md">
+          <h1 className="text-2xl font-bold mb-4 text-black">Error carregant productes</h1>
+          <p className="text-gray-600 mb-4">{error?.message || 'Si us plau, torna-ho a intentar.'}</p>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-6 py-2 bg-black text-white rounded-md hover:bg-gray-800 transition-colors"
+          >
+            Recarregar
+          </button>
+        </div>
+      </div>
+    ) : (
     <>
       <SkipLink />
       {isNavigating && !isAdminRoute && <LoadingScreen />}
@@ -1004,8 +1029,8 @@ function App() {
           adminBannerHeight={adminBannerHeight}
           rulerInset={rulerInset}
           cartItemCount={getTotalItems()}
-          onCartClick={() => toggleSlidePreset('FastCartSlide')}
-          onUserClick={() => toggleSlidePreset('FastViewSlide')}
+          onCartClick={() => toggleSlidePreset(cartPresetId)}
+          onUserClick={() => toggleSlidePreset(viewPresetId)}
         />
       )}
 
@@ -1014,8 +1039,8 @@ function App() {
         isHomeRoute ? null : isNikeDemoRoute ? (
           <NikeInspiredHeader
             cartItemCount={getTotalItems()}
-            onCartClick={() => toggleSlidePreset('FastCartSlide')}
-            onUserClick={() => toggleSlidePreset('FastViewSlide')}
+            onCartClick={() => toggleSlidePreset(cartPresetId)}
+            onUserClick={() => toggleSlidePreset(viewPresetId)}
             adminBannerVisible={adminBannerVisible}
             guidesOffsetPx={rulerInset}
             offersHeaderVisible={offersHeaderVisible}
@@ -1026,8 +1051,8 @@ function App() {
         ) : (
           <Header
             cartItemCount={getTotalItems()}
-            onCartClick={() => toggleSlidePreset('FastCartSlide')}
-            onUserClick={() => toggleSlidePreset('FastViewSlide')}
+            onCartClick={() => toggleSlidePreset(cartPresetId)}
+            onUserClick={() => toggleSlidePreset(viewPresetId)}
             adminBannerVisible={adminBannerVisible}
             rulerInset={rulerInset}
             offersHeaderVisible={offersHeaderVisible}
@@ -1066,8 +1091,8 @@ function App() {
                     <div className="w-full max-w-none" style={{ '--appHeaderOffset': adidasHeaderOffset }}>
                       <AdidasInspiredHeader
                         cartItemCount={getTotalItems()}
-                        onCartClick={() => toggleSlidePreset('FastCartSlide')}
-                        onUserClick={() => toggleSlidePreset('FastViewSlide')}
+                        onCartClick={() => toggleSlidePreset(cartPresetId)}
+                        onUserClick={() => toggleSlidePreset(viewPresetId)}
                       />
                     </div>
                     <Home {...pageProps} />
@@ -1205,7 +1230,7 @@ function App() {
                 />
 
                 <Route path="/wishlist" element={<Navigate to="/" replace />} />
-                <Route path="/profile" element={<Navigate to="/" replace />} />
+                <Route path="/profile" element={<ProfilePage />} />
 
                 <Route path="/full-wide-slide" element={<FullWideSlidePage />} />
 
@@ -1262,7 +1287,19 @@ function App() {
                 <Route path="/ruleta-demo" element={<Navigate to="/admin/draft/ruleta" replace />} />
 
                 {/* Full Screen Media Page */}
-                <Route path="/ec-preview" element={<Navigate to="/ec-preview-lite" replace />} />
+                <Route
+                  path="/ec-preview"
+                  element={
+                    <motion.div
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                      transition={{ duration: 0.5 }}
+                    >
+                      <ECPreviewPage />
+                    </motion.div>
+                  }
+                />
 
                 <Route path="/ec-preview-lite" element={
                   <motion.div
@@ -1511,6 +1548,21 @@ function App() {
                 Guides
               </button>
 
+              {isFullWideSlideDemoRoute || isHomeRoute ? (
+                <button
+                  type="button"
+                  className="h-12 rounded-md border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const nextEnabled = !fullWideSlideManualEnabled;
+                    writeFullWideSlideDemoControls({ enabled: nextEnabled });
+                  }}
+                >
+                  Control manual: {fullWideSlideManualEnabled ? 'ON' : 'OFF'}
+                </button>
+              ) : null}
+
               {isNikeDemoRoute && (
                 <button
                   type="button"
@@ -1556,19 +1608,6 @@ function App() {
                       {(nikeDemoPhaseOverride || 'expanded') === 'expanded' ? 'Repòs' : 'Expandir'}
                     </button>
                   )}
-
-                  {isFullWideSlideDemoRoute ? (
-                    <button
-                      type="button"
-                      className="h-12 rounded-md border border-black/15 bg-white px-3 text-[11px] font-medium text-black/80 shadow-sm hover:bg-black/5"
-                      onClick={() => {
-                        const nextEnabled = !fullWideSlideManualEnabled;
-                        writeFullWideSlideDemoControls({ enabled: nextEnabled });
-                      }}
-                    >
-                      Manual: {fullWideSlideManualEnabled ? 'ON' : 'OFF'}
-                    </button>
-                  ) : null}
                 </div>
               )}
             </div>
@@ -1601,6 +1640,7 @@ function App() {
           </div>
         )}
       </>
+    )}
     </ErrorBoundary>
   );
 }

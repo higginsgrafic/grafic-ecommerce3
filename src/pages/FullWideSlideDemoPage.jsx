@@ -36,7 +36,7 @@ function PlaceholderMedia({ label }) {
 export default function FullWideSlideDemoPage() {
   const [slideOpen, setSlideOpen] = useState(false);
   const [slidePresetId, setSlidePresetId] = useState('');
-  const { slidesConfig } = useSlidesConfig();
+  const { config: slidesConfig } = useSlidesConfig();
   const navigate = useNavigate();
   const { cartItems, getTotalItems, getTotalPrice, updateQuantity, removeFromCart, updateSize, clearCart } = useProductContext();
 

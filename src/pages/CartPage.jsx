@@ -4,7 +4,6 @@ import { motion } from 'framer-motion';
 import { Helmet } from 'react-helmet';
 import { Trash2, Plus, Minus, ShoppingBag, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { useCart } from '@/contexts/CartContext';
 import Checkout from '@/components/Checkout';
 import { useToast } from '@/contexts/ToastContext';
 import { formatPrice } from '@/utils/formatters';

@@ -19,13 +19,13 @@ html.scrollbar-compensate .offers-header-cart-open {
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 100% 50%;
+    --foreground: 0 0% 9.02%;
 
     --white-strong: var(--background);
     --white-soft: var(--background);
 
     --muted: 0 0% 96%;
-    --muted-foreground: 0 100% 82.35%;
+    --muted-foreground: 0 0% 69.8%;
 
     --popover: 0 0% 100%;
     --popover-foreground: 0 100% 50%;
@@ -109,6 +109,17 @@ html.scrollbar-compensate .offers-header-cart-open {
 @layer utilities {
   .animate-pulse-once {
     animation: pulse-scale 0.3s ease-out;
+  }
+}
+
+@layer utilities {
+  .fw-no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .fw-no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 

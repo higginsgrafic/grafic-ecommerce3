@@ -5,6 +5,8 @@ import { X, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useFocusTrap } from '@/hooks/useFocusTrap';
 import { formatPrice } from '@/utils/formatters';
+import { validateEmail, validatePostalCode, validateRequired } from '@/utils/validation';
+import { useNavigate } from 'react-router-dom';
 
 function resolveButtonVariant(raw) {
   if (!raw) return undefined;
@@ -787,12 +789,112 @@ export default function SlideShell({
   onClearCart,
   onLogout,
 }) {
+  const navigate = useNavigate();
   const panelRef = useRef(null);
   const preset = useMemo(() => resolvePreset(slidesConfig, presetId), [slidesConfig, presetId]);
-  const shellVariant = preset?.shell?.variant || 'right-drawer';
+  const inferredVariant = typeof presetId === 'string' && presetId.startsWith('FullWide') ? 'full-wide' : 'right-drawer';
+  const shellVariant = preset?.shell?.variant || inferredVariant;
   const isFullWide = shellVariant === 'full-wide';
+  const fullWideTop = 'var(--appHeaderOffset, 0px)';
+  const fullWideMaxHeight = 'calc(100vh - var(--appHeaderOffset, 0px))';
+
+  const isCartPreset = presetId === 'FastCartSlide';
+  const isViewPreset = presetId === 'FastViewSlide' || presetId === 'FullWideViewSlide';
 
   const supportsBlocksGrid = useMemo(() => canRenderBlocksGrid(preset), [preset]);
+
+  const defaultScreen = useMemo(() => {
+    if (isCartPreset) return 'cart';
+    if (isViewPreset) return 'account';
+    return 'default';
+  }, [isCartPreset, isViewPreset]);
+
+  const [activeScreen, setActiveScreen] = useState(defaultScreen);
+
+  const [checkoutDetails, setCheckoutDetails] = useState({
+    email: '',
+    firstName: '',
+    lastName: '',
+    address: '',
+    city: '',
+    postalCode: '',
+    country: 'Espanya',
+  });
+  const [checkoutErrors, setCheckoutErrors] = useState({});
+  const [checkoutProcessing, setCheckoutProcessing] = useState(false);
+  const [checkoutOrderId, setCheckoutOrderId] = useState('');
+
+  const [megaSlideIndex, setMegaSlideIndex] = useState(1);
+  const prevMegaSlideIndexRef = useRef(1);
+
+  useEffect(() => {
+    if (!open) return;
+    setActiveScreen(defaultScreen);
+    setCheckoutErrors({});
+    setCheckoutProcessing(false);
+    setCheckoutOrderId('');
+    setMegaSlideIndex(1);
+    prevMegaSlideIndexRef.current = 1;
+  }, [defaultScreen, open]);
+
+  const megaSlideDirection = megaSlideIndex >= prevMegaSlideIndexRef.current ? 1 : -1;
+
+  useEffect(() => {
+    prevMegaSlideIndexRef.current = megaSlideIndex;
+  }, [megaSlideIndex]);
+
+  const validateCheckoutDetails = () => {
+    const nextErrors = {};
+    if (!validateRequired(checkoutDetails.email) || !validateEmail(checkoutDetails.email)) nextErrors.email = 'Email invàlid';
+    if (!validateRequired(checkoutDetails.firstName)) nextErrors.firstName = 'Nom obligatori';
+    if (!validateRequired(checkoutDetails.lastName)) nextErrors.lastName = 'Cognoms obligatoris';
+    if (!validateRequired(checkoutDetails.address)) nextErrors.address = "Adreça obligatòria";
+    if (!validateRequired(checkoutDetails.city)) nextErrors.city = 'Ciutat obligatòria';
+    if (!validateRequired(checkoutDetails.postalCode) || !validatePostalCode(checkoutDetails.postalCode)) nextErrors.postalCode = 'Codi postal invàlid';
+    if (!validateRequired(checkoutDetails.country)) nextErrors.country = 'País obligatori';
+    setCheckoutErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  };
+
+  const startCheckoutFlow = () => {
+    setCheckoutErrors({});
+    setActiveScreen('details');
+  };
+
+  const proceedFromDetails = () => {
+    if (!validateCheckoutDetails()) return;
+    setActiveScreen('payment');
+  };
+
+  const confirmDemoPayment = async () => {
+    if (checkoutProcessing) return;
+    if (!validateCheckoutDetails()) {
+      setActiveScreen('details');
+      return;
+    }
+
+    setCheckoutProcessing(true);
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 1400));
+      const orderId = 'GRF-' + Math.random().toString(36).slice(2, 10).toUpperCase();
+      setCheckoutOrderId(orderId);
+      setActiveScreen('confirmation');
+      await new Promise((resolve) => setTimeout(resolve, 650));
+      try {
+        onClearCart?.();
+      } catch {
+        // ignore
+      }
+      try {
+        onClose?.();
+      } catch {
+        // ignore
+      }
+      navigate(`/order-confirmation/${orderId}`);
+    } finally {
+      setCheckoutProcessing(false);
+    }
+  };
 
   useFocusTrap(open, panelRef);
 
@@ -842,8 +944,12 @@ export default function SlideShell({
           <motion.div
             key="slide-backdrop"
             onClick={onClose}
-            className="fixed inset-0 z-50 backdrop-blur-sm"
-            style={{ backgroundColor: 'hsl(var(--foreground) / 0.5)' }}
+            className={isFullWide ? 'fixed left-0 right-0 bottom-0 z-[20000] backdrop-blur-sm' : 'fixed inset-0 z-[20000] backdrop-blur-sm'}
+            style={
+              isFullWide
+                ? { top: fullWideTop, backgroundColor: 'hsl(var(--foreground) / 0.5)' }
+                : { backgroundColor: 'hsl(var(--foreground) / 0.5)' }
+            }
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
@@ -851,60 +957,389 @@ export default function SlideShell({
           />
 
           <motion.div
-            key="slide-panel"
+            key={`slide-panel-${shellVariant}`}
             ref={panelRef}
+            data-shell-variant={shellVariant}
             className={
               isFullWide
-                ? 'fixed inset-0 w-full h-full bg-white z-50 shadow-2xl flex flex-col'
-                : 'fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white z-50 shadow-2xl flex flex-col h-full'
+                ? 'fixed left-0 right-0 w-full bg-white z-[20001] border-b border-border shadow-2xl flex flex-col'
+                : 'fixed inset-y-0 right-0 w-full sm:w-[450px] bg-white z-[20001] shadow-2xl flex flex-col h-full'
             }
-            initial={isFullWide ? { y: '100%', opacity: 0 } : { x: '100%', opacity: 0 }}
+            style={isFullWide ? { top: fullWideTop, maxHeight: fullWideMaxHeight } : undefined}
+            initial={isFullWide ? { y: -8, opacity: 0 } : { x: '100%', opacity: 0 }}
             animate={isFullWide ? { y: 0, opacity: 1 } : { x: 0, opacity: 1 }}
-            exit={isFullWide ? { y: '100%', opacity: 0 } : { x: '100%', opacity: 0 }}
+            exit={isFullWide ? { y: -8, opacity: 0 } : { x: '100%', opacity: 0 }}
             transition={{ duration: 0.3 }}
             role="dialog"
             aria-modal="true"
           >
-            <div className="p-2 border-b bg-white flex items-center justify-end">
-              <Button variant="ghost" size="icon" onClick={onClose} aria-label="Tancar">
-                <X className="h-6 w-6 text-foreground" />
-              </Button>
+            <div className="border-b bg-white">
+              <div className={`mx-auto ${isFullWide ? 'max-w-[1400px] px-4 sm:px-6 lg:px-10' : 'px-2'} py-2`}>
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    {(() => {
+                      try {
+                        const isLocalhost =
+                          typeof window !== 'undefined' &&
+                          (window.location?.hostname === 'localhost' || window.location?.hostname === '127.0.0.1');
+                        return import.meta?.env?.DEV || isLocalhost;
+                      } catch {
+                        return import.meta?.env?.DEV;
+                      }
+                    })() ? (
+                      <div
+                        className="max-w-[260px] truncate rounded-sm bg-muted px-2 py-1 text-[11px] font-medium text-foreground/70"
+                        title={`${presetId || '—'} · ${shellVariant}`}
+                      >
+                        {presetId || '—'} · {shellVariant}
+                      </div>
+                    ) : null}
+                  </div>
+
+                  {isFullWide && (isCartPreset || isViewPreset) ? (
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-1 rounded-md bg-muted p-1">
+                        {[1, 2, 3, 4].map((n) => (
+                          <button
+                            key={n}
+                            type="button"
+                            onClick={() => setMegaSlideIndex(n)}
+                            className={`h-7 w-7 rounded-md text-xs font-bold ${
+                              megaSlideIndex === n ? 'bg-foreground text-background' : 'bg-transparent text-foreground'
+                            }`}
+                            aria-label={`Slide ${n}`}
+                          >
+                            {n}
+                          </button>
+                        ))}
+                      </div>
+
+                      {isCartPreset ? (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => setActiveScreen('cart')}
+                            className={`h-9 rounded-md px-3 text-sm font-semibold ${
+                              activeScreen === 'cart' ? 'bg-foreground text-background' : 'bg-muted text-foreground'
+                            }`}
+                          >
+                            Cistell
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActiveScreen('details')}
+                            className={`h-9 rounded-md px-3 text-sm font-semibold ${
+                              activeScreen === 'details' ? 'bg-foreground text-background' : 'bg-muted text-foreground'
+                            }`}
+                          >
+                            Dades
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActiveScreen('payment')}
+                            className={`h-9 rounded-md px-3 text-sm font-semibold ${
+                              activeScreen === 'payment' ? 'bg-foreground text-background' : 'bg-muted text-foreground'
+                            }`}
+                          >
+                            Pagament
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setActiveScreen('confirmation')}
+                            disabled={!checkoutOrderId && activeScreen !== 'confirmation'}
+                            className={`h-9 rounded-md px-3 text-sm font-semibold disabled:opacity-40 ${
+                              activeScreen === 'confirmation'
+                                ? 'bg-foreground text-background'
+                                : 'bg-muted text-foreground'
+                            }`}
+                          >
+                            Confirmació
+                          </button>
+                        </>
+                      ) : null}
+
+                      {isViewPreset ? (
+                        <button
+                          type="button"
+                          onClick={() => setActiveScreen('account')}
+                          className={`h-9 rounded-md px-3 text-sm font-semibold ${
+                            activeScreen === 'account' ? 'bg-foreground text-background' : 'bg-muted text-foreground'
+                          }`}
+                        >
+                          Compte
+                        </button>
+                      ) : null}
+                    </div>
+                  ) : null}
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={onClose}
+                    aria-label="Tancar"
+                    title={`${presetId || '—'} · ${shellVariant}`}
+                  >
+                    <X className="h-6 w-6 text-foreground" />
+                  </Button>
+
+                </div>
+              </div>
             </div>
 
-            <div className="flex-1 min-h-0">
-              <SlideContentErrorBoundary>
-                {presetId === 'FastCartSlide' && supportsBlocksGrid ? (
-                  <CartBlocksGrid
-                    preset={preset}
-                    cartItems={cartItems}
-                    totalPrice={totalPrice}
-                    onUpdateQuantity={onUpdateQuantity}
-                    onRemove={onRemove}
-                    onUpdateSize={onUpdateSize}
-                    onViewCart={onViewCart}
-                    onCheckout={onCheckout}
-                    onClearCart={onClearCart}
-                  />
-                ) : presetId === 'FastCartSlide' ? (
-                  <CartContent
-                    preset={preset}
-                    cartItems={cartItems}
-                    totalPrice={totalPrice}
-                    onUpdateQuantity={onUpdateQuantity}
-                    onRemove={onRemove}
-                    onUpdateSize={onUpdateSize}
-                    onViewCart={onViewCart}
-                    onCheckout={onCheckout}
-                    onClearCart={onClearCart}
-                  />
-                ) : presetId === 'FastViewSlide' && supportsBlocksGrid ? (
-                  <FastViewBlocksGrid preset={preset} onLogout={onLogout} />
-                ) : presetId === 'FastViewSlide' ? (
-                  <FastViewContent preset={preset} onLogout={onLogout} />
-                ) : (
-                  <div className="p-6 text-sm text-muted-foreground">Preset no disponible</div>
-                )}
-              </SlideContentErrorBoundary>
+            <div className="flex-1 min-h-0 overflow-y-auto">
+              <div className={isFullWide ? 'relative h-full overflow-hidden' : ''}>
+                <AnimatePresence mode="wait">
+                  {isFullWide ? (
+                    <motion.div
+                      key={`mega-slide-${megaSlideIndex}`}
+                      initial={{ x: megaSlideDirection > 0 ? '100%' : '-100%', opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      exit={{ x: megaSlideDirection > 0 ? '-100%' : '100%', opacity: 0 }}
+                      transition={{ duration: 0.28, ease: 'easeOut' }}
+                      className="absolute inset-0"
+                    >
+                      <SlideContentErrorBoundary>
+                        {megaSlideIndex === 1 ? (
+                          <>
+                            {isCartPreset && activeScreen === 'details' ? (
+                              <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-6">
+                                <div className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">DADES</div>
+                                <div className="mt-3 text-2xl font-black tracking-tight text-foreground">Informació d'enviament</div>
+
+                                <div className="mt-6 grid gap-4 sm:grid-cols-2">
+                                  <div>
+                                    <label className="block text-xs font-semibold text-foreground">Email</label>
+                                    <input
+                                      value={checkoutDetails.email}
+                                      onChange={(e) => setCheckoutDetails((p) => ({ ...p, email: e.target.value }))}
+                                      className={`mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none ${
+                                        checkoutErrors.email ? 'border-red-500' : 'border-border'
+                                      }`}
+                                      type="email"
+                                      autoComplete="email"
+                                    />
+                                    {checkoutErrors.email ? (
+                                      <div className="mt-1 text-xs text-red-600">{checkoutErrors.email}</div>
+                                    ) : null}
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-foreground">País</label>
+                                    <input
+                                      value={checkoutDetails.country}
+                                      onChange={(e) => setCheckoutDetails((p) => ({ ...p, country: e.target.value }))}
+                                      className={`mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none ${
+                                        checkoutErrors.country ? 'border-red-500' : 'border-border'
+                                      }`}
+                                      type="text"
+                                      autoComplete="country-name"
+                                    />
+                                    {checkoutErrors.country ? (
+                                      <div className="mt-1 text-xs text-red-600">{checkoutErrors.country}</div>
+                                    ) : null}
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-foreground">Nom</label>
+                                    <input
+                                      value={checkoutDetails.firstName}
+                                      onChange={(e) => setCheckoutDetails((p) => ({ ...p, firstName: e.target.value }))}
+                                      className={`mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none ${
+                                        checkoutErrors.firstName ? 'border-red-500' : 'border-border'
+                                      }`}
+                                      type="text"
+                                      autoComplete="given-name"
+                                    />
+                                    {checkoutErrors.firstName ? (
+                                      <div className="mt-1 text-xs text-red-600">{checkoutErrors.firstName}</div>
+                                    ) : null}
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-foreground">Cognoms</label>
+                                    <input
+                                      value={checkoutDetails.lastName}
+                                      onChange={(e) => setCheckoutDetails((p) => ({ ...p, lastName: e.target.value }))}
+                                      className={`mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none ${
+                                        checkoutErrors.lastName ? 'border-red-500' : 'border-border'
+                                      }`}
+                                      type="text"
+                                      autoComplete="family-name"
+                                    />
+                                    {checkoutErrors.lastName ? (
+                                      <div className="mt-1 text-xs text-red-600">{checkoutErrors.lastName}</div>
+                                    ) : null}
+                                  </div>
+
+                                  <div className="sm:col-span-2">
+                                    <label className="block text-xs font-semibold text-foreground">Adreça</label>
+                                    <input
+                                      value={checkoutDetails.address}
+                                      onChange={(e) => setCheckoutDetails((p) => ({ ...p, address: e.target.value }))}
+                                      className={`mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none ${
+                                        checkoutErrors.address ? 'border-red-500' : 'border-border'
+                                      }`}
+                                      type="text"
+                                      autoComplete="street-address"
+                                    />
+                                    {checkoutErrors.address ? (
+                                      <div className="mt-1 text-xs text-red-600">{checkoutErrors.address}</div>
+                                    ) : null}
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-foreground">Ciutat</label>
+                                    <input
+                                      value={checkoutDetails.city}
+                                      onChange={(e) => setCheckoutDetails((p) => ({ ...p, city: e.target.value }))}
+                                      className={`mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none ${
+                                        checkoutErrors.city ? 'border-red-500' : 'border-border'
+                                      }`}
+                                      type="text"
+                                      autoComplete="address-level2"
+                                    />
+                                    {checkoutErrors.city ? (
+                                      <div className="mt-1 text-xs text-red-600">{checkoutErrors.city}</div>
+                                    ) : null}
+                                  </div>
+
+                                  <div>
+                                    <label className="block text-xs font-semibold text-foreground">Codi postal</label>
+                                    <input
+                                      value={checkoutDetails.postalCode}
+                                      onChange={(e) => setCheckoutDetails((p) => ({ ...p, postalCode: e.target.value }))}
+                                      className={`mt-1 h-10 w-full rounded-md border px-3 text-sm outline-none ${
+                                        checkoutErrors.postalCode ? 'border-red-500' : 'border-border'
+                                      }`}
+                                      type="text"
+                                      autoComplete="postal-code"
+                                    />
+                                    {checkoutErrors.postalCode ? (
+                                      <div className="mt-1 text-xs text-red-600">{checkoutErrors.postalCode}</div>
+                                    ) : null}
+                                  </div>
+                                </div>
+
+                                <div className="mt-6 flex items-center gap-2">
+                                  <Button className="rounded-sm" onClick={proceedFromDetails}>
+                                    Continuar
+                                  </Button>
+                                  <Button variant="secondary" className="rounded-sm" onClick={() => setActiveScreen('cart')}>
+                                    Tornar
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : isCartPreset && activeScreen === 'payment' ? (
+                              <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-6">
+                                <div className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">PAGAMENT</div>
+                                <div className="mt-3 text-2xl font-black tracking-tight text-foreground">Confirmació (demo)</div>
+
+                                <div className="mt-4 grid gap-4 sm:grid-cols-3">
+                                  <div className="rounded-lg border border-border bg-white p-4 sm:col-span-2">
+                                    <div className="text-sm text-muted-foreground">Enviament a</div>
+                                    <div className="mt-1 text-sm font-semibold text-foreground">
+                                      {checkoutDetails.firstName} {checkoutDetails.lastName}
+                                    </div>
+                                    <div className="mt-1 text-sm text-foreground/80">{checkoutDetails.address}</div>
+                                    <div className="mt-1 text-sm text-foreground/80">
+                                      {checkoutDetails.postalCode} {checkoutDetails.city} · {checkoutDetails.country}
+                                    </div>
+                                    <div className="mt-3 text-sm text-muted-foreground">Contacte</div>
+                                    <div className="mt-1 text-sm font-semibold text-foreground">{checkoutDetails.email}</div>
+                                  </div>
+
+                                  <div className="rounded-lg border border-border bg-white p-4">
+                                    <div className="text-sm text-muted-foreground">Total</div>
+                                    <div className="mt-1 text-lg font-black text-foreground">
+                                      {Number.isFinite(totalPrice) ? formatPrice(totalPrice) : ''}
+                                    </div>
+                                    <div className="mt-4 flex flex-col gap-2">
+                                      <Button className="rounded-sm" onClick={confirmDemoPayment} disabled={checkoutProcessing}>
+                                        {checkoutProcessing ? 'Processant…' : 'Paga ara'}
+                                      </Button>
+                                      <Button
+                                        variant="secondary"
+                                        className="rounded-sm"
+                                        onClick={() => setActiveScreen('details')}
+                                        disabled={checkoutProcessing}
+                                      >
+                                        Tornar
+                                      </Button>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            ) : isCartPreset && activeScreen === 'confirmation' ? (
+                              <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-6">
+                                <div className="text-xs font-semibold tracking-[0.18em] text-muted-foreground">CONFIRMACIÓ</div>
+                                <div className="mt-3 text-2xl font-black tracking-tight text-foreground">Comanda confirmada</div>
+
+                                <div className="mt-4 rounded-lg border border-border bg-white p-4">
+                                  <div className="text-sm text-muted-foreground">Número de comanda</div>
+                                  <div className="mt-1 font-mono text-sm font-semibold text-foreground">{checkoutOrderId || '—'}</div>
+                                  <div className="mt-3 text-sm text-foreground/80">Redirigint a la pàgina de confirmació…</div>
+                                </div>
+
+                                <div className="mt-6 flex items-center gap-2">
+                                  <Button className="rounded-sm" onClick={onClose}>
+                                    Tancar
+                                  </Button>
+                                </div>
+                              </div>
+                            ) : isCartPreset && supportsBlocksGrid ? (
+                              <CartBlocksGrid
+                                preset={preset}
+                                cartItems={cartItems}
+                                totalPrice={totalPrice}
+                                onUpdateQuantity={onUpdateQuantity}
+                                onRemove={onRemove}
+                                onUpdateSize={onUpdateSize}
+                                onViewCart={onViewCart}
+                                onCheckout={startCheckoutFlow}
+                                onClearCart={onClearCart}
+                              />
+                            ) : isViewPreset && supportsBlocksGrid ? (
+                              <FastViewBlocksGrid preset={preset} onLogout={onLogout} />
+                            ) : isViewPreset ? (
+                              <FastViewContent preset={preset} onLogout={onLogout} />
+                            ) : (
+                              <SlideContent preset={preset} onLogout={onLogout} />
+                            )}
+                          </>
+                        ) : (
+                          <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10 py-16">
+                            <div className="flex h-full min-h-[320px] items-center justify-center">
+                              <div className="text-7xl font-black tracking-tight text-foreground">{megaSlideIndex}</div>
+                            </div>
+                          </div>
+                        )}
+                      </SlideContentErrorBoundary>
+                    </motion.div>
+                  ) : (
+                    <SlideContentErrorBoundary>
+                      {isCartPreset && supportsBlocksGrid ? (
+                        <CartBlocksGrid
+                          preset={preset}
+                          cartItems={cartItems}
+                          totalPrice={totalPrice}
+                          onUpdateQuantity={onUpdateQuantity}
+                          onRemove={onRemove}
+                          onUpdateSize={onUpdateSize}
+                          onViewCart={onViewCart}
+                          onCheckout={startCheckoutFlow}
+                          onClearCart={onClearCart}
+                        />
+                      ) : isViewPreset && supportsBlocksGrid ? (
+                        <FastViewBlocksGrid preset={preset} onLogout={onLogout} />
+                      ) : isViewPreset ? (
+                        <FastViewContent preset={preset} onLogout={onLogout} />
+                      ) : (
+                        <SlideContent preset={preset} onLogout={onLogout} />
+                      )}
+                    </SlideContentErrorBoundary>
+                  )}
+                </AnimatePresence>
+              </div>
             </div>
           </motion.div>
         </>

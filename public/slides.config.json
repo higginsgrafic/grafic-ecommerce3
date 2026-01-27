@@ -110,6 +110,114 @@
           }
         }
       },
+      "FullWideViewSlide": {
+        "shell": {
+          "variant": "full-wide"
+        },
+        "tools": {
+          "catalog": {
+            "logout": {
+              "type": "action",
+              "ref": "ui.regions.helpAndSession.actions.logout"
+            }
+          },
+          "order": ["logout"]
+        },
+        "layout": {
+          "grid": {
+            "cols": 6,
+            "rows": 6,
+            "gap": "md",
+            "templateAreas": [
+              "identity identity identity primaryActions primaryActions primaryActions",
+              "identity identity identity primaryActions primaryActions primaryActions",
+              "ordersSummary ordersSummary ordersSummary helpAndSession helpAndSession helpAndSession",
+              "ordersSummary ordersSummary ordersSummary helpAndSession helpAndSession helpAndSession",
+              "recentlyViewed recentlyViewed recentlyViewed helpAndSession helpAndSession helpAndSession",
+              "recentlyViewed recentlyViewed recentlyViewed helpAndSession helpAndSession helpAndSession"
+            ]
+          },
+          "policy": { "maxHeight": "no-scroll" },
+          "regions": [
+            { "id": "identity", "span": { "colStart": 1, "colEnd": 4, "rowStart": 1, "rowEnd": 2 } },
+            { "id": "primaryActions", "span": { "colStart": 5, "colEnd": 6, "rowStart": 1, "rowEnd": 2 } },
+            { "id": "ordersSummary", "span": { "colStart": 1, "colEnd": 4, "rowStart": 3, "rowEnd": 4 } },
+            { "id": "recentlyViewed", "span": { "colStart": 1, "colEnd": 4, "rowStart": 5, "rowEnd": 6 } },
+            { "id": "helpAndSession", "span": { "colStart": 5, "colEnd": 6, "rowStart": 3, "rowEnd": 6 } }
+          ]
+        },
+        "ui": {
+          "blocks": [
+            { "id": "identity", "type": "region", "regionId": "identity", "gridArea": "identity", "visible": true },
+            { "id": "primaryActions", "type": "region", "regionId": "primaryActions", "gridArea": "primaryActions", "visible": true },
+            { "id": "ordersSummary", "type": "region", "regionId": "ordersSummary", "gridArea": "ordersSummary", "visible": true },
+            { "id": "recentlyViewed", "type": "region", "regionId": "recentlyViewed", "gridArea": "recentlyViewed", "visible": true },
+            { "id": "helpAndSession", "type": "region", "regionId": "helpAndSession", "gridArea": "helpAndSession", "visible": true }
+          ],
+          "regions": [
+            {
+              "id": "identity",
+              "component": "IdentityCard",
+              "variant": "compact"
+            },
+            {
+              "id": "primaryActions",
+              "component": "PrimaryActions",
+              "variant": "compact",
+              "limits": { "maxActions": 3 }
+            },
+            {
+              "id": "ordersSummary",
+              "component": "OrdersSummary",
+              "variant": "micro",
+              "limits": { "maxLines": 2 }
+            },
+            {
+              "id": "recentlyViewed",
+              "component": "RecentlyViewed",
+              "variant": "micro",
+              "limits": { "maxItems": 4 }
+            },
+            {
+              "id": "helpAndSession",
+              "component": "HelpAndSession",
+              "variant": "compact",
+              "limits": { "maxLinks": 4 },
+              "actions": {
+                "logout": {
+                  "style": "secondary",
+                  "confirmModalId": "logoutConfirm"
+                }
+              }
+            }
+          ],
+          "modals": [
+            {
+              "id": "logoutConfirm",
+              "title": "Tancar sessió?",
+              "body": "Perdràs l'accés al teu compte fins que tornis a iniciar sessió.",
+              "actions": [
+                { "id": "confirm", "label": "Tancar sessió", "variant": "destructive" },
+                { "id": "cancel", "label": "Cancel·lar", "variant": "secondary" }
+              ]
+            }
+          ]
+        },
+        "data": {
+          "sources": {
+            "user": "auth.user",
+            "ordersSummary": "orders.summary",
+            "recentlyViewed": "local.recentlyViewed",
+            "helpLinks": "static.helpLinks"
+          },
+          "mapping": {
+            "identity": { "source": "user" },
+            "ordersSummary": { "source": "ordersSummary" },
+            "recentlyViewed": { "source": "recentlyViewed" },
+            "helpAndSession": { "source": "helpLinks" }
+          }
+        }
+      },
       "FastCartSlide": {
         "shell": {
           "variant": "right-drawer"

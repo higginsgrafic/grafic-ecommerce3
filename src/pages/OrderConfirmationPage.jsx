@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { Helmet } from 'react-helmet';
 import { motion } from 'framer-motion';
-import { CheckCircle, Package, Truck, CreditCard } from 'lucide-react';
+import { CheckCircle, Package, Truck, CreditCard, Mail, MapPin, Clock, Download, ArrowRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { formatPrice } from '@/utils/formatters';
 import { useToast } from '@/contexts/ToastContext';

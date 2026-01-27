@@ -1,7 +1,7 @@
 import React from 'react';
 import { Layers, LayoutGrid } from 'lucide-react';
 
-export default function FullWideSlideDemoCatalogPanel({ megaTileSize }) {
+export default function MegaCatalogPanel({ megaTileSize }) {
   if (!megaTileSize) return null;
 
   return (

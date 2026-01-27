@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import { getGildan5000Catalog } from '../utils/placeholders.js';
 import AdidasColorStripeButtons from './AdidasColorStripeButtons.jsx';
 import AdidasCatalogPanel from './AdidasCatalogPanel.jsx';
+import MegaStripeCatalogPanel from './MegaStripeCatalogPanel.jsx';
 import AdidasHumanInsideSlider from './AdidasHumanInsideSlider.jsx';
 
 const FIRST_CONTACT_MEDIA = {
@@ -66,11 +67,13 @@ const THE_HUMAN_INSIDE_MEDIA_WHITE = {
 const OptimizedImg = React.forwardRef(function OptimizedImg({ src, alt, className, style, ...rest }, ref) {
   const normalizeSrc = (value) => {
     const s = (value || '').toString();
+    if (!s) return '';
+    if (/^(https?:)?\/\//i.test(s) || /^data:/i.test(s) || /^blob:/i.test(s)) return s;
     return s.startsWith('/') ? s : `/${s}`;
   };
 
   const originalSrc = normalizeSrc(src);
-  const webpSrc = originalSrc.replace(/\.(png|jpe?g)$/i, '.webp');
+  const webpSrc = originalSrc.replace(/\.(png|jpe?g)(?=([?#]|$))/i, '.webp');
   const [currentSrc, setCurrentSrc] = useState(webpSrc);
   const triedFallbackRef = useRef(false);
 
@@ -82,13 +85,17 @@ const OptimizedImg = React.forwardRef(function OptimizedImg({ src, alt, classNam
   return (
     <img
       ref={ref}
-      src={encodeURI(currentSrc)}
+      src={currentSrc ? encodeURI(currentSrc) : undefined}
       alt={alt}
       className={className}
       style={style}
       loading="lazy"
       decoding="async"
       onError={() => {
+        if (import.meta.env.DEV) {
+          // eslint-disable-next-line no-console
+          console.warn('[OptimizedImg] error loading', { src, currentSrc, originalSrc });
+        }
         if (triedFallbackRef.current) return;
         triedFallbackRef.current = true;
         if (currentSrc !== originalSrc) setCurrentSrc(originalSrc);
@@ -436,9 +443,21 @@ export default function AdidasInspiredHeader({
 }) {
   const navigate = useNavigate();
   const cartClickTimeoutRef = useRef(null);
+
+  const isManualLockEnabled = () => {
+    try {
+      return (
+        window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1' ||
+        window.localStorage.getItem('FULL_WIDE_SLIDE_DEMO_MANUAL') === '1'
+      );
+    } catch {
+      return false;
+    }
+  };
+
   const [active, setActive] = useState(() => {
     try {
-      return window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1' ? 'first_contact' : null;
+      return isManualLockEnabled() ? 'first_contact' : null;
     } catch {
       return null;
     }
@@ -446,7 +465,7 @@ export default function AdidasInspiredHeader({
   const [mobileOpen, setMobileOpen] = useState(false);
   const [demoManualEnabled, setDemoManualEnabled] = useState(() => {
     try {
-      return window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1';
+      return isManualLockEnabled();
     } catch {
       return false;
     }
@@ -631,7 +650,7 @@ export default function AdidasInspiredHeader({
   useEffect(() => {
     const readControls = () => {
       try {
-        const enabled = window.localStorage.getItem('NIKE_DEMO_MANUAL') === '1';
+        const enabled = isManualLockEnabled();
         setDemoManualEnabled((prev) => (prev === enabled ? prev : enabled));
       } catch {
         setDemoManualEnabled((prev) => (prev === false ? prev : false));
@@ -640,10 +659,17 @@ export default function AdidasInspiredHeader({
 
     const onStorage = (e) => {
       if (!e || !e.key) return;
-      if (e.key === 'NIKE_DEMO_MANUAL' || e.key === 'NIKE_DEMO_PHASE') {
+      if (
+        e.key === 'NIKE_DEMO_MANUAL' ||
+        e.key === 'NIKE_DEMO_PHASE' ||
+        e.key === 'FULL_WIDE_SLIDE_DEMO_MANUAL' ||
+        e.key === 'FULL_WIDE_SLIDE_DEMO_PHASE'
+      ) {
         readControls();
       }
     };
+
+    const onFullWideLocalChange = () => readControls();
 
     const onLocalChange = () => {
       readControls();
@@ -651,17 +677,17 @@ export default function AdidasInspiredHeader({
 
     readControls();
     window.addEventListener('storage', onStorage);
-    window.addEventListener('nike-demo-controls-changed', onLocalChange);
+    window.addEventListener('full-wide-slide-demo-controls-changed', onFullWideLocalChange);
     return () => {
       window.removeEventListener('storage', onStorage);
-      window.removeEventListener('nike-demo-controls-changed', onLocalChange);
+      window.removeEventListener('full-wide-slide-demo-controls-changed', onFullWideLocalChange);
     };
   }, []);
 
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.key === 'Escape') {
-        if (demoManualEnabled) return;
+        if (demoManualEnabled || isManualLockEnabled()) return;
         setActive(null);
         setMobileOpen(false);
       }
@@ -884,7 +910,7 @@ export default function AdidasInspiredHeader({
           <div
             className="fixed inset-0 z-[9990] bg-foreground/25"
             onClick={() => {
-              if (demoManualEnabled) return;
+              if (demoManualEnabled || isManualLockEnabled()) return;
               setActive(null);
             }}
           />
@@ -895,7 +921,7 @@ export default function AdidasInspiredHeader({
       <div
         className="relative"
         onMouseLeave={() => {
-          if (demoManualEnabled) return;
+          if (demoManualEnabled || isManualLockEnabled()) return;
           setActive(null);
         }}
       >
@@ -927,36 +953,26 @@ export default function AdidasInspiredHeader({
                 ))}
               </div>
 
-              <div
-                className="relative"
-                style={
-                  megaTileSize
-                    ? {
-                        marginTop: '13px',
-                        width: '100%',
-                        height: `${megaTileSize}px`,
-                      }
-                    : undefined
-                }
-              >
-                <AdidasColorStripeButtons
-                  megaTileSize={megaTileSize}
-                  selectedColorOrder={selectedColorOrder}
-                  selectedColorSlug={selectedColorSlug}
-                  onSelect={setSelectedColorSlug}
-                  colorLabelBySlug={colorLabelBySlug}
-                  colorButtonSrcBySlug={colorButtonSrcBySlug}
-                  itemLeftOffsetPxByIndex={stripeItemLeftOffsetPxByIndex}
-                  redistributeBetweenFirstAndLast={redistributeStripeBetweenFirstAndLast}
-                  firstOffsetPx={-20}
-                  lastOffsetPx={63}
-                  cropFirstRightPx={20}
-                  compressFactor={0.79}
-                  forceDebugStripeHit={forceStripeDebugHit}
-                  ignoreUrlDebugStripeHit={ignoreStripeDebugFromUrl}
-                />
-                <AdidasCatalogPanel megaTileSize={megaTileSize} />
-              </div>
+              <MegaStripeCatalogPanel
+                megaTileSize={megaTileSize}
+                StripeButtonsComponent={AdidasColorStripeButtons}
+                stripeProps={{
+                  selectedColorOrder,
+                  selectedColorSlug,
+                  onSelect: setSelectedColorSlug,
+                  colorLabelBySlug,
+                  colorButtonSrcBySlug,
+                  itemLeftOffsetPxByIndex: stripeItemLeftOffsetPxByIndex,
+                  redistributeBetweenFirstAndLast: redistributeStripeBetweenFirstAndLast,
+                  firstOffsetPx: -20,
+                  lastOffsetPx: 63,
+                  cropFirstRightPx: 20,
+                  compressFactor: 0.79,
+                  forceDebugStripeHit: forceStripeDebugHit,
+                  ignoreUrlDebugStripeHit: ignoreStripeDebugFromUrl,
+                }}
+                CatalogPanelComponent={AdidasCatalogPanel}
+              />
             </div>
           </div>
         ) : null}

@@ -383,11 +383,26 @@ function Home({ onAddToCart, cartItems, onUpdateQuantity }) {
         />
       </OverlayUnderHeader>
 
-      <NikeHeroSlider
-        slides={heroSliderSlides}
-        autoplay={autoplay}
-        autoplayIntervalMs={autoplayInterval}
-      />
+      <div className="mt-4">
+        <div className="mx-auto max-w-[1400px] px-4 sm:px-6 lg:px-10">
+          <div className="py-8 lg:py-10">
+            <div className="text-xs font-semibold tracking-[0.18em] text-muted-foreground opacity-50">ADIDAS-STYLE DEMO</div>
+            <h1 className="mt-4 text-4xl font-black tracking-tight text-foreground sm:text-5xl">
+              Header + Mega-menú (placeholders)
+            </h1>
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground opacity-60">
+              Aquesta pàgina és una demo per iterar ràpidament sobre un header tipus adidas.es: sticky, mega-menú desktop,
+              menú mobile i layout de categories. Les lògiques les podem ajustar fins trobar el que busques.
+            </p>
+          </div>
+        </div>
+
+        <NikeHeroSlider
+          slides={heroSliderSlides}
+          autoplay={autoplay}
+          autoplayIntervalMs={autoplayInterval}
+        />
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <AnimatePresence>
