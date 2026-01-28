@@ -57,7 +57,7 @@ const THE_HUMAN_INSIDE_MEDIA_WHITE = {
   'Cylon 78': '/custom_logos/drawings/the_human_inside/blanc/11-cylon-78-w4.webp',
   'Cylon 03': '/custom_logos/drawings/the_human_inside/blanc/12-cylon-03-w3.webp',
   'Iron Man 68': '/custom_logos/drawings/the_human_inside/blanc/13-iron-man-68-w4.webp',
-  'Iron Man 08': '/custom_logos/drawings/the_human_inside/blanc/14-ironman-08-w4.webp',
+  'Iron Man 08': '/custom_logos/drawings/the_human_inside/blanc/14-iron-man-08-w4.webp',
   'Cyberman': '/custom_logos/drawings/the_human_inside/blanc/15-cyberman-w1.webp',
   'Maschinenmensch': '/custom_logos/drawings/the_human_inside/blanc/16-maschinenmensch-w1.webp',
   'Robocop': '/custom_logos/drawings/the_human_inside/blanc/17-robocop-w3.webp',
@@ -555,6 +555,10 @@ export default function FullWideSlideDemoHeader({
   const ensureMegaOpen = () => {
     setActive((prev) => prev || 'first_contact');
   };
+
+  useEffect(() => {
+    setHumanInsideVariant((prev) => (prev === firstContactVariant ? prev : firstContactVariant));
+  }, [firstContactVariant]);
 
   const scrollSearchGridBy = (deltaPx) => {
     const el = searchGridScrollRef.current;
@@ -1273,8 +1277,8 @@ export default function FullWideSlideDemoHeader({
                           firstContactVariant={firstContactVariant}
                           onFirstContactWhite={() => setFirstContactVariant('white')}
                           onFirstContactBlack={() => setFirstContactVariant('black')}
-                          onHumanWhite={() => setHumanInsideVariant('white')}
-                          onHumanBlack={() => setHumanInsideVariant('black')}
+                          onHumanWhite={() => setFirstContactVariant('white')}
+                          onHumanBlack={() => setFirstContactVariant('black')}
                           onHumanPrev={() => setThinStartIndex((v) => v - 1)}
                           onHumanNext={() => setThinStartIndex((v) => v + 1)}
                         />
